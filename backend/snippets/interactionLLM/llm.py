@@ -45,7 +45,7 @@ class LLM:
     - str: Ответ от API в виде текстовой строки.
     """
     @staticmethod
-    def say_to_chat(auth_token, user_message, model='GigaChat:latest'):
+    def talk_to_chat(auth_token, user_message, model='GigaChat:latest'):
         giga = GigaChat(access_token=auth_token,
                         model=model,
                         verify_ssl_certs=False
