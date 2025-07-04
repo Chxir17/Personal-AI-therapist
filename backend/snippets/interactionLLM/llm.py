@@ -28,7 +28,7 @@ class LLM:
         )
         try:
             response = giga.get_token()
-            return response
+            return response.access_token
         except requests.RequestException as e:
             return None
 
@@ -52,7 +52,7 @@ class LLM:
                         )
         try:
             response = giga.chat(user_message)
-            return response
+            return response.choices[0].message.content
         except requests.RequestException as e:
             return None
 
