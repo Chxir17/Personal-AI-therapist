@@ -10,6 +10,6 @@ public class StartCommand implements ICommand {
     @Override
     public SendMessage apply(Update update) {
         long chatId = update.getMessage().getChatId();
-        return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.toString());
+        return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
     }
 }

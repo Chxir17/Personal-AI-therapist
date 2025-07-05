@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.Map;
 
 /**
- * CommandsHandler - registration list of commands handler. Keep list of commands in Map(str to obj Command)
+ * CommandsHandler - registration list of commands handler. Keep list of available commands in Map(str to obj Command)
  */
 @Getter
 @Setter
@@ -26,6 +26,11 @@ public class CommandsHandler {
                 "/stoptracking", stopTrackingCommand);
     }
 
+    /**
+     * handleCommand - find command in map commands, and execute the found command
+     * @param update
+     * @return
+     */
     public SendMessage handleCommand(Update update) {
         String messageText = update.getMessage().getText();
         String command = messageText.split(" ")[0];

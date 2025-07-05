@@ -24,37 +24,38 @@ import org.springframework.http.*;
 @Slf4j
 public class MessagesHandler implements IMessageHandler {
     private final RestTemplate restTemplate = new RestTemplate();
-    @Value("${python.service.url}")
+    //@Value("${python.service.url}")
     private String pythonServiceUrl;
 
     public JSONObject jsonObject = new JSONObject();
 
     /**
-     * check is this medical data
+     * canHandle - check is this medical data.
      * Fix: add json parse
      * @param messageText
      * @return
      */
     @Override
     public boolean canHandle(String messageText) {// request to python part (parse)
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            Map<String, String> request = Map.of("text", messageText); //FIX
-            HttpEntity<Map<String, String>> entity = new HttpEntity<>(request, headers);
-
-            ResponseEntity<MedicalAnalysisResult> response = restTemplate.exchange(
-                    pythonServiceUrl,
-                    HttpMethod.POST,
-                    entity,
-                    MedicalAnalysisResult.class
-            );
-
-            return response.getBody().isMedical();
-        } catch (Exception e) {
-            return false;
-        }
+        return false;
+//        try {
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//            Map<String, String> request = Map.of("text", messageText); //FIX
+//            HttpEntity<Map<String, String>> entity = new HttpEntity<>(request, headers);
+//
+//            ResponseEntity<MedicalAnalysisResult> response = restTemplate.exchange(
+//                    pythonServiceUrl,
+//                    HttpMethod.POST,
+//                    entity,
+//                    MedicalAnalysisResult.class
+//            );
+//
+//            return response.getBody().isMedical();
+//        } catch (Exception e) {
+//            return false;
+//        }
     }
 
     /**

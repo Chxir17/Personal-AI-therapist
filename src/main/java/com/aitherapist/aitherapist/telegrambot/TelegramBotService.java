@@ -24,6 +24,10 @@ public class TelegramBotService extends TelegramLongPollingBot {
     private final CommandsHandler commandsHandler;
     private final MessagesHandler messagesHandler;
 
+    /**
+     * getBotToken - get information (bot token) from application.yml
+     * @return
+     */
     @Override
     public String getBotToken() {
         return botProperties.getToken();
@@ -35,6 +39,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
     }
 
     /**
+     * Check message. if command -> call handle command and update state. else handle message
      * @param update - full information about users.
      */
     @Override
@@ -53,6 +58,10 @@ public class TelegramBotService extends TelegramLongPollingBot {
         }
     }
 
+    /**
+     * sendMessage - execute message. (Send to user)
+     * @param sendMessage
+     */
     private void sendMessage(SendMessage sendMessage) {
         if (sendMessage == null) {
             return;
