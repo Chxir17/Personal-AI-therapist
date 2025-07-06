@@ -1,24 +1,29 @@
 package com.aitherapist.aitherapist.telegrambot.dto;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * MedicalAnalysisResult - object for transfer and
+ */
 @Data
+@Getter
+@Setter
 public class MedicalAnalysisResult {
     private boolean isMedical;
-    private MedicalDetails details;
+    private List<String> details;
 
-    @Data
-    public static class MedicalDetails {
-        private List<String> keywordsFound;
-        private List<String> numbersFound;
-    }
-
-    public static MedicalAnalysisResult getDefault() {
-        MedicalAnalysisResult result = new MedicalAnalysisResult();
-        result.setMedical(false);
-        result.setDetails(new MedicalDetails());
-        return result;
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Medical result: ").append(isMedical ? "Medical" : "Non-medical");
+        if (details != null && !details.isEmpty()) {
+            sb.append("\nDetails:");
+            details.forEach(detail -> sb.append("\n- ").append(detail));
+        }
+        return sb.toString();
     }
 }

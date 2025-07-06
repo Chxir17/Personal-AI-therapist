@@ -7,6 +7,11 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+/**
+ * FIXME: to implement
+ * InformationCommand - get default information from Enum Answers.
+ * User pres {/start} and methods send info.
+ */
 @Getter
 @Setter
 @Component

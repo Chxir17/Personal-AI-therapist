@@ -4,6 +4,7 @@ import com.aitherapist.aitherapist.Consts;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.BotProperties;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 /**
+ * FIXME: add exception!
  * TelegramBotService - main class with main methods onUpdateReceived.
  * when user sends message, it arrives to onUpdateReceived.
  */
@@ -39,7 +41,8 @@ public class TelegramBotService extends TelegramLongPollingBot {
     }
 
     /**
-     * Check message. if command -> call handle command and update state. else handle message
+     * Check message. if command -> call handle command and update state.
+     * else handle message
      * @param update - full information about users.
      */
     @Override
@@ -47,12 +50,18 @@ public class TelegramBotService extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String chatId = update.getMessage().getChatId().toString();
             if (update.getMessage().getText().startsWith("/")) {
-                sendMessage(commandsHandler.handleCommand(update));
+                try {sendMessage(commandsHandler.handleCommand(update));}
+                catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 if (messagesHandler.canHandle(update.getMessage().getText())) {
                     messagesHandler.handle(update);
                 } else {
-                    sendMessage(new SendMessage(chatId, Answers.IS_NOT_MEDICAL_INFORMATION.getMessage()));
+                    try {sendMessage(new SendMessage(chatId, Answers.IS_NOT_MEDICAL_INFORMATION.getMessage()));}
+                    catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
@@ -62,14 +71,12 @@ public class TelegramBotService extends TelegramLongPollingBot {
      * sendMessage - execute message. (Send to user)
      * @param sendMessage
      */
-    private void sendMessage(SendMessage sendMessage) {
-        if (sendMessage == null) {
-            return;
-        }
+    private void sendMessage(@Nullable SendMessage sendMessage) throws TelegramApiException {
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
-            log.error(e.getMessage());
+            log.error("Send message error.", e);
+            throw e;
         }
     }
 }

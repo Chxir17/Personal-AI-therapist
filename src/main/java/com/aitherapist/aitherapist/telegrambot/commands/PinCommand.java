@@ -5,6 +5,11 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+/**
+ * FIXME: to implement
+ * PinCommand - pin main information about user.
+ * (name, age, healthData).
+ */
 @Getter
 @Setter
 @Component

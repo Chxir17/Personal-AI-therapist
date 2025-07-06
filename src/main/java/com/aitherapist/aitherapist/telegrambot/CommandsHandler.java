@@ -12,7 +12,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.Map;
 
 /**
- * CommandsHandler - registration list of commands handler. Keep list of available commands in Map(str to obj Command)
+ * FIXME: add all commands to Map and add Exception
+ * CommandsHandler - registration list of commands handler.
+ * Keep list of available commands in Map(str to obj Command)
  */
 @Getter
 @Setter

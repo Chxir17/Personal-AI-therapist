@@ -7,12 +7,14 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 
+/**
+ * FIXME: to implement
+ * StopTrackingCommand - stop user tracking. delete {HP} information in database
+ * and notifies user with confirm
+ */
 @Getter
 @Setter
 @Component
-/**
- * StopTrackingCommand - stop user tracking. delete {HP} information in database
- */
 public class StopTrackingCommand implements ICommand {
     @Override
     public SendMessage apply(Update update) {

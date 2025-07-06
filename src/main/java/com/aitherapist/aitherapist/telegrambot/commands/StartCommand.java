@@ -5,6 +5,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.springframework.stereotype.Component;
 
+/**
+ * StartCommand - send start message to user.
+ */
 @Component
 public class StartCommand implements ICommand {
     @Override

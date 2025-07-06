@@ -11,8 +11,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
 
-//@Configurationpublic class DatabaseConfig {@Value("${spring.datasource.url}")private String url;@Value("${spring.datasource.username}")private String username;@Value("${spring.datasource.password}")private String password;@Beanpublic DataSource dataSource() {DriverManagerDataSource dataSource = new DriverManagerDataSource();dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");dataSource.setUrl(url);dataSource.setUsername(username);dataSource.setPassword(password);return dataSource;}}
-
 /**
  * DataSource class - config for database.
  * @Getter, Setter - from lombok library. it helps not use useful methods
@@ -29,7 +27,6 @@ public class DatabaseConfig {
     @Value("${spring.datasource.password}")
     private String password;
     //@Setter(AccessLevel.PROTECTED)
-
 
     @Bean
     public DataSource dataSource() {
