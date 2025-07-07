@@ -11,11 +11,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
+import org.springframework.context.annotation.Lazy;
 /**
  * FIXME: maybe add apache kafka?
  * MessagesHandler - message handler.
@@ -33,8 +34,12 @@ public class MessagesHandler implements IHandler {
     private MedicalAnalysisResult medicalAnalysisResult;
     private final RegistrationContext registrationContext;
     private final DataController dataController;
-    private final IMessageSender messageSender;
+    private IMessageSender messageSender;
 
+    @Autowired
+    public void setMessageSender(@Lazy IMessageSender messageSender) {
+        this.messageSender = messageSender;
+    }
     /**
      * FIXME: add check is medical information.
      * canHandle - check is this medical data.

@@ -12,7 +12,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
+import org.springframework.context.annotation.Lazy;
 /**
  * TelegramBotService - main class with main methods onUpdateReceived.
  * when user sends message, it arrives to onUpdateReceived.
@@ -20,10 +20,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class TelegramBotService extends TelegramLongPollingBot {
+public class TelegramBotService extends TelegramLongPollingBot implements ITelegramExecutor  {
     private final BotProperties botProperties;
     private final CommandsHandler commandsHandler;
-    private final MessagesHandler messagesHandler;
+    private final @Lazy MessagesHandler messagesHandler;
 
     /**
      * getBotToken - get information (bot token) from application.yml
@@ -75,6 +75,16 @@ public class TelegramBotService extends TelegramLongPollingBot {
     public void sendMessage(@Nullable SendMessage sendMessage) throws TelegramApiException {
         try {
             execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error("Send message error.", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void execute(SendMessage sendMessage) throws TelegramApiException {
+        try {
+            super.execute(sendMessage);  // Call to parent class method
         } catch (TelegramApiException e) {
             log.error("Send message error.", e);
             throw e;
