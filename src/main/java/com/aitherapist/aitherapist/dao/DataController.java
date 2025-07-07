@@ -39,6 +39,14 @@ public class DataController {
         return "data success save!";
     }
 
+    @RequestMapping(path = "/user/{id}", method = RequestMethod.GET)
+    public Boolean isSignUp(@PathVariable Integer userId) { //accepts a json object and
+        if(userService.fetchUserList(userId).isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
 //    @RequestMapping(path="/user/{id}", method = RequestMethod.GET)
 //    public User getUserData(){
 //        return userService.fetchUserList();

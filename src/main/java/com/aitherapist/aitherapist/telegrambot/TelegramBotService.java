@@ -53,7 +53,8 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
-            } else {
+            }
+            else {
                 if (messagesHandler.canHandle(update.getMessage().getText())) {
                     messagesHandler.handle(update);
                 } else {

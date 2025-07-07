@@ -3,8 +3,6 @@ package com.aitherapist.aitherapist.db.entities;
 import lombok.*;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User - custom Object for Hibernate
@@ -12,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Entity
 @Table(name = "users")
@@ -22,6 +21,7 @@ public class User {
     @NonNull
     private Integer id;
 
+    @NonNull
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -46,7 +46,4 @@ public class User {
     //@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     //private List<HealthData> healthDataList = new ArrayList<>();
 
-    public User() {
-
-    }
 }
