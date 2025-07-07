@@ -53,6 +53,25 @@ public final class Llm {
      * @return ответ модели или null
      */
 
+    public static String talkToChat(String accessToken, String userMessage, String model) {
+        GigaChatClient client = GigaChatClient.builder()
+                .authClient(AuthClient.builder()
+                        .withProvidedTokenAuth(accessToken).build())
+                .build();
+        try {
+            CompletionResponse response = client.completions(CompletionRequest.builder()
+                    .model(model)
+                    .message(ChatMessage.builder()
+                            .content(userMessage)
+                            .role(ChatMessage.Role.USER)
+                            .build())
+                    .build());
+            return response.choices().get(0).message().content();
+        } catch (HttpClientException ex) {
+            return ex.statusCode() + " " + ex.bodyAsString();
+        }
+    }
+
     public static String talkToChat(String accessToken, String userMessage) {
         GigaChatClient client = GigaChatClient.builder()
                 .authClient(AuthClient.builder()
