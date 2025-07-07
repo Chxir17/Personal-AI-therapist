@@ -1,4 +1,5 @@
 package com.aitherapist.aitherapist.dao;
 
-public class UserController {
+public class UserService {
+
 }

@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.dao;
 
 import com.aitherapist.aitherapist.db.entities.HealthData;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +13,9 @@ import java.util.Optional;
  * JpaRepository - default java interface with methods(CRUD, ...) and add methods for Hibernate.
  * (for works with database. aka.dao)
  */
+@Repository
 public interface IHealthDataRepository extends JpaRepository<HealthData, Integer>  {
-    Optional<HealthData> findById(Integer id);
-    Optional<String> findUserId(Integer id);
-    
-    List<String> findAllUserId(Integer id);
+    Optional<HealthData> findByUserId(Integer userId);
+
+    List<HealthData> findAllByUserId(Integer userId);
 }

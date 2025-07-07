@@ -2,7 +2,7 @@ package com.aitherapist.aitherapist.db.entities;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +11,6 @@ import java.util.List;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
@@ -20,6 +19,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @NonNull
     private Integer id;
 
     @Column(name = "name", nullable = false)
@@ -43,6 +43,10 @@ public class User {
     @Column(name = "bad_habits")
     private String badHabits;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HealthData> healthDataList = new ArrayList<>();
+    //@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    //private List<HealthData> healthDataList = new ArrayList<>();
+
+    public User() {
+
+    }
 }

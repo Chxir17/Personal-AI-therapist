@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.dto;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -14,16 +15,10 @@ import java.util.List;
 @Setter
 public class MedicalAnalysisResult {
     private boolean isMedical;
-    private List<String> details;
+    private JSONObject jsonObject;
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Medical result: ").append(isMedical ? "Medical" : "Non-medical");
-        if (details != null && !details.isEmpty()) {
-            sb.append("\nDetails:");
-            details.forEach(detail -> sb.append("\n- ").append(detail));
-        }
-        return sb.toString();
+        return "isMedical -  " + (isMedical ? "yes":"no") + " medical analysis: " + jsonObject;
     }
 }

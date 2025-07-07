@@ -19,4 +19,5 @@ public class PinCommand implements ICommand {
         long chatId = update.getMessage().getChatId();
         return null;
     }
+
 }

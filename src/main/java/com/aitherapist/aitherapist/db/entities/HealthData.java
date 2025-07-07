@@ -2,7 +2,7 @@ package com.aitherapist.aitherapist.db.entities;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -37,11 +37,11 @@ public class HealthData implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @NonNull
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    private User user;
+    private Integer userId;
 
     @Column(name = "blood_oxygen_level", columnDefinition = "DECIMAL(5,2)")
     private Double bloodOxygenLevel;

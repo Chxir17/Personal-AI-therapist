@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.springframework.stereotype.Component;
 
 /**
+ * FIXME: add check: is user reg or already reg.
  * StartCommand - send start message to user.
  */
 @Component
@@ -13,6 +14,7 @@ public class StartCommand implements ICommand {
     @Override
     public SendMessage apply(Update update) {
         long chatId = update.getMessage().getChatId();
+
         return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
     }
 }
