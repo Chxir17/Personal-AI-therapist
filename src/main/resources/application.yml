@@ -2,12 +2,16 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/medical_app?useSSL=false&serverTimezone=UTC
     username: root
-    password: 1234567890
+    password: Ss3141592653517
     driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 10
-  liquibase:
-    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
 
 bot:
   name: "aitherapist_bot"
