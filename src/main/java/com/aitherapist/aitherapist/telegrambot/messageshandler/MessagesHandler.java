@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
+import com.aitherapist.aitherapist.telegrambot.dto.MedicalAnalysisResult;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class MessagesHandler implements IHandler {
     private final RestTemplate restTemplate = new RestTemplate();
     private String pythonServiceUrl;
-    public JSONObject jsonObject = new JSONObject();
+    private MedicalAnalysisResult medicalAnalysisResult;
 
     /**
      * FIXME: add json parse
