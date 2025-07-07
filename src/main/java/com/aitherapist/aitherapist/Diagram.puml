@@ -1,0 +1,268 @@
+@startuml
+title Complete UML Class Diagram for Aitherapist Project
+
+' Main Application Class
+class AitherapistApplication {
+  + main(String[]): void
+}
+
+' Configuration Classes
+class DatabaseConfig {
+  - url: String
+  - username: String
+  - password: String
+  + dataSource(): DataSource
+}
+
+class BotProperties {
+  - name: String
+  - token: String
+}
+
+' Entities
+class User {
+  - id: Integer
+  - name: String
+  - age: Integer
+  - male: Boolean
+  - chronicDiseases: String
+  - height: Double
+  - weight: Double
+  - badHabits: String
+  + toString(): String
+}
+
+class HealthData {
+  - id: Integer
+  - userId: Integer
+  - bloodOxygenLevel: Double
+  - temperature: Double
+  - hoursOfSleepToday: Double
+  - pulse: Integer
+  - pressure: Double
+  - sugar: Double
+  - heartPain: Boolean
+  - arrhythmia: Boolean
+}
+
+' DTOs
+class MedicalAnalysisResult {
+  - isMedical: Boolean
+  - healthData: HealthData
+  + toString(): String
+}
+
+' Repositories
+interface IUserRepository {
+}
+
+interface IHealthDataRepository {
+  + findByUserId(Integer): Optional<HealthData>
+  + findAllByUserId(Integer): List<HealthData>
+}
+
+' Services
+interface IUserService {
+  + saveUser(User): User
+  + fetchUserList(Integer): List<User>
+  + updateUser(User, Integer): User
+  + deleteUser(Integer): void
+}
+
+interface IHealthDataService {
+  + saveHealthData(HealthData): HealthData
+  + fetchHealhDataList(Integer): List<HealthData>
+  + updateHealthData(HealthData, Integer): HealthData
+  + deleteHealthData(Integer): void
+}
+
+class UserServiceImpl {
+  - userRepository: IUserRepository
+}
+
+class HealthDataServiceImpl {
+  - healthDataRepository: IHealthDataRepository
+}
+
+' Controllers
+class DataController {
+  - healthDataService: HealthDataServiceImpl
+  - userService: UserServiceImpl
+  + saveHealthData(HealthData): String
+  + isSignUp(Integer): Boolean
+}
+
+' Telegram Bot Core
+class TelegramBotService {
+  - botProperties: BotProperties
+  - commandsHandler: CommandsHandler
+  - messagesHandler: MessagesHandler
+  + getBotToken(): String
+  + getBotUsername(): String
+  + onUpdateReceived(Update): void
+  + sendMessage(SendMessage): void
+  + execute(SendMessage): void
+}
+
+class BotInitializer {
+  - bot: TelegramBotService
+  + init(): void
+}
+
+' Handlers
+class CommandsHandler {
+  - commands: Map<String, ICommand>
+  + handleCommand(Update): SendMessage
+}
+
+class MessagesHandler {
+  - registrationContext: RegistrationContext
+  - dataController: DataController
+  - messageSender: IMessageSender
+  + canHandle(String): Boolean
+  + handle(Update): void
+}
+
+' Commands
+interface ICommand {
+  + apply(Update): SendMessage
+}
+
+class StartCommand {
+  - dataController: DataController
+  - registrationContext: RegistrationContext
+  + apply(Update): SendMessage
+}
+
+class InformationCommand {
+  + apply(Update): SendMessage
+}
+
+class PinCommand {
+  + apply(Update): SendMessage
+}
+
+class StopTrackingCommand {
+  + apply(Update): SendMessage
+}
+
+' Contexts
+class RegistrationContext {
+  - registrationInProgress: Map<Long, Boolean>
+  + startRegistration(Long): void
+  + isRegistrationInProgress(Long): Boolean
+  + completeRegistration(Long): void
+}
+
+' Utilities
+Enum Answers {
+  - message: String
+  + getMessage(): String
+}
+
+Enum Consts {
+  - message: String
+  + getMessage(): String
+}
+
+class JsonUserParser {
+  + extractUserFromGigaResponse(String): User
+}
+
+class ParserJsonUserHealthData {
+  - bloodOxygenLevel: Double
+  - temperature: Double
+  - hoursOfSleepToday: Double
+  - pulse: Integer
+  - pressure: Double
+  - sugar: Double
+  - heartPain: Boolean
+  - arrhythmia: Boolean
+}
+
+' Interfaces
+interface ITelegramExecutor {
+  + execute(SendMessage): void
+}
+
+interface IMessageSender {
+  + sendMessage(Long, String): void
+}
+
+interface IHandler {
+  + canHandle(String): Boolean
+  + handle(Update): void
+}
+
+' Implementations
+class TelegramMessageSender {
+  - telegramExecutor: ITelegramExecutor
+  + sendMessage(Long, String): void
+}
+
+' Relationships
+AitherapistApplication --> DatabaseConfig
+AitherapistApplication --> DataController
+
+DataController --> HealthDataServiceImpl
+DataController --> UserServiceImpl
+
+HealthDataServiceImpl ..|> IHealthDataService
+HealthDataServiceImpl --> IHealthDataRepository
+
+UserServiceImpl ..|> IUserService
+UserServiceImpl --> IUserRepository
+
+IHealthDataRepository --|> JpaRepository
+IUserRepository --|> JpaRepository
+
+DatabaseConfig --> DataSource
+
+TelegramBotService ..|> ITelegramExecutor
+TelegramBotService --> BotProperties
+TelegramBotService --> CommandsHandler
+TelegramBotService --> MessagesHandler
+
+BotInitializer --> TelegramBotService
+
+CommandsHandler --> ICommand
+CommandsHandler --> StartCommand
+CommandsHandler --> InformationCommand
+CommandsHandler --> PinCommand
+CommandsHandler --> StopTrackingCommand
+
+MessagesHandler ..|> IHandler
+MessagesHandler --> RegistrationContext
+MessagesHandler --> DataController
+MessagesHandler --> IMessageSender
+MessagesHandler --> JsonUserParser
+
+StartCommand ..|> ICommand
+InformationCommand ..|> ICommand
+PinCommand ..|> ICommand
+StopTrackingCommand ..|> ICommand
+
+StartCommand --> Answers
+InformationCommand --> Answers
+PinCommand --> Answers
+StopTrackingCommand --> Answers
+
+TelegramMessageSender ..|> IMessageSender
+TelegramMessageSender --> ITelegramExecutor
+
+JsonUserParser --> User
+ParserJsonUserHealthData --> HealthData
+
+' Dependencies
+JsonUserParser ..> ObjectMapper
+MessagesHandler ..> RestTemplate
+User ..> HealthData
+
+' Notes
+note top of TelegramBotService: Основной класс бота,\nобрабатывает все входящие\nсообщения и команды
+note top of MessagesHandler: Обрабатывает обычные\nсообщения (не команды)
+note top of CommandsHandler: Обрабатывает команды,\nначинающиеся с "/"
+note right of ICommand: Паттерн Command\nдля обработки команд
+note left of RegistrationContext: Хранит состояние\nрегистрации пользователей
+
+@enduml

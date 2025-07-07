@@ -22,9 +22,9 @@ public class BotInitializer {
     @EventListener({ContextRefreshedEvent.class})
     public void init() {
         try {
-            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(bot);
-        } catch (TelegramApiException ignored) {
+            new TelegramBotsApi(DefaultBotSession.class).registerBot(bot);
+        } catch (TelegramApiException e) {
+            log.error("Bot registration failed", e);
         }
     }
 

@@ -3,11 +3,8 @@ package com.aitherapist.aitherapist.dao;
 import com.aitherapist.aitherapist.dao.services.HealthDataServiceImpl;
 import com.aitherapist.aitherapist.dao.services.UserServiceImpl;
 import com.aitherapist.aitherapist.db.entities.HealthData;
-import com.aitherapist.aitherapist.db.entities.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -28,15 +25,23 @@ public class DataController {
     private UserServiceImpl userService;
 
     /**
-     * @PostMapping("/health") - processing POST-request (/bot/health
      * @param healthData
      * @return
+     * @PostMapping("/health") - processing POST-request (/bot/health
      */
     @PostMapping("/health")
     public String saveHealthData(@RequestBody HealthData healthData) { //accepts a json object and
         // automatically converts it to healthdata
         healthDataService.saveHealthData(healthData);
         return "data success save!";
+    }
+
+    @RequestMapping(path = "/user/{id}", method = RequestMethod.GET)
+    public Boolean isSignUp(@PathVariable Integer userId) { //accepts a json object and
+        if(userService.fetchUserList(userId).isEmpty()){
+            return false;
+        }
+        return true;
     }
 
 //    @RequestMapping(path="/user/{id}", method = RequestMethod.GET)

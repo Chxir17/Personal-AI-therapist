@@ -3,8 +3,6 @@ package com.aitherapist.aitherapist.db.entities;
 import lombok.*;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User - custom Object for Hibernate
@@ -12,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Entity
 @Table(name = "users")
@@ -22,6 +21,7 @@ public class User {
     @NonNull
     private Integer id;
 
+    @NonNull
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -45,8 +45,18 @@ public class User {
 
     //@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     //private List<HealthData> healthDataList = new ArrayList<>();
-
-    public User() {
-
+    @Override
+    public String toString() {
+        return "🙌 Спасибо за ответ!\n" +
+                "🆔 ID пользователя: " + id + "\n" +
+                "👤 Имя: " + name + "\n" +
+                "🎂 Возраст: " + (age != null ? age + " лет" : "не указано") + "\n" +
+                "⚧ Пол: " + (male == null ? "не указан" : (male ? "мужской" : "женский")) + "\n" +
+                "🩺 Хронические заболевания: " + (chronicDiseases != null ? chronicDiseases : "не указаны") + "\n" +
+                "📏 Рост: " + (height != null ? height + " см" : "не указан") + "\n" +
+                "⚖️ Вес: " + (weight != null ? weight + " кг" : "не указан") + "\n" +
+                "🚬 Плохие привычки: " + (badHabits != null ? badHabits : "не указаны") + "\n" +
+                "💙 Берегите себя!";
     }
+
 }
