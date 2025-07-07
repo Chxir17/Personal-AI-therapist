@@ -3,9 +3,11 @@ package com.aitherapist.aitherapist.telegrambot.commands;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
  * FIXME: to implement
@@ -21,4 +23,7 @@ public class InformationCommand implements ICommand {
         long chatId = update.getMessage().getChatId();
         return new SendMessage(String.valueOf(chatId), Answers.INFORMATION_MESSAGE.getMessage());
     }
+
+
+
 }

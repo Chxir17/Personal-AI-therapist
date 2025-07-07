@@ -23,6 +23,8 @@ public class HealthDataServiceImpl implements IHealthDataService {
         return healthDataRepository.save(healthData);
     }
 
+
+
     @Override
     public List<HealthData> fetchHealhDataList(Integer userId) {
         return healthDataRepository.findAll();

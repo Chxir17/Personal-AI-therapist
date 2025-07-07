@@ -1,7 +1,9 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
 import com.aitherapist.aitherapist.dao.DataController;
+import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
+import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.springframework.stereotype.Component;
@@ -11,8 +13,10 @@ import org.springframework.stereotype.Component;
  * StartCommand - send start message to user.
  */
 @Component
+@RequiredArgsConstructor
 public class StartCommand implements ICommand {
     private DataController dataController;
+    private final RegistrationContext registrationContext;
 
     private Integer getHashId(String tag){
         return tag.hashCode();
@@ -22,9 +26,13 @@ public class StartCommand implements ICommand {
     public SendMessage apply(Update update) {
         int userId = getHashId(update.getMessage().getFrom().getUserName());
         long chatId = update.getMessage().getChatId();
-        if(!dataController.isSignUp(userId)){
+        //FIXME: add database function
+        //if(!dataController.isSignUp(userId)) {
+        if (true) {
+            registrationContext.startRegistration(chatId);
             return new SendMessage(String.valueOf(chatId), Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage());
         }
+
         return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
     }
 }

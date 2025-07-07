@@ -58,7 +58,8 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 if (messagesHandler.canHandle(update.getMessage().getText())) {
                     messagesHandler.handle(update);
                 } else {
-                    try {sendMessage(new SendMessage(chatId, Answers.IS_NOT_MEDICAL_INFORMATION.getMessage()));}
+                    try {
+                        sendMessage(new SendMessage(chatId, Answers.IS_NOT_MEDICAL_INFORMATION.getMessage()));}
                     catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
@@ -71,7 +72,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
      * sendMessage - execute message. (Send to user)
      * @param sendMessage
      */
-    private void sendMessage(@Nullable SendMessage sendMessage) throws TelegramApiException {
+    public void sendMessage(@Nullable SendMessage sendMessage) throws TelegramApiException {
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {

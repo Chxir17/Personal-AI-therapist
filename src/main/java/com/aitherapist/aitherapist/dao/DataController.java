@@ -3,11 +3,8 @@ package com.aitherapist.aitherapist.dao;
 import com.aitherapist.aitherapist.dao.services.HealthDataServiceImpl;
 import com.aitherapist.aitherapist.dao.services.UserServiceImpl;
 import com.aitherapist.aitherapist.db.entities.HealthData;
-import com.aitherapist.aitherapist.db.entities.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -28,9 +25,9 @@ public class DataController {
     private UserServiceImpl userService;
 
     /**
-     * @PostMapping("/health") - processing POST-request (/bot/health
      * @param healthData
      * @return
+     * @PostMapping("/health") - processing POST-request (/bot/health
      */
     @PostMapping("/health")
     public String saveHealthData(@RequestBody HealthData healthData) { //accepts a json object and

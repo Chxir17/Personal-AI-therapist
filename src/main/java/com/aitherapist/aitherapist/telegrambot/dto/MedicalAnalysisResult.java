@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.dto;
 
+import com.aitherapist.aitherapist.db.entities.HealthData;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,10 +16,10 @@ import java.util.List;
 @Setter
 public class MedicalAnalysisResult {
     private boolean isMedical;
-    private JSONObject jsonObject;
+    private HealthData healthData;
 
     @Override
     public String toString() {
-        return "isMedical -  " + (isMedical ? "yes":"no") + " medical analysis: " + jsonObject;
+        return "isMedical -  " + (isMedical ? "yes":"no") + " medical analysis: " + healthData.toString();
     }
 }
