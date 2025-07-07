@@ -8,6 +8,7 @@ import chat.giga.model.*;
 import chat.giga.client.*;
 import chat.giga.model.completion.ChatMessage;
 import chat.giga.model.completion.CompletionRequest;
+import chat.giga.model.completion.CompletionResponse;
 
 
 public class Llm {
@@ -32,6 +33,19 @@ public class Llm {
         }
     }
 
+    public static AccessToken getGigaChatToken(String authKey) {
+        try {
+            AuthClient client = AuthClient.builder().withOAuth(AuthClientBuilder.OAuthBuilder.builder()
+                    .scope(Scope.GIGACHAT_API_PERS)
+                    .authKey(authKey)
+                    .build()).build();
+            return client.getToken();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     /**
      * Отправка сообщения в чат GigaChat и получение ответа.
@@ -40,7 +54,7 @@ public class Llm {
      * @param model модель (по умолчанию GigaChat:latest)
      * @return ответ модели или null
      */
-    public static String talkToChat(String accessToken, String userMessage, String model, Scope scope) {
+    public static String talkToChat(String accessToken, Scope scope,  String model,String userMessage) {
         GigaChatClient client = GigaChatClient.builder()
                 .authClient(AuthClient.builder()
                         .withOAuth(AuthClientBuilder.OAuthBuilder.builder()
@@ -50,19 +64,41 @@ public class Llm {
                         .build())
                 .build();
         try {
-            System.out.println(client.completions(CompletionRequest.builder()
+            CompletionResponse response = client.completions(CompletionRequest.builder()
                     .model(model)
                     .message(ChatMessage.builder()
                             .content(userMessage)
                             .role(ChatMessage.Role.USER)
                             .build())
-                    .build()));
+                    .build());
+            return response.choices().get(0).message().content();
         } catch (HttpClientException ex) {
-            System.out.println(ex.statusCode() + " " + ex.bodyAsString());
+            return ex.statusCode() + " " + ex.bodyAsString();
         }
-        return accessToken;
     }
 
+    public static String talkToChat(String accessToken, String userMessage) {
+        GigaChatClient client = GigaChatClient.builder()
+                .authClient(AuthClient.builder()
+                        .withOAuth(AuthClientBuilder.OAuthBuilder.builder()
+                                .scope(Scope.GIGACHAT_API_PERS)
+                                .authKey(accessToken)
+                                .build())
+                        .build())
+                .build();
+        try {
+            CompletionResponse response = client.completions(CompletionRequest.builder()
+                    .model(ModelName.GIGA_CHAT)
+                    .message(ChatMessage.builder()
+                            .content(userMessage)
+                            .role(ChatMessage.Role.USER)
+                            .build())
+                    .build());
+            return response.choices().get(0).message().content();
+        } catch (HttpClientException ex) {
+            return ex.statusCode() + " " + ex.bodyAsString();
+        }
+    }
 }
 
 
