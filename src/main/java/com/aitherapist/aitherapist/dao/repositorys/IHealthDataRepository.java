@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.dao;
+package com.aitherapist.aitherapist.dao.repositorys;
 
 import com.aitherapist.aitherapist.db.entities.HealthData;
 import org.springframework.data.jpa.repository.JpaRepository;

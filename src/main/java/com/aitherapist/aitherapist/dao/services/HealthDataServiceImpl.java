@@ -1,17 +1,16 @@
-package com.aitherapist.aitherapist.dao;
+package com.aitherapist.aitherapist.dao.services;
 
+import com.aitherapist.aitherapist.dao.repositorys.IHealthDataRepository;
 import com.aitherapist.aitherapist.db.entities.HealthData;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class HealthDataService {
+public class HealthDataServiceImpl {
     private final IHealthDataRepository healthDataRepository;
 
-    public HealthDataService(IHealthDataRepository healthDataRepository) {
+    public HealthDataServiceImpl(IHealthDataRepository healthDataRepository) {
         this.healthDataRepository = healthDataRepository;
     }
 
