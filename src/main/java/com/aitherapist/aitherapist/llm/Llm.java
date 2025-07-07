@@ -1,6 +1,5 @@
 package com.aitherapist.aitherapist.llm;
 
-import chat.giga.client.auth.AccessToken;
 import chat.giga.client.auth.AuthClient;
 import chat.giga.client.auth.AuthClientBuilder;
 import chat.giga.http.client.HttpClientException;
@@ -11,7 +10,7 @@ import chat.giga.model.completion.CompletionRequest;
 import chat.giga.model.completion.CompletionResponse;
 
 
-public class Llm {
+public final class Llm {
 
     /**
      * Получение токена из SDK GigaChat.
@@ -20,26 +19,26 @@ public class Llm {
      * @param scope   область действия
      * @return access_token или null
      */
-    public static AccessToken getGigaChatToken(String authKey, Scope scope) {
+    public static String getGigaChatToken(String authKey, Scope scope) {
         try {
             AuthClient client = AuthClient.builder().withOAuth(AuthClientBuilder.OAuthBuilder.builder()
                                     .scope(scope)
                                     .authKey(authKey)
                                     .build()).build();
-            return client.getToken();
+            return client.getToken().token();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static AccessToken getGigaChatToken(String authKey) {
+    public static String getGigaChatToken(String authKey) {
         try {
             AuthClient client = AuthClient.builder().withOAuth(AuthClientBuilder.OAuthBuilder.builder()
                     .scope(Scope.GIGACHAT_API_PERS)
                     .authKey(authKey)
                     .build()).build();
-            return client.getToken();
+            return client.getToken().token();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -51,40 +50,13 @@ public class Llm {
      * Отправка сообщения в чат GigaChat и получение ответа.
      * @param accessToken access_token
      * @param userMessage сообщение пользователя
-     * @param model модель (по умолчанию GigaChat:latest)
      * @return ответ модели или null
      */
-    public static String talkToChat(String accessToken, Scope scope,  String model,String userMessage) {
-        GigaChatClient client = GigaChatClient.builder()
-                .authClient(AuthClient.builder()
-                        .withOAuth(AuthClientBuilder.OAuthBuilder.builder()
-                                .scope(scope)
-                                .authKey(accessToken)
-                                .build())
-                        .build())
-                .build();
-        try {
-            CompletionResponse response = client.completions(CompletionRequest.builder()
-                    .model(model)
-                    .message(ChatMessage.builder()
-                            .content(userMessage)
-                            .role(ChatMessage.Role.USER)
-                            .build())
-                    .build());
-            return response.choices().get(0).message().content();
-        } catch (HttpClientException ex) {
-            return ex.statusCode() + " " + ex.bodyAsString();
-        }
-    }
 
     public static String talkToChat(String accessToken, String userMessage) {
         GigaChatClient client = GigaChatClient.builder()
                 .authClient(AuthClient.builder()
-                        .withOAuth(AuthClientBuilder.OAuthBuilder.builder()
-                                .scope(Scope.GIGACHAT_API_PERS)
-                                .authKey(accessToken)
-                                .build())
-                        .build())
+                        .withProvidedTokenAuth(accessToken).build())
                 .build();
         try {
             CompletionResponse response = client.completions(CompletionRequest.builder()
