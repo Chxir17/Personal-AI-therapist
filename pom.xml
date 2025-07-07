@@ -58,7 +58,12 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-
+		<!-- Gigachat API -->
+		<dependency>
+			<groupId>chat.giga</groupId>
+			<artifactId>gigachat-java</artifactId>
+			<version>0.1.4</version>
+		</dependency>
 		<!-- Telegram -->
 		<dependency>
 			<groupId>org.telegram</groupId>
