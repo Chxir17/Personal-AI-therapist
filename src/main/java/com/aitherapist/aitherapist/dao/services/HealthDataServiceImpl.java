@@ -39,7 +39,7 @@ public class HealthDataServiceImpl implements IHealthDataService {
     public HealthData updateHealthData(HealthData healthData, Integer userId) {
         HealthData currentHealthData = healthDataRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        BeanUtils.copyProperties(healthData, currentHealthData, "id"); // ignore id, чтобы
+        BeanUtils.copyProperties(healthData, currentHealthData, "id"); // ignore id
         return healthDataRepository.save(currentHealthData);
     }
 
