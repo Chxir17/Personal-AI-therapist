@@ -2,6 +2,10 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.Consts;
 import com.aitherapist.aitherapist.dao.DataController;
+import com.aitherapist.aitherapist.db.entities.JsonUserParser;
+import com.aitherapist.aitherapist.db.entities.User;
+import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecomendation;
+import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.dto.MedicalAnalysisResult;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
@@ -35,7 +39,8 @@ public class MessagesHandler implements IHandler {
     private final RegistrationContext registrationContext;
     private final DataController dataController;
     private IMessageSender messageSender;
-
+    private ParseUserPrompt parseUserPrompt = new ParseUserPrompt();
+    private MakeMedicalRecomendation makeMedicalRecomendation = new MakeMedicalRecomendation();
     @Autowired
     public void setMessageSender(@Lazy IMessageSender messageSender) {
         this.messageSender = messageSender;
@@ -64,24 +69,29 @@ public class MessagesHandler implements IHandler {
 
         if (registrationContext.isRegistrationInProgress(chatId)) {
             try {
-                JSONObject request = new JSONObject();
-                request.put("text", messageText);
+                System.out.println("Giga response raw:");
+                System.out.println(messageText);
 
-                //тту должен быть вызов AI сервиса
-                // MedicalAnalysisResult result = restTemplate.postForObject(pythonServiceUrl, request, MedicalAnalysisResult.class);
+                String rawJsonResponse = parseUserPrompt.initPromptParser(messageText);
 
-                MedicalAnalysisResult result = new MedicalAnalysisResult();
-                result.setMedical(true);
+                User user = JsonUserParser.extractUserFromGigaResponse(rawJsonResponse);
+                user.setId((update.getMessage().getFrom().getUserName()).hashCode());
+                System.out.println("Parsed User:");
+                System.out.println(user.toString());
 
-                if (result.isMedical()) {
-                    int userId = update.getMessage().getFrom().getUserName().hashCode();
-                    dataController.saveHealthData(result.getHealthData());
-                    messageSender.sendMessage(chatId, Answers.REGISTRATION_SUCCESSFUL.getMessage());
-
-                    registrationContext.completeRegistration(chatId);
-                } else {
-                    messageSender.sendMessage(chatId, Answers.INVALID_INPUT_DATA.getMessage());
-                }
+                messageSender.sendMessage(chatId, user.toString());
+//                MedicalAnalysisResult result = new MedicalAnalysisResult();
+//                result.setMedical(true);
+//
+//                if (result.isMedical()) {
+//                    int userId = update.getMessage().getFrom().getUserName().hashCode();
+//                    dataController.saveHealthData(result.getHealthData());
+//                    messageSender.sendMessage(chatId, Answers.REGISTRATION_SUCCESSFUL.getMessage());
+//
+//                    registrationContext.completeRegistration(chatId);
+//                } else {
+//                    messageSender.sendMessage(chatId, Answers.INVALID_INPUT_DATA.getMessage());
+//                }
             } catch (Exception e) {
                 log.error("Error during registration processing", e);
                 try {

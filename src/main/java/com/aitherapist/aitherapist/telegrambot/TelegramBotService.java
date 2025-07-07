@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
+
 /**
  * TelegramBotService - main class with main methods onUpdateReceived.
  * when user sends message, it arrives to onUpdateReceived.
@@ -49,7 +50,9 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         if (update.hasMessage() && update.getMessage().hasText()) {
             String chatId = update.getMessage().getChatId().toString();
             if (update.getMessage().getText().startsWith("/")) {
-                try {sendMessage(commandsHandler.handleCommand(update));}
+                try {
+                    sendMessage(commandsHandler.handleCommand(update));
+                }
                 catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }

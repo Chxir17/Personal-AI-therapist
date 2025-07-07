@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class MakeMedicalRecomendation {
 
-    public static  String makeMedicalRecomendation(String jsonMedicalData) throws JsonProcessingException {
+    public String makeMedicalRecomendation(String jsonMedicalData) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         ParserJsonUserHealthData user = mapper.readValue(jsonMedicalData, ParserJsonUserHealthData.class);
         String apiKey = System.getenv("GIGA_CHAT_API_KEY");
