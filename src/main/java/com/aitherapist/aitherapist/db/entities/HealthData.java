@@ -66,4 +66,5 @@ public class HealthData implements Serializable {
 
     @Column(name = "arrhythmia")
     private Boolean arrhythmia;
+
 }
