@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler;
 import com.aitherapist.aitherapist.Consts;
 import com.aitherapist.aitherapist.dao.DataController;
 import com.aitherapist.aitherapist.db.entities.JsonUserParser;
+import com.aitherapist.aitherapist.db.entities.ParseJsonUserInitData;
 import com.aitherapist.aitherapist.db.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecomendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
@@ -10,6 +11,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationCon
 import com.aitherapist.aitherapist.telegrambot.dto.MedicalAnalysisResult;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -74,8 +76,8 @@ public class MessagesHandler implements IHandler {
 
                 String rawJsonResponse = parseUserPrompt.initPromptParser(messageText);
 
-                User user = JsonUserParser.extractUserFromGigaResponse(rawJsonResponse);
-                user.setId((update.getMessage().getFrom().getUserName()).hashCode());
+                ObjectMapper mapper = new ObjectMapper();
+                ParseJsonUserInitData user = mapper.readValue(rawJsonResponse, ParseJsonUserInitData.class);
                 System.out.println("Parsed User:");
                 System.out.println(user.toString());
 
