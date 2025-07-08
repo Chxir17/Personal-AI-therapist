@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface IHealthDataService {
     HealthData saveHealthDataInUser(int userId, HealthData healthData);
-    List<HealthData> fetchHealhDataList(Integer userId);
+    List<HealthData> fetchHealthDataList(Integer userId);
     HealthData updateHealthData(HealthData healthData, Integer userId);
     void deleteHealthData(Integer userId);
 }

@@ -35,7 +35,8 @@ public enum Answers {
     WELCOME_BACK("С возвращением! Чем могу помочь?"),
     REGISTRATION_SUCCESSFUL("Регистрация успешно завершена!"),
     INVALID_INPUT_DATA("Введенные данные некорректны. Пожалуйста, попробуйте еще раз."),
-    REGISTRATION_ERROR("Произошла ошибка при обработке ваших данных. Пожалуйста, попробуйте позже.");
+    REGISTRATION_ERROR("Произошла ошибка при обработке ваших данных. Пожалуйста, попробуйте позже."),
+    ALREADY_REGISTRATION("Вы уже зарегстрировнаны ввидети свои симптомы ");
     private final String message;
 
     Answers(String message) {

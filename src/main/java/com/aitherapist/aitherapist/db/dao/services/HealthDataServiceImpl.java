@@ -36,8 +36,10 @@ public class HealthDataServiceImpl implements IHealthDataService {
 
     @Override
     @Transactional
-    public List<HealthData> fetchHealhDataList(Integer userId) {
-        return healthDataRepository.findAll();
+    public List<HealthData> fetchHealthDataList(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        return healthDataRepository.findByUser(user);
     }
 
     /**

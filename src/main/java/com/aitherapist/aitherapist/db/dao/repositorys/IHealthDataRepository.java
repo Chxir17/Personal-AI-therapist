@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.db.dao.repositorys;
 
 import com.aitherapist.aitherapist.db.entities.HealthData;
+import com.aitherapist.aitherapist.db.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,5 @@ import java.util.Optional;
  */
 @Repository
 public interface IHealthDataRepository extends JpaRepository<HealthData, Integer>  {
+    List<HealthData> findByUser(User user);  // Spring Data JPA auto implement methods.
 }

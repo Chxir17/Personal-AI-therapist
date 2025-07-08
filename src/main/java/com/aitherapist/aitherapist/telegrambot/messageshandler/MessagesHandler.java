@@ -36,7 +36,10 @@ public class MessagesHandler implements IHandler {
     private String pythonServiceUrl;
     private MedicalAnalysisResult medicalAnalysisResult;
     private final RegistrationContext registrationContext;
+    @Autowired
     private final DataController dataController;
+    @Autowired
+    private final UserRegistrationService userRegistrationService;
     private IMessageSender messageSender;
     private ParseUserPrompt parseUserPrompt = new ParseUserPrompt();
     private MakeMedicalRecomendation makeMedicalRecomendation = new MakeMedicalRecomendation();
@@ -62,7 +65,7 @@ public class MessagesHandler implements IHandler {
      * @return
      */
     @Override
-    public void handle(Update update) {
+    public void handle(Update update) throws TelegramApiException {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
 
@@ -77,19 +80,15 @@ public class MessagesHandler implements IHandler {
                 System.out.println("Parsed User:");
                 System.out.println(user.toString());
 
-                messageSender.sendMessage(chatId, user.toString());
-//                MedicalAnalysisResult result = new MedicalAnalysisResult();
-//                result.setMedical(true);
-//
-//                if (result.isMedical()) {
-//                    int userId = update.getMessage().getFrom().getUserName().hashCode();
-//                    dataController.saveHealthData(result.getHealthData());
-//                    messageSender.sendMessage(chatId, Answers.REGISTRATION_SUCCESSFUL.getMessage());
-//
-//                    registrationContext.completeRegistration(chatId);
-//                } else {
-//                    messageSender.sendMessage(chatId, Answers.INVALID_INPUT_DATA.getMessage());
-//                }
+                System.out.println(rawJsonResponse);
+                String cleanJson = rawJsonResponse.replaceAll("```json|```", "").trim();
+                ObjectMapper mapper = new ObjectMapper();
+                User user = mapper.readValue(cleanJson, User.class);
+                userRegistrationService.registerUser(
+                        Math.toIntExact(update.getMessage().getFrom().getId()),
+                        user
+                );
+                messageSender.sendMessage(chatId, Answers.REGISTRATION_SUCCESSFUL.getMessage());
             } catch (Exception e) {
                 log.error("Error during registration processing", e);
                 try {
@@ -98,6 +97,9 @@ public class MessagesHandler implements IHandler {
                     log.error("Failed to send error message", ex);
                 }
             }
+        } else {
+            messageSender.sendMessage(chatId, Answers.ALREADY_REGISTRATION.getMessage());
+
         }
     }
 }
