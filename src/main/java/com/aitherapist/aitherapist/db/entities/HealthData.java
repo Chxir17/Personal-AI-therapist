@@ -35,7 +35,6 @@ public class HealthData implements Serializable {
     private static final long serialVersionUID = -5527566248002296042L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @NonNull
     private Integer id;

@@ -58,8 +58,13 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                 }
             }
             else {
+                //FIXME: переписать canHandle.
                 if (messagesHandler.canHandle(update.getMessage().getText())) {
-                    messagesHandler.handle(update);
+                    try {
+                        messagesHandler.handle(update);
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     try {
                         sendMessage(new SendMessage(chatId, Answers.IS_NOT_MEDICAL_INFORMATION.getMessage()));}

@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.db.dao;
 
+import com.aitherapist.aitherapist.db.dao.logic.UserRegistrationService;
 import com.aitherapist.aitherapist.db.dao.services.HealthDataServiceImpl;
 import com.aitherapist.aitherapist.db.dao.services.UserServiceImpl;
 import com.aitherapist.aitherapist.db.entities.HealthData;
@@ -25,6 +26,9 @@ public class DataController {
 
     @Autowired
     private UserServiceImpl userService;
+
+    @Autowired
+    private UserRegistrationService userRegistrationService;
 
     @RequestMapping(path = "/user/{id}", method = RequestMethod.GET)
     public Boolean isSignUp(@PathVariable Integer userId) { //accepts a json object and
@@ -67,10 +71,8 @@ public class DataController {
      * @return
      */
     @PostMapping("/user/{userId}/information")
-    public String CreateAndSaveUserInformation(@PathVariable Integer userId, @RequestBody User user) {
-        userService.createUser(userId, user);
-        return "user" + userId + "success save!" + user.toString();
+    public void CreateAndSaveUserInformation(@PathVariable Integer userId, @RequestBody User user) {
+        userRegistrationService.registerUser(userId, user);
     }
-
 
 }
