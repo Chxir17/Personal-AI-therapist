@@ -9,7 +9,7 @@ public class ParseUserPrompt {
         String apiKey = System.getenv("GIGA_CHAT_API_KEY");
         String token = Llm.getGigaChatToken(apiKey);
         String systemPrompt = """ 
-    "your role is": "You are a medical assistant. Parse user messages and extract personal health-related information in the following format. If any field is missing or not mentioned, use null as its value. Output only a valid JSON without any explanation or extra text.",
+    "Parse user messages and extract personal health-related information in the following format. If any field is missing or not mentioned, use null as its value. Output only a valid JSON without any explanation or extra text.",
     "user": {
         "name": str | null,
         "age": int | null,
