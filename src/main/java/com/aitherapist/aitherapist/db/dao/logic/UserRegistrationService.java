@@ -1,7 +1,10 @@
 package com.aitherapist.aitherapist.db.dao.logic;
 
+import com.aitherapist.aitherapist.db.dao.services.HealthDataServiceImpl;
 import com.aitherapist.aitherapist.db.dao.services.UserServiceImpl;
+import com.aitherapist.aitherapist.db.entities.HealthData;
 import com.aitherapist.aitherapist.db.entities.User;
+import org.springframework.core.SpringVersion;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,12 +17,27 @@ public class UserRegistrationService {
     private final UserServiceImpl userService;
 
     @Autowired
+    private HealthDataServiceImpl healthDataService;
+
+    @Autowired
     public UserRegistrationService(UserServiceImpl userService) {
         this.userService = userService;
     }
 
     public void registerUser(Integer userId, User user) {
         userService.createUser(userId, user);
+    }
+
+    public Boolean isSignup(Integer userId){
+        if(userService.fetchUserList(userId).isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    public String saveUserHealthData(Integer userId, HealthData healthData){
+        healthDataService.saveHealthDataInUser(userId, healthData);
+        return "data success save!";
     }
 
 }
