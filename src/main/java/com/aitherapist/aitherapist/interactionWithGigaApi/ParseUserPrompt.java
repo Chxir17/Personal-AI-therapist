@@ -5,7 +5,7 @@ import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
 public class ParseUserPrompt {
 
 
-    public String initPromptParser(String userPrompt){
+    public String initPromptParser(String userPrompt) throws InterruptedException {
         String apiKey = System.getenv("GIGA_CHAT_API_KEY");
         String token = Llm.getGigaChatToken(apiKey);
         String systemPrompt = """ 
@@ -15,15 +15,24 @@ public class ParseUserPrompt {
         "age": int | null,
         "male": bool | null,  # true if male, false if female, null if not mentioned
         "chronicDiseases": str | null,
-        "height": float | null,  # in centimeters
-        "weight": float | null,  # in kilograms
+        "height": double | null,  # in centimeters
+        "weight": double | null,  # in kilograms
         "badHabits": str | null
     }
     User Message:
 """;
         String finalPrompt = systemPrompt + userPrompt;
-        String response = Llm.talkToChat(token, finalPrompt);
-
+//        String response = Llm.talkToChat(token, finalPrompt);
+        String response = "";
+        for (int i = 0; i < 10; i++) {
+            try {
+                response = Llm.talkToChat(token, finalPrompt);
+                break;
+            } catch (Exception e) {
+                if (i == 10 - 1) throw e;
+                Thread.sleep(1000);
+            }
+        }
         return response;
     }
 
@@ -46,10 +55,11 @@ User Message:
 """;
         String finalPrompt = systemPrompt+ userPrompt;
         String response = Llm.talkToChat(token, finalPrompt);
+
         return response;
     }
 
-    public void main(String[] args) {
+    public void main(String[] args) throws InterruptedException {
         String userPrompt = "Hi, I'm Alex. I'm 34, male. I have asthma. I smoke. Height 182 cm, weight 76 kg.";
 
         String response = initPromptParser(userPrompt);

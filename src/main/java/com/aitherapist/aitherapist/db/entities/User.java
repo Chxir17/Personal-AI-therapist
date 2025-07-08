@@ -4,6 +4,9 @@ import lombok.*;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * User - custom Object for Hibernate
  */
@@ -18,7 +21,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @NonNull
     private Integer id;
 
     @NonNull
@@ -43,12 +45,12 @@ public class User {
     @Column(name = "bad_habits")
     private String badHabits;
 
-    //@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<HealthData> healthDataList = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HealthData> healthDataList = new ArrayList<>();
+
     @Override
     public String toString() {
-        return "🙌 Спасибо за ответ!\n" +
-                "🆔 ID пользователя: " + id + "\n" +
+        return "🆔 ID пользователя: " + id + "\n" +
                 "👤 Имя: " + name + "\n" +
                 "🎂 Возраст: " + (age != null ? age + " лет" : "не указано") + "\n" +
                 "⚧ Пол: " + (male == null ? "не указан" : (male ? "мужской" : "женский")) + "\n" +

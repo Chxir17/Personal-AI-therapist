@@ -1,10 +1,13 @@
-package com.aitherapist.aitherapist.dao.services;
+package com.aitherapist.aitherapist.db.dao.services;
 
-import com.aitherapist.aitherapist.dao.repositorys.IHealthDataRepository;
+import com.aitherapist.aitherapist.db.dao.repositorys.IHealthDataRepository;
+import com.aitherapist.aitherapist.db.dao.repositorys.IUserRepository;
 import com.aitherapist.aitherapist.db.entities.HealthData;
+import com.aitherapist.aitherapist.db.entities.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,19 +16,26 @@ import java.util.List;
  * IHealthDataRepository -  repository-interface. auto create interface with implemented main methods.
  */
 @Service
+@Transactional(readOnly=true)
 public class HealthDataServiceImpl implements IHealthDataService {
 
     @Autowired
     private IHealthDataRepository healthDataRepository;
 
+    @Autowired
+    private IUserRepository userRepository;
+
     @Override
-    public HealthData saveHealthData(HealthData healthData) {
+    @Transactional
+    public HealthData saveHealthDataInUser(int userId, HealthData healthData) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user not found!" + userId));
+        healthData.setUser(user);
         return healthDataRepository.save(healthData);
+
     }
 
-
-
     @Override
+    @Transactional
     public List<HealthData> fetchHealhDataList(Integer userId) {
         return healthDataRepository.findAll();
     }
@@ -38,6 +48,7 @@ public class HealthDataServiceImpl implements IHealthDataService {
      * @return
      */
     @Override
+    @Transactional
     public HealthData updateHealthData(HealthData healthData, Integer userId) {
         HealthData currentHealthData = healthDataRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -46,6 +57,7 @@ public class HealthDataServiceImpl implements IHealthDataService {
     }
 
     @Override
+    @Transactional
     public void deleteHealthData(Integer userId) {
         HealthData healthData =  healthDataRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

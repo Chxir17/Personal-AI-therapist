@@ -40,8 +40,9 @@ public class HealthData implements Serializable {
     @NonNull
     private Integer id;
 
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    private Integer userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "blood_oxygen_level", columnDefinition = "DECIMAL(5,2)")
     private Double bloodOxygenLevel;

@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.dao.repositorys;
+package com.aitherapist.aitherapist.db.dao.repositorys;
 
 import com.aitherapist.aitherapist.db.entities.HealthData;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +15,4 @@ import java.util.Optional;
  */
 @Repository
 public interface IHealthDataRepository extends JpaRepository<HealthData, Integer>  {
-    Optional<HealthData> findByUserId(Integer userId);
-
-    List<HealthData> findAllByUserId(Integer userId);
 }

@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.dao.services;
+package com.aitherapist.aitherapist.db.dao.services;
 import com.aitherapist.aitherapist.db.entities.User;
 import java.util.List;
 
@@ -11,4 +11,6 @@ public interface IUserService {
     List<User> fetchUserList(Integer id);
     User updateUser(User user, Integer id);
     void deleteUser(Integer id);
+    void createUser(int userId, User user);
+    void deleteUserIfExists(Integer id);
 }
