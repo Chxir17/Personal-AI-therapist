@@ -86,7 +86,7 @@ public final class Llm {
                     .build());
             return response.choices().get(0).message().content();
         } catch (HttpClientException ex) {
-            return ex.statusCode() + " " + ex.bodyAsString();
+            return ex.statusCode() + "  " + ex.bodyAsString();
         }
     }
 }
