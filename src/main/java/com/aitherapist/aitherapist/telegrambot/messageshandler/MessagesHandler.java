@@ -1,9 +1,10 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.db.dao.DataController;
+import com.aitherapist.aitherapist.db.dao.logic.UserRegistrationService;
 import com.aitherapist.aitherapist.db.entities.ParseJsonUserInitData;
 import com.aitherapist.aitherapist.db.entities.User;
-import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecomendation;
+import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.dto.MedicalAnalysisResult;
@@ -42,7 +43,7 @@ public class MessagesHandler implements IHandler {
     private final UserRegistrationService userRegistrationService;
     private IMessageSender messageSender;
     private ParseUserPrompt parseUserPrompt = new ParseUserPrompt();
-    private MakeMedicalRecomendation makeMedicalRecomendation = new MakeMedicalRecomendation();
+    private MakeMedicalRecommendation makeMedicalRecommendation = new MakeMedicalRecommendation();
     @Autowired
     public void setMessageSender(@Lazy IMessageSender messageSender) {
         this.messageSender = messageSender;
