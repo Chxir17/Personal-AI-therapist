@@ -1,7 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.db.dao.DataController;
-import com.aitherapist.aitherapist.JsonUserParser;
+import com.aitherapist.aitherapist.db.entities.ParseJsonUserInitData;
 import com.aitherapist.aitherapist.db.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecomendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
@@ -72,8 +72,8 @@ public class MessagesHandler implements IHandler {
                 System.out.println(messageText);
                 String rawJsonResponse = parseUserPrompt.initPromptParser(messageText);
                 System.out.println(rawJsonResponse);
-                User user = JsonUserParser.extractUserFromGigaResponse(rawJsonResponse);
-                user.setId((update.getMessage().getFrom().getUserName()).hashCode());
+                ObjectMapper mapper = new ObjectMapper();
+                ParseJsonUserInitData user = mapper.readValue(rawJsonResponse, ParseJsonUserInitData.class);
                 System.out.println("Parsed User:");
                 System.out.println(user.toString());
 
