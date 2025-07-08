@@ -76,6 +76,13 @@
 			<version>6.8.0</version>
 		</dependency>
 
+		<!-- Gigachat API -->
+		<dependency>
+			<groupId>chat.giga</groupId>
+			<artifactId>gigachat-java</artifactId>
+			<version>0.1.4</version>
+		</dependency>
+
 		<!-- Тесты -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

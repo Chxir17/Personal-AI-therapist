@@ -9,6 +9,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationCon
 import com.aitherapist.aitherapist.telegrambot.dto.MedicalAnalysisResult;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
