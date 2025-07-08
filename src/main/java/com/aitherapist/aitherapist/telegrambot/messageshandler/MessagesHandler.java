@@ -1,8 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
-import com.aitherapist.aitherapist.Consts;
-import com.aitherapist.aitherapist.dao.DataController;
-import com.aitherapist.aitherapist.db.entities.JsonUserParser;
+import com.aitherapist.aitherapist.db.dao.DataController;
+import com.aitherapist.aitherapist.JsonUserParser;
 import com.aitherapist.aitherapist.db.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecomendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
@@ -14,7 +13,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -71,9 +69,8 @@ public class MessagesHandler implements IHandler {
             try {
                 System.out.println("Giga response raw:");
                 System.out.println(messageText);
-
                 String rawJsonResponse = parseUserPrompt.initPromptParser(messageText);
-
+                System.out.println(rawJsonResponse);
                 User user = JsonUserParser.extractUserFromGigaResponse(rawJsonResponse);
                 user.setId((update.getMessage().getFrom().getUserName()).hashCode());
                 System.out.println("Parsed User:");

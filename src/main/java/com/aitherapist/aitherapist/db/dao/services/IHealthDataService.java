@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.dao.services;
+package com.aitherapist.aitherapist.db.dao.services;
 import com.aitherapist.aitherapist.db.entities.HealthData;
 import java.util.List;
 
@@ -7,7 +7,7 @@ import java.util.List;
  * Defines methods for CRUD operations and additional business logic
  */
 public interface IHealthDataService {
-    HealthData saveHealthData(HealthData healthData);
+    HealthData saveHealthDataInUser(int userId, HealthData healthData);
     List<HealthData> fetchHealhDataList(Integer userId);
     HealthData updateHealthData(HealthData healthData, Integer userId);
     void deleteHealthData(Integer userId);

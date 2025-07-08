@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.interactionWithGigaApi;
 
-import com.aitherapist.aitherapist.db.entities.ParserJsonUserHealthData;
+import com.aitherapist.aitherapist.ParserJsonUserHealthData;
 
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
 import com.fasterxml.jackson.core.JsonProcessingException;

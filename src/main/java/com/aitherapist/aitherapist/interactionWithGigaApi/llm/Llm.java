@@ -14,7 +14,6 @@ public final class Llm {
 
     /**
      * Получение токена из SDK GigaChat.
-     *
      * @param authKey OAuth ключ
      * @param scope   область действия
      * @return access_token или null

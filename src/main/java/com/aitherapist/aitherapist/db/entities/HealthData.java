@@ -40,8 +40,9 @@ public class HealthData implements Serializable {
     @NonNull
     private Integer id;
 
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    private Integer userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "blood_oxygen_level", columnDefinition = "DECIMAL(5,2)")
     private Double bloodOxygenLevel;
@@ -66,4 +67,21 @@ public class HealthData implements Serializable {
 
     @Column(name = "arrhythmia")
     private Boolean arrhythmia;
+
+
+    @Override
+    public String toString() {
+        return "🩺 Данные о здоровье:\n" +
+                "🆔 ID записи: " + id + "\n" +
+                "👤 ID пользователя: " + user.getId() + "\n" +
+                "💨 Кислород в крови: " + (bloodOxygenLevel != null ? bloodOxygenLevel + "%" : "не измерялось") + "\n" +
+                "🌡 Температура: " + (temperature != null ? temperature + "°C" : "не измерялась") + "\n" +
+                "😴 Сон: " + (hoursOfSleepToday != null ? hoursOfSleepToday + " часов" : "не указано") + "\n" +
+                "💓 Пульс: " + (pulse != null ? pulse + " уд/мин" : "не измерялся") + "\n" +
+                "🩸 Давление: " + (pressure != null ? pressure + " мм рт.ст." : "не измерялось") + "\n" +
+                "🍬 Уровень сахара: " + (sugar != null ? sugar + " ммоль/л" : "не измерялся") + "\n" +
+                "❤️ Боль в сердце: " + (heartPain != null ? (heartPain ? "да" : "нет") : "не указано") + "\n" +
+                "💓 Аритмия: " + (arrhythmia != null ? (arrhythmia ? "есть" : "нет") : "не указано");
+    }
+
 }
