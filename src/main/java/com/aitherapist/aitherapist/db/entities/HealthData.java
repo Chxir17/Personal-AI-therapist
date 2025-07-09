@@ -67,4 +67,19 @@ public class HealthData implements Serializable {
     @Column(name = "arrhythmia")
     private Boolean arrhythmia;
 
+    @Override
+    public String toString() {
+        return "HealthData{" +
+                "id=" + id +
+                ", user=" + (user != null ? user.getId() : "null") +
+                ", bloodOxygenLevel=" + bloodOxygenLevel +
+                ", temperature=" + temperature +
+                ", hoursOfSleepToday=" + hoursOfSleepToday +
+                ", pulse=" + pulse +
+                ", pressure=" + pressure +
+                ", sugar=" + sugar +
+                ", heartPain=" + heartPain +
+                ", arrhythmia=" + arrhythmia +
+                '}';
+    }
 }

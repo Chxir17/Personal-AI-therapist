@@ -2,7 +2,7 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.db.dao.DataController;
 import com.aitherapist.aitherapist.db.dao.logic.UserRegistrationService;
-import com.aitherapist.aitherapist.db.entities.ParseJsonUserInitData;
+import com.aitherapist.aitherapist.db.entities.HealthData;
 import com.aitherapist.aitherapist.db.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
@@ -10,6 +10,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationCon
 import com.aitherapist.aitherapist.telegrambot.dto.MedicalAnalysisResult;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -34,13 +35,14 @@ import org.springframework.context.annotation.Lazy;
 @Slf4j
 public class MessagesHandler implements IHandler {
     private final RestTemplate restTemplate = new RestTemplate();
-    private String pythonServiceUrl;
     private MedicalAnalysisResult medicalAnalysisResult;
     private final RegistrationContext registrationContext;
+
     @Autowired
     private final DataController dataController;
     @Autowired
     private final UserRegistrationService userRegistrationService;
+
     private IMessageSender messageSender;
     private ParseUserPrompt parseUserPrompt = new ParseUserPrompt();
     private MakeMedicalRecommendation makeMedicalRecommendation = new MakeMedicalRecommendation();
@@ -48,6 +50,7 @@ public class MessagesHandler implements IHandler {
     public void setMessageSender(@Lazy IMessageSender messageSender) {
         this.messageSender = messageSender;
     }
+
     /**
      * FIXME: add check is medical information.
      * canHandle - check is this medical data.
@@ -66,10 +69,10 @@ public class MessagesHandler implements IHandler {
      * @return
      */
     @Override
-    public void handle(Update update) throws TelegramApiException {
+    public void handle(Update update) throws TelegramApiException, JsonProcessingException {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
-
+        int userId = Math.toIntExact(update.getMessage().getFrom().getId());
         if (registrationContext.isRegistrationInProgress(chatId)) {
             try {
                 System.out.println("Giga response raw:");
@@ -79,7 +82,7 @@ public class MessagesHandler implements IHandler {
                 ObjectMapper mapper = new ObjectMapper();
                 User user = mapper.readValue(cleanJson, User.class);
                 userRegistrationService.registerUser(
-                        Math.toIntExact(update.getMessage().getFrom().getId()),
+                        userId,
                         user
                 );
                 messageSender.sendMessage(chatId, Answers.REGISTRATION_SUCCESSFUL.getMessage());
@@ -92,8 +95,17 @@ public class MessagesHandler implements IHandler {
                 }
             }
         } else {
-            messageSender.sendMessage(chatId, Answers.ALREADY_REGISTRATION.getMessage());
+            messageSender.sendMessage(chatId, Answers.GIVE_ANSWER.getMessage());
+            String cleanJson = ParseUserPrompt.dailyQuestionnaireParser(messageText).replaceAll("```json|```", "").trim();
+            System.out.println(cleanJson);
+            messageSender.sendMessage(chatId, cleanJson);
+            ObjectMapper mapper = new ObjectMapper();
+            HealthData healthData = mapper.readValue(cleanJson, HealthData.class);
 
+//            userRegistrationService.putHealthDataInUser(userId, healthData);
+//            String answer = MakeMedicalRecommendation.giveMedicalRecommendation(userRegistrationService.getUserByUserId(Math.toIntExact(update.getMessage().getFrom().getId())));
+//            messageSender.sendMessage(chatId, answer);
+//            messageSender.sendMessage(chatId, "AS");
         }
     }
 }

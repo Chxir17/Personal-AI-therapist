@@ -13,4 +13,5 @@ public interface IUserService {
     void deleteUser(Integer id);
     void createUser(int userId, User user);
     void deleteUserIfExists(Integer id);
+    User getUser(Integer id);
 }
