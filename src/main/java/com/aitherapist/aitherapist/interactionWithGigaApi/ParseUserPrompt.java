@@ -27,7 +27,7 @@ public class ParseUserPrompt {
                 3. Обрабатывай только те данные, которые четко указаны в тексте без предположений.
                 4. Игнорируй любые дополнительные сведения, которые не подходят под один из указанных параметров.
                 [Формат ответа]:
-                {"user": {"name": <string>, "age": <int> | null, "male": <bool> | null, "chronicDiseases": <string> | null, "height": <double> | null, "weight": <double> | null, "badHabits": <string> | null}}
+                {"name": <string>, "age": <int> | null, "male": <bool> | null, "chronicDiseases": <string> | null, "height": <double> | null, "weight": <double> | null, "badHabits": <string> | null}
                 [Примечания]: Используй строгую обработку данных согласно указанным типам и единицам измерений.
                 [Критерии качества]:
                 - Корректное заполнение всех полей JSON согласно правилам преобразования данных.
