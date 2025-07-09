@@ -75,13 +75,6 @@ public class MessagesHandler implements IHandler {
                 System.out.println("Giga response raw:");
                 System.out.println(messageText);
                 String rawJsonResponse = parseUserPrompt.initPromptParser(messageText);
-                System.out.println(rawJsonResponse);
-                ObjectMapper mapper = new ObjectMapper();
-                ParseJsonUserInitData user = mapper.readValue(rawJsonResponse, ParseJsonUserInitData.class);
-                System.out.println("Parsed User:");
-                System.out.println(user.toString());
-
-                System.out.println(rawJsonResponse);
                 String cleanJson = rawJsonResponse.replaceAll("```json|```", "").trim();
                 ObjectMapper mapper = new ObjectMapper();
                 User user = mapper.readValue(cleanJson, User.class);

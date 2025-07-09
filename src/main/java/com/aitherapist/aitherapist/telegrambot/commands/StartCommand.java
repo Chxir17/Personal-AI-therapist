@@ -18,13 +18,10 @@ public class StartCommand implements ICommand {
     private DataController dataController;
     private final RegistrationContext registrationContext;
 
-    private Integer getHashId(String tag){
-        return tag.hashCode();
-    }
 
     @Override
     public SendMessage apply(Update update) {
-        int userId = getHashId(update.getMessage().getFrom().getUserName());
+        Long userId = update.getMessage().getFrom().getId();
         long chatId = update.getMessage().getChatId();
         //FIXME: add database function
         //if(!dataController.isSignUp(userId)) {
