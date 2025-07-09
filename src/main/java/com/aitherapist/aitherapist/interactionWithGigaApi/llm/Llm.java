@@ -9,17 +9,18 @@ import chat.giga.model.completion.ChatMessage;
 import chat.giga.model.completion.CompletionRequest;
 import chat.giga.model.completion.CompletionResponse;
 
+import java.util.List;
+
 
 public final class Llm {
-
     /**
      * Получение токена из SDK GigaChat.
-     * @param authKey OAuth ключ
      * @param scope   область действия
      * @return access_token или null
      */
-    public static String getGigaChatToken(String authKey, Scope scope) {
+    public static String getGigaChatToken(Scope scope) {
         try {
+            String authKey = System.getenv("GIGA_CHAT_API_KEY");
             AuthClient client = AuthClient.builder().withOAuth(AuthClientBuilder.OAuthBuilder.builder()
                                     .scope(scope)
                                     .authKey(authKey)
@@ -31,8 +32,9 @@ public final class Llm {
         }
     }
 
-    public static String getGigaChatToken(String authKey) {
+    public static String getGigaChatToken() {
         try {
+            String authKey = System.getenv("GIGA_CHAT_API_KEY");
             AuthClient client = AuthClient.builder().withOAuth(AuthClientBuilder.OAuthBuilder.builder()
                     .scope(Scope.GIGACHAT_API_PERS)
                     .authKey(authKey)
@@ -71,7 +73,7 @@ public final class Llm {
         }
     }
 
-    public static String talkToChat(String accessToken, String userMessage) {
+    public static String talkToChat(String accessToken, List<ChatMessage> messages) {
         GigaChatClient client = GigaChatClient.builder()
                 .authClient(AuthClient.builder()
                         .withProvidedTokenAuth(accessToken).build())
@@ -79,10 +81,7 @@ public final class Llm {
         try {
             CompletionResponse response = client.completions(CompletionRequest.builder()
                     .model(ModelName.GIGA_CHAT)
-                    .message(ChatMessage.builder()
-                            .content(userMessage)
-                            .role(ChatMessage.Role.USER)
-                            .build())
+                    .messages(messages)
                     .build());
             return response.choices().get(0).message().content();
         } catch (HttpClientException ex) {
