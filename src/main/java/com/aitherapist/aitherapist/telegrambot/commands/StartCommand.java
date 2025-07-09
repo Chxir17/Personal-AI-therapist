@@ -27,11 +27,11 @@ public class StartCommand implements ICommand {
     public SendMessage apply(Update update) {
         Long userId = update.getMessage().getFrom().getId();
         long chatId = update.getMessage().getChatId();
+        System.out.println(userId);
         if(!userRegistrationService.isSignUp(Math.toIntExact(userId))) {
             registrationContext.startRegistration(chatId);
             return new SendMessage(String.valueOf(chatId), Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage());
         }
-
         return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
     }
 }

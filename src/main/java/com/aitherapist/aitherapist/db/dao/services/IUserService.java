@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface IUserService {
     User saveUser(User user);
-    List<User> fetchUserList(Integer id);
+    User fetchUser(Integer id);
     User updateUser(User user, Integer id);
     void deleteUser(Integer id);
     void createUser(int userId, User user);

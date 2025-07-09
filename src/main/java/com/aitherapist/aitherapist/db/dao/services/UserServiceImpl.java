@@ -28,8 +28,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public List<User> fetchUserList(Integer id) {
-        return userRepository.findAll();
+    public User fetchUser(Integer id) {
+        return userRepository.getOne(id);
     }
 
     /**
