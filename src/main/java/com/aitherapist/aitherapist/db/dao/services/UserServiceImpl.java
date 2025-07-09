@@ -29,7 +29,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public User fetchUser(Integer id) {
-        return userRepository.getOne(id);
+        return userRepository.findById(id).orElse(null);
     }
 
     /**

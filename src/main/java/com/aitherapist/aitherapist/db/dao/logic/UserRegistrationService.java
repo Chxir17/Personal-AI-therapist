@@ -30,7 +30,8 @@ public class UserRegistrationService {
     }
 
     public Boolean isSignUp(Integer userId){
-        return userService.fetchUserList(userId).isEmpty();
+        User user = userService.fetchUser(userId);
+        return user != null;
     }
 
     public String saveUserHealthData(Integer userId, HealthData healthData){

@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.db.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -28,6 +29,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "health_data")
 public class HealthData implements Serializable {

@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.springframework.stereotype.Component;
 
 /**
- * FIXME: add check: is user reg or already reg.
  * StartCommand - send start message to user.
  */
 @Component
@@ -23,6 +22,12 @@ public class StartCommand implements ICommand {
     private final RegistrationContext registrationContext;
 
 
+    /**
+     * Check is user sign up or no.
+     * if no send message and wait answer
+     * @param update
+     * @return
+     */
     @Override
     public SendMessage apply(Update update) {
         Long userId = update.getMessage().getFrom().getId();
@@ -32,6 +37,6 @@ public class StartCommand implements ICommand {
             registrationContext.startRegistration(chatId);
             return new SendMessage(String.valueOf(chatId), Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage());
         }
-        return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
+        return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage() );
     }
 }

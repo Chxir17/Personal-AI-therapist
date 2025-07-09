@@ -8,6 +8,7 @@ import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.ToString;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public final class MakeMedicalRecommendation {
+public class MakeMedicalRecommendation {
 
 
 
@@ -41,7 +42,6 @@ public final class MakeMedicalRecommendation {
         result.put("badHabits", makeDataList(List.of(user.getBadHabits() != null ? user.getBadHabits() : "null")));
         return result;
     }
-
 
     public static Map<String, String> buildMedicalHistory(User user) {
         var result = new LinkedHashMap<String, String>();
