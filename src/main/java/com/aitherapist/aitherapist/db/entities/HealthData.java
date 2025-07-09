@@ -57,8 +57,8 @@ public class HealthData implements Serializable {
     @Column(name = "pulse")
     private Integer pulse;
 
-    @Column(name = "pressure", columnDefinition = "DECIMAL(5,2)")
-    private Double pressure;
+    @Column(name = "pressure", columnDefinition = "VARCHAR(10)")
+    private String pressure;
 
     @Column(name = "sugar", columnDefinition = "DECIMAL(4,2)")
     private Double sugar;

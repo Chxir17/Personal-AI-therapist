@@ -99,7 +99,6 @@ public class ParseUserPrompt {
 [Формат ответа]
 Выводи только валидный JSON без комментариев или пояснений, строго в следующей структуре:
 {"bloodOxygenLevel": <float> | null, "temperature": <float> | null, "hoursOfSleepToday": <float> | null, "pulse": <int> | null, "pressure": <string> | null, "sugar": <float> | null, "heartPain": <bool> | null, "arrhythmia": <bool> | null}
-Если пользователь полностью ввел 
 
 [Критерии качества]
 - Корректное извлечение значений из текста и преобразование их в нужные единицы измерения и типы данных.

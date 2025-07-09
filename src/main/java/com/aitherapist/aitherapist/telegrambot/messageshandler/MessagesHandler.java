@@ -95,7 +95,9 @@ public class MessagesHandler implements IHandler {
 
     private HealthData parseHealthData(String messageText) throws JsonProcessingException {
         String rawJsonResponse = ParseUserPrompt.dailyQuestionnaireParser(messageText);
+
         String cleanJson = cleanJsonResponse(rawJsonResponse);
+        System.out.println(cleanJson);
         return mapper.readValue(cleanJson, HealthData.class);
     }
 
