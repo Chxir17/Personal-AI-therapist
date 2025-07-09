@@ -59,7 +59,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                 }
             }
             else {
-                //FIXME: переписать canHandle.
                 if (messagesHandler.canHandle(update.getMessage().getText())) {
                     try {
                         messagesHandler.handle(update);

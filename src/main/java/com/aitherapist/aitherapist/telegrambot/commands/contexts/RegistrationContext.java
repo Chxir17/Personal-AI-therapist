@@ -24,4 +24,8 @@ public class RegistrationContext {
     public void completeRegistration(long chatId) {
         registrationInProgress.remove(chatId);
     }
+
+    public void deleteRegistration(long chatId) {
+        registrationInProgress.remove(chatId);
+    }
 }

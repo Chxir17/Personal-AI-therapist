@@ -69,6 +69,7 @@ public class MessagesHandler implements IHandler {
             User user = parseUserRegistrationData(messageText);
             registerUser(userId, user);
             sendSuccessMessage(chatId, Answers.REGISTRATION_SUCCESSFUL.getMessage());
+            registrationContext.deleteRegistration(chatId);
         } catch (Exception e) {
             logRegistrationError(chatId, e);
         }
