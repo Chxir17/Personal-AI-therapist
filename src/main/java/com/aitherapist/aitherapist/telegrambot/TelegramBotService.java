@@ -4,6 +4,7 @@ import com.aitherapist.aitherapist.Consts;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.BotProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
@@ -62,7 +63,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                 if (messagesHandler.canHandle(update.getMessage().getText())) {
                     try {
                         messagesHandler.handle(update);
-                    } catch (TelegramApiException e) {
+                    } catch (TelegramApiException | JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
                 } else {

@@ -4,7 +4,6 @@ import com.aitherapist.aitherapist.db.dao.services.HealthDataServiceImpl;
 import com.aitherapist.aitherapist.db.dao.services.UserServiceImpl;
 import com.aitherapist.aitherapist.db.entities.HealthData;
 import com.aitherapist.aitherapist.db.entities.User;
-import org.springframework.core.SpringVersion;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Service
 public class UserRegistrationService {
-    private final UserServiceImpl userService;
+
+    @Autowired
+    private UserServiceImpl userService;
 
     @Autowired
     private HealthDataServiceImpl healthDataService;
@@ -28,11 +29,9 @@ public class UserRegistrationService {
         userService.createUser(userId, user);
     }
 
-    public Boolean isSignup(Integer userId){
-        if(userService.fetchUserList(userId).isEmpty()){
-            return false;
-        }
-        return true;
+    public Boolean isSignUp(Integer userId){
+        User user = userService.fetchUser(userId);
+        return user != null;
     }
 
     public String saveUserHealthData(Integer userId, HealthData healthData){
@@ -40,4 +39,11 @@ public class UserRegistrationService {
         return "data success save!";
     }
 
+    public User getUserByUserId(Integer userId){
+        return userService.getUser(userId);
+    }
+
+    public void putHealthDataInUser(Integer userId, HealthData healthData){
+        healthDataService.saveHealthDataInUser(userId, healthData);
+    }
 }

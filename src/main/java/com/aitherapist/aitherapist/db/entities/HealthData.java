@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.db.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -28,6 +29,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "health_data")
 public class HealthData implements Serializable {
@@ -35,8 +37,8 @@ public class HealthData implements Serializable {
     private static final long serialVersionUID = -5527566248002296042L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @NonNull
     private Integer id;
 
     @ManyToOne
@@ -67,4 +69,19 @@ public class HealthData implements Serializable {
     @Column(name = "arrhythmia")
     private Boolean arrhythmia;
 
+    @Override
+    public String toString() {
+        return "HealthData{" +
+                "id=" + id +
+                ", user=" + (user != null ? user.getId() : "null") +
+                ", bloodOxygenLevel=" + bloodOxygenLevel +
+                ", temperature=" + temperature +
+                ", hoursOfSleepToday=" + hoursOfSleepToday +
+                ", pulse=" + pulse +
+                ", pressure=" + pressure +
+                ", sugar=" + sugar +
+                ", heartPain=" + heartPain +
+                ", arrhythmia=" + arrhythmia +
+                '}';
+    }
 }

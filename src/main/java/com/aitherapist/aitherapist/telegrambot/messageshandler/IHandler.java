@@ -1,4 +1,5 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -7,5 +8,5 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  */
 public interface IHandler {
     boolean canHandle(String messageText);
-    void handle(Update update) throws TelegramApiException;
+    void handle(Update update) throws TelegramApiException, JsonProcessingException;
 }

@@ -28,8 +28,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public List<User> fetchUserList(Integer id) {
-        return userRepository.findAll();
+    public User fetchUser(Integer id) {
+        return userRepository.findById(id).orElse(null);
     }
 
     /**
@@ -67,5 +67,11 @@ public class UserServiceImpl implements IUserService {
         if (userRepository.findById(id).isPresent()) {
             userRepository.delete(userRepository.findById(id).get());
         }
+    }
+
+    @Override
+    public User getUser(Integer id) {
+        User user =  userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        return user;
     }
 }

@@ -19,7 +19,6 @@ import java.util.List;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @NonNull
     private Integer id;
@@ -46,7 +45,7 @@ public class User {
     @Column(name = "bad_habits")
     private String badHabits;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<HealthData> healthDataList = new ArrayList<>();
     @Override
     public String toString() {

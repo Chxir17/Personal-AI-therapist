@@ -32,10 +32,7 @@ public class DataController {
 
     @RequestMapping(path = "/user/{id}", method = RequestMethod.GET)
     public Boolean isSignUp(@PathVariable Integer userId) { //accepts a json object and
-        if(userService.fetchUserList(userId).isEmpty()){
-            return false;
-        }
-        return true;
+        return userService.fetchUser(userId) != null;
     }
 
     /**
@@ -70,9 +67,9 @@ public class DataController {
      * @param user
      * @return
      */
-    @PostMapping("/user/{userId}/information")
-    public void CreateAndSaveUserInformation(@PathVariable Integer userId, @RequestBody User user) {
-        userRegistrationService.registerUser(userId, user);
-    }
+//    @PostMapping("/user/{userId}/information")
+//    public void CreateAndSaveUserInformation(@PathVariable Integer userId, @RequestBody User user) {
+//        userRegistrationService.registerUser(userId, user);
+//    }
 
 }
