@@ -30,8 +30,8 @@ public class User {
     @Column(name = "age")
     private Integer age;
 
-    @Column(name = "male")
-    private Boolean male;
+    @Column(name = "gender")
+    private Boolean gender;
 
     @Column(name = "chronic_diseases")
     private String chronicDiseases;
@@ -53,7 +53,7 @@ public class User {
                 "🆔 ID пользователя: " + id + "\n" +
                 "👤 Имя: " + name + "\n" +
                 "🎂 Возраст: " + (age != null ? age + " лет" : "не указано") + "\n" +
-                "⚧ Пол: " + (male == null ? "не указан" : (male ? "мужской" : "женский")) + "\n" +
+                "⚧ Пол: " + (gender == null ? "не указан" : (gender ? "мужской" : "женский")) + "\n" +
                 "🩺 Хронические заболевания: " + (chronicDiseases != null ? chronicDiseases : "не указаны") + "\n" +
                 "📏 Рост: " + (height != null ? height + " см" : "не указан") + "\n" +
                 "⚖️ Вес: " + (weight != null ? weight + " кг" : "не указан") + "\n" +

@@ -25,13 +25,13 @@ public class DatabaseIntegrationTest {
     @BeforeEach
     public void setup() {
         userService.fetchUserList(null).stream()
-                .filter(u -> TEST_USER_NAME.equals(u.getName()))
+                .filter(u -> TEST_USER_NAME.equals(u.getGender()))
                 .forEach(u -> userService.deleteUser(u.getId()));
 
         User user = User.builder()
                 .name(TEST_USER_NAME)
                 .age(30)  // пример обязательного поля
-                .male(true)  // пример обязательного поля
+                .gender(true)  // пример обязательного поля
                 .build();
 
         User savedUser = userService.saveUser(user);

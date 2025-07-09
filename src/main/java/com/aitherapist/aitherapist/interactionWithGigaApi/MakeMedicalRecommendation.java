@@ -2,14 +2,9 @@ package com.aitherapist.aitherapist.interactionWithGigaApi;
 
 import chat.giga.model.completion.ChatMessage;
 import com.aitherapist.aitherapist.db.entities.HealthData;
-import com.aitherapist.aitherapist.db.entities.ParserJsonUserHealthData;
 
 import com.aitherapist.aitherapist.db.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.ToString;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -33,7 +28,7 @@ public class MakeMedicalRecommendation {
         var result = new LinkedHashMap<String, String>();
         result.put("name", makeDataList(List.of(user.getName())));
         result.put("age", makeDataList(List.of(user.getAge() != null ? String.valueOf(user.getAge()) : "null")));
-        result.put("male", makeDataList(List.of(user.getMale() != null ? String.valueOf(user.getMale()) : "null")));
+        result.put("male", makeDataList(List.of(user.getGender() != null ? String.valueOf(user.getGender()) : "null")));
         result.put("chronicDiseases", makeDataList(List.of(user.getChronicDiseases() != null ? user.getChronicDiseases() : "null")));
         result.put("height", makeDataList(List.of(user.getHeight() != null ? String.valueOf(user.getHeight()) : "null")));
         result.put("weight", makeDataList(List.of(user.getWeight() != null ? String.valueOf(user.getWeight()) : "null")));

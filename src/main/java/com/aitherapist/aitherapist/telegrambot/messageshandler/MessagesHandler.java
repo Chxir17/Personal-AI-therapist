@@ -97,10 +97,8 @@ public class MessagesHandler implements IHandler {
         } else {
             messageSender.sendMessage(chatId, Answers.GIVE_ANSWER.getMessage());
             String cleanJson = ParseUserPrompt.dailyQuestionnaireParser(messageText).replaceAll("```json|```", "").trim();
-            System.out.println(cleanJson);
             ObjectMapper mapper = new ObjectMapper();
             HealthData healthData = mapper.readValue(cleanJson, HealthData.class);
-            messageSender.sendMessage(chatId, healthData.toString());
             userRegistrationService.putHealthDataInUser(userId, healthData);
             String answer = MakeMedicalRecommendation.giveMedicalRecommendation(userRegistrationService.getUserByUserId(Math.toIntExact(update.getMessage().getFrom().getId())));
             messageSender.sendMessage(chatId, answer);
