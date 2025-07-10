@@ -60,7 +60,7 @@ public class StartDoctors implements IDoctorsCommands, ICommand {
         }
     }
 
-    /**
+    /**g
      * Get telephone number and set to field
      * @param update
      */
