@@ -8,5 +8,5 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  * ICommand - interface for commands in telegram. pin/start... commands use ICommand (methods apply).
  */
 public interface ICommand {
-    SendMessage apply(Update update);
+    SendMessage apply(Update update) throws TelegramApiException;
 }
