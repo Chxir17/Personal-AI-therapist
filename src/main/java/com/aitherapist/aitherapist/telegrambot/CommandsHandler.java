@@ -22,10 +22,11 @@ import java.util.Map;
 public class CommandsHandler {
     private final Map<String, ICommand> commands;
     public CommandsHandler(@Autowired StartCommand startCommand,
-                           @Autowired InformationCommand informationCommand, @Autowired StopTrackingCommand stopTrackingCommand) {
+                           @Autowired InformationCommand informationCommand, @Autowired ChooseRoleCommand chooseRoleCommand) {
         this.commands = Map.of("/start", startCommand, "/information", informationCommand,
-                "/stoptracking", stopTrackingCommand);
+                 "/role", chooseRoleCommand);
     }
+
 
     /**
      * handleCommand - find command in map commands, and execute the found command
