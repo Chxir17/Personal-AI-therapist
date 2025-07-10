@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.scheduled
+package com.aitherapist.aitherapist.telegrambot.scheduled
 
 import org.springframework.data.jpa.repository.JpaRepository
 import java.time.LocalDateTime

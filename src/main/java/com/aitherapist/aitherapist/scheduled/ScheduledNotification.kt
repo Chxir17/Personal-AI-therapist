@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.scheduled
+package com.aitherapist.aitherapist.telegrambot.scheduled
 
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -23,8 +23,9 @@ class ScheduledNotification(
     val triggerTime: LocalDateTime,
 
     @Enumerated(EnumType.STRING)
-    val status: NotificationStatus = NotificationStatus.PENDING,
+    @Column(nullable = false)
+    var status: NotificationStatus = NotificationStatus.PENDING,
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
