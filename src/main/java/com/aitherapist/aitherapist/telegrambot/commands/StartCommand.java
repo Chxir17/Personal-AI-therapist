@@ -3,8 +3,6 @@ package com.aitherapist.aitherapist.telegrambot.commands;
 import com.aitherapist.aitherapist.db.dao.logic.UserRegistrationService;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
-import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -16,31 +14,19 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 
 import java.util.List;
 
-
-/**
- * StartCommand - send start message to user.
- */
 @Component
-@RequiredArgsConstructor
 public class StartCommand implements ICommand {
-
-    private IMessageSender messageSender;
-
-    @Autowired
-    private UserRegistrationService userRegistrationService;
-
-    @Autowired
+    private final IMessageSender messageSender;
+    private final UserRegistrationService userRegistrationService;
     private final RegistrationContext registrationContext;
 
     @Autowired
-    private TelegramMessageSender telegramMessageSender;
+    public StartCommand(IMessageSender messageSender, UserRegistrationService userRegistrationService, RegistrationContext registrationContext) {
+        this.messageSender = messageSender;
+        this.userRegistrationService = userRegistrationService;
+        this.registrationContext = registrationContext;
+    }
 
-    /**
-     * Check is user sign up or no.
-     * if no send message and wait answer
-     * @param update
-     * @return
-     */
     @Override
     public SendMessage apply(Update update) throws TelegramApiException {
         Long userId = update.getMessage().getFrom().getId();
@@ -49,36 +35,34 @@ public class StartCommand implements ICommand {
         if(!userRegistrationService.isSignUp(Math.toIntExact(userId))) {
             InlineKeyboardMarkup replyKeyboardDoctor = createInlineRoleKeyboard();
             registrationContext.startRegistration(chatId);
-            telegramMessageSender.sendMessage(new SendMessage(String.valueOf(chatId), Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage()));
+            messageSender.sendMessage(new SendMessage(String.valueOf(chatId),
+                    Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage()));
+
             return SendMessage.builder()
-                    .chatId(update.getMessage().getChatId().toString())
+                    .chatId(String.valueOf(chatId))
                     .text("Выберите роль")
                     .replyMarkup(replyKeyboardDoctor)
                     .build();
-
         }
-        return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage() );
+        return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
     }
 
-    public InlineKeyboardMarkup createInlineRoleKeyboard() {
-        InlineKeyboardButton doctorBtn = new InlineKeyboardButton();
-        doctorBtn.setText("Доктор");
-        doctorBtn.setCallbackData("/doctor");
-
-        InlineKeyboardButton patientClinicBtn = new InlineKeyboardButton();
-        patientClinicBtn.setText("Пациент привязанный к клинике");
-        patientClinicBtn.setCallbackData("/botPatient");
-
-        InlineKeyboardButton patientBotBtn = new InlineKeyboardButton();
-        patientBotBtn.setText("Пациент не привязанный к клинике");
-        patientBotBtn.setCallbackData("/clinicPatient");
-
-        List<InlineKeyboardButton> row = List.of(doctorBtn, patientBotBtn, patientClinicBtn);
-        List<List<InlineKeyboardButton>> keyboard = List.of(row);
+    private InlineKeyboardMarkup createInlineRoleKeyboard() {
+        List<InlineKeyboardButton> row = List.of(
+                createButton("Доктор", "/doctor"),
+                createButton("Пациент не привязанный к клинике", "/clinicPatient"),
+                createButton("Пациент привязанный к клинике", "/botPatient")
+        );
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
-        markup.setKeyboard(keyboard);
-
+        markup.setKeyboard(List.of(row));
         return markup;
+    }
+
+    private InlineKeyboardButton createButton(String text, String callbackData) {
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setText(text);
+        button.setCallbackData(callbackData);
+        return button;
     }
 }

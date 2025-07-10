@@ -29,10 +29,6 @@ public class MakeMedicalRecommendation {
         result.put("name", makeDataList(List.of(user.getName())));
         result.put("age", makeDataList(List.of(user.getAge() != null ? String.valueOf(user.getAge()) : "null")));
         result.put("male", makeDataList(List.of(user.getGender() != null ? String.valueOf(user.getGender()) : "null")));
-        result.put("chronicDiseases", makeDataList(List.of(user.getChronicDiseases() != null ? user.getChronicDiseases() : "null")));
-        result.put("height", makeDataList(List.of(user.getHeight() != null ? String.valueOf(user.getHeight()) : "null")));
-        result.put("weight", makeDataList(List.of(user.getWeight() != null ? String.valueOf(user.getWeight()) : "null")));
-        result.put("badHabits", makeDataList(List.of(user.getBadHabits() != null ? user.getBadHabits() : "null")));
         return result;
     }
 

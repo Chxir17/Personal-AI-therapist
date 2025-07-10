@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
+
 import com.aitherapist.aitherapist.db.dao.logic.DoctorRegistrationService;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.IDoctorsCommands;
