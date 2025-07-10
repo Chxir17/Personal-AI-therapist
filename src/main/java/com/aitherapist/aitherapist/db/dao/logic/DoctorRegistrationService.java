@@ -9,5 +9,4 @@ import java.util.List;
 @Service
 public class DoctorRegistrationService {
 
-    public List<UserActivityLog> getByUserId(Long userId) {}
 }
