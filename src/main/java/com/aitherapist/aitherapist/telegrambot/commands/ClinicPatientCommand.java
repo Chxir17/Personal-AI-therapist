@@ -6,6 +6,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class ClinicPatientCommand implements ICommand{
     @Override
     public SendMessage apply(Update update) {
-        return null;
-    }
+        long chatId = update.getMessage().getChatId();
+        return new SendMessage(String.valueOf(chatId), "пациент привязанный к клинике" );    }
 }

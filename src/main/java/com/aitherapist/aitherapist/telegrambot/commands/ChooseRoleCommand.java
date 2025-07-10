@@ -1,12 +1,16 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
+import com.aitherapist.aitherapist.db.dao.logic.UserRegistrationService;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.List;
 
@@ -14,47 +18,51 @@ public class ChooseRoleCommand implements ICommand{
 
     private IMessageSender messageSender;
 
+    @Autowired
+    RegistrationContext registrationContext;
+
+    @Autowired
+    private UserRegistrationService userRegistrationService;
+
     @Override
-    public SendMessage apply(Update update) {
+    public SendMessage apply(Update update) throws TelegramApiException {
         Long userId = update.getMessage().getFrom().getId();
         long chatId = update.getMessage().getChatId();
-        ReplyKeyboardMarkup replyKeyboardMarkup = createDoctorKeyboard();
+        InlineKeyboardMarkup replyKeyboardDoctor = createInlineRoleKeyboard();
+
 
         if(!userRegistrationService.isSignUp(Math.toIntExact(userId))) {
             registrationContext.startRegistration(chatId);
             return new SendMessage(String.valueOf(chatId), Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage());
         }
+
+        messageSender.sendMessage(SendMessage.builder()
+                .chatId(update.getMessage().getChatId().toString())
+                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .replyMarkup(replyKeyboardDoctor)
+                .build());
         return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage() );
-        return null;
     }
 
-    public ReplyKeyboardMarkup createDoctorKeyboard() {
-        KeyboardButton contactButton = new KeyboardButton("Пациент");
-        contactButton.setRequestContact(true);
+    public InlineKeyboardMarkup createInlineRoleKeyboard() {
+        InlineKeyboardButton doctorBtn = new InlineKeyboardButton();
+        doctorBtn.setText("Доктор");
+        doctorBtn.setCallbackData("/doctor");
 
-        KeyboardRow row = new KeyboardRow();
-        row.add(contactButton);
+        InlineKeyboardButton patientClinicBtn = new InlineKeyboardButton();
+        patientClinicBtn.setText("Пациент привязанный к клинике");
+        patientClinicBtn.setCallbackData("/botPatient");
 
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setKeyboard(List.of(row));
-        keyboard.setResizeKeyboard(true);
-        keyboard.setOneTimeKeyboard(true);
+        InlineKeyboardButton patientBotBtn = new InlineKeyboardButton();
+        patientBotBtn.setText("Пациент не привязанный к клинике");
+        patientBotBtn.setCallbackData("/clinicPatient");
 
-        return keyboard;
-    }
+        List<InlineKeyboardButton> row = List.of(doctorBtn, patientBotBtn, patientClinicBtn);
+        List<List<InlineKeyboardButton>> keyboard = List.of(row);
 
-    public static ReplyKeyboardMarkup createPatientKeyboard() {
-        KeyboardButton contactButton = new KeyboardButton("Доктор");
-        contactButton.setRequestContact(true);
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
 
-        KeyboardRow row = new KeyboardRow();
-        row.add(contactButton);
-
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setKeyboard(List.of(row));
-        keyboard.setResizeKeyboard(true);
-        keyboard.setOneTimeKeyboard(true);
-
-        return keyboard;
+        return markup;
     }
 }
