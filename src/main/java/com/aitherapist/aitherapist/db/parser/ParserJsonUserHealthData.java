@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.db.entities;
+package com.aitherapist.aitherapist.db.parser;
 
 public class ParserJsonUserHealthData {
     private Double bloodOxygenLevel;
