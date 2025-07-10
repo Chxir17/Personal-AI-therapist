@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Map;
 
@@ -22,9 +23,10 @@ import java.util.Map;
 public class CommandsHandler {
     private final Map<String, ICommand> commands;
     public CommandsHandler(@Autowired StartCommand startCommand,
-                           @Autowired InformationCommand informationCommand, @Autowired ChooseRoleCommand chooseRoleCommand) {
+                           @Autowired InformationCommand informationCommand, @Autowired ChooseRoleCommand chooseRoleCommand, @Autowired DoctorCommand doctorCommand,
+                           @Autowired BotPatientCommand botPatientCommand, @Autowired ClinicPatientCommand clinicPatientCommand) {
         this.commands = Map.of("/start", startCommand, "/information", informationCommand,
-                 "/role", chooseRoleCommand);
+                 "/role", chooseRoleCommand, "/doctor", doctorCommand, "/botPatient", botPatientCommand, "/clinicPatient", clinicPatientCommand);
     }
 
 
@@ -33,7 +35,7 @@ public class CommandsHandler {
      * @param update
      * @return
      */
-    public SendMessage handleCommand(Update update) {
+    public SendMessage handleCommand(Update update) throws TelegramApiException {
         String messageText = update.getMessage().getText();
         String command = messageText.split(" ")[0];
         long chatId = update.getMessage().getChatId();
