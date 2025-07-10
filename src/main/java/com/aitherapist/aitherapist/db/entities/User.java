@@ -45,6 +45,9 @@ public class User {
     @Column(name = "bad_habits")
     private String badHabits;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserActivityLog> activityLogs = new ArrayList<>();
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<HealthData> healthDataList = new ArrayList<>();
     @Override
