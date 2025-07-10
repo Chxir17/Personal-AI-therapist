@@ -28,6 +28,8 @@ public class UserActivityLog {
     private LocalDateTime actionTime;
 
     @Column(name = "action_type", nullable = false)
-    private String actionType = "read"; //default ?
+    private String actionType;
 
+    @Column(name = "message_id")
+    private Long messageId;
 }
