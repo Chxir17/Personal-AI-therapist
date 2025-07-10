@@ -1,9 +1,9 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.db.dao.logic.DoctorRegistrationService;
-import com.aitherapist.aitherapist.telegrambot.commands.IDoctorsComm;
+import com.aitherapist.aitherapist.telegrambot.commands.IDoctorsCommands;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
-import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
@@ -16,45 +16,65 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 
 /**
- * StartDoctors - class for verify Doctors.
+ * StartDoctors - main class with this functions :
+ *  1) verify Doctors
+ *  2) send to user some message
+ *  3)
  */
 @Component
 @RequiredArgsConstructor
-public class StartDoctors implements IDoctorsComm {
+public class StartDoctors implements IDoctorsCommands {
 
+    private String telephoneNumber;
     private DoctorRegistrationService doctorRegistationService;
     private RegistrationContext registrationContext;
     private IMessageSender messageSender;
+    private SendMessageUser sendMessageUser;
     @Autowired
     public StartDoctors(RegistrationContext registrationContext, DoctorRegistrationService doctorRegistationService,
-                        TelegramMessageSender messageSender) {
+                        TelegramMessageSender messageSender, SendMessageUser sendMessageUser) {
         this.registrationContext = registrationContext;
         this.doctorRegistationService = doctorRegistationService;
         this.messageSender = messageSender;
+        this.sendMessageUser = sendMessageUser;
     }
 
     /**
      * verify user. If user hide telephone number-> create buttom and request.
      * @param update
-     * @param telephoneNumber
      * @return
      * @throws TelegramApiException
      */
     @Override
-    public boolean verify(Update update, String telephoneNumber) throws TelegramApiException {
+    public boolean verify(Update update) throws TelegramApiException {
         if (Verification.isContactRequest(update)) {
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(update.getMessage().getChatId());
-            sendMessage.setText(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage());
-            sendMessage.setReplyMarkup(Verification.createContactRequestKeyboard());
-            messageSender.sendMessage(sendMessage);
+            messageSender.sendMessage(SendMessage.builder()
+                    .chatId(update.getMessage().getChatId().toString())
+                    .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                    .replyMarkup(Verification.createContactRequestKeyboard())
+                    .build());
         }
+        if (Verification.verify(update, this.telephoneNumber)) {
+            messageSender.sendMessage(SendMessage.builder().chatId(update.getMessage().getChatId().toString()).text(Answers.VERIFICAATION_SUCCESS.getMessage()).build());
+            return true;
+        } else {
+            messageSender.sendMessage(SendMessage.builder().chatId(update.getMessage().getChatId().toString()).text(Answers.VERIFICAATION_ERROR.getMessage()).build());
+            return false;
+        }
+    }
 
+    /**
+     * Get telephone number and set to field
+     * @param update
+     */
+    @Override
+    public void apply(Update update) {
+        this.telephoneNumber = update.getMessage().getText();;
     }
 
     @Override
-    public void apply(Update update) {
-        String telephoneNumber =
+    public void sendMessageToUser(Long userId, String message) throws TelegramApiException {
+        sendMessageUser.sendToUserMessage(userId, message, this.messageSender);
     }
 
 }

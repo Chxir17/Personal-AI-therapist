@@ -37,7 +37,9 @@ public enum Answers {
     INVALID_INPUT_DATA("Введенные данные некорректны. Пожалуйста, попробуйте еще раз."),
     REGISTRATION_ERROR("Произошла ошибка при обработке ваших данных. Пожалуйста, попробуйте позже."),
     GIVE_ANSWER("Спасибо за ответ! Сейчас наш ии терапевт даст вам совет... "),
-    PLEASE_GIVE_TELEPHONE_NUMBER("Пожалуйста, поделитесь своим номером телефона:");
+    PLEASE_GIVE_TELEPHONE_NUMBER("Пожалуйста, поделитесь своим номером телефона:"),
+    VERIFICAATION_SUCCESS("Верификация прошла успешна"),
+    VERIFICAATION_ERROR("Верификация прошла не успешна! попробуйте позже...");
     private final String message;
 
     Answers(String message) {

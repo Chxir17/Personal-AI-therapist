@@ -22,8 +22,8 @@ import java.util.Map;
 public class CommandsHandler {
     private final Map<String, ICommand> commands;
     public CommandsHandler(@Autowired StartCommand startCommand,
-                           @Autowired PinCommand pinCommand, @Autowired InformationCommand informationCommand, @Autowired StopTrackingCommand stopTrackingCommand) {
-        this.commands = Map.of("/start", startCommand, "/pin", pinCommand, "/information", informationCommand,
+                           @Autowired InformationCommand informationCommand, @Autowired StopTrackingCommand stopTrackingCommand) {
+        this.commands = Map.of("/start", startCommand, "/information", informationCommand,
                 "/stoptracking", stopTrackingCommand);
     }
 
