@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.scheduled
+package com.aitherapist.aitherapist.scheduled
 
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
