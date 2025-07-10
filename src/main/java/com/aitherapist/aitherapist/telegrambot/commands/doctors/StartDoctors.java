@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.db.dao.logic.DoctorRegistrationService;
+import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.IDoctorsCommands;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -23,18 +24,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  */
 @Component
 @RequiredArgsConstructor
-public class StartDoctors implements IDoctorsCommands {
+public class StartDoctors implements IDoctorsCommands, ICommand {
 
     private String telephoneNumber;
-    private DoctorRegistrationService doctorRegistationService;
-    private RegistrationContext registrationContext;
     private IMessageSender messageSender;
     private SendMessageUser sendMessageUser;
     @Autowired
     public StartDoctors(RegistrationContext registrationContext, DoctorRegistrationService doctorRegistationService,
                         TelegramMessageSender messageSender, SendMessageUser sendMessageUser) {
-        this.registrationContext = registrationContext;
-        this.doctorRegistationService = doctorRegistationService;
         this.messageSender = messageSender;
         this.sendMessageUser = sendMessageUser;
     }
