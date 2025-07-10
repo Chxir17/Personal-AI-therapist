@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.scheduled
+package com.aitherapist.aitherapist.scheduled
 
 import jakarta.persistence.*
 import java.time.LocalDateTime

@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.scheduled
+package com.aitherapist.aitherapist.scheduled
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
