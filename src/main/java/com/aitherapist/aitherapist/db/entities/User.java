@@ -33,35 +33,12 @@ public class User {
     @Column(name = "gender")
     private Boolean gender;
 
-    @Column(name = "chronic_diseases")
-    private String chronicDiseases;
-
-    @Column(name = "height")
-    private Double height;
-
-    @Column(name = "weight")
-    private Double weight;
-
-    @Column(name = "bad_habits")
-    private String badHabits;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserActivityLog> activityLogs = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<HealthData> healthDataList = new ArrayList<>();
-    @Override
-    public String toString() {
-        return "🙌 Спасибо за ответ!\n" +
-                "🆔 ID пользователя: " + id + "\n" +
-                "👤 Имя: " + name + "\n" +
-                "🎂 Возраст: " + (age != null ? age + " лет" : "не указано") + "\n" +
-                "⚧ Пол: " + (gender == null ? "не указан" : (gender ? "мужской" : "женский")) + "\n" +
-                "🩺 Хронические заболевания: " + (chronicDiseases != null ? chronicDiseases : "не указаны") + "\n" +
-                "📏 Рост: " + (height != null ? height + " см" : "не указан") + "\n" +
-                "⚖️ Вес: " + (weight != null ? weight + " кг" : "не указан") + "\n" +
-                "🚬 Плохие привычки: " + (badHabits != null ? badHabits : "не указаны") + "\n" +
-                "💙 Берегите себя!";
-    }
+
+    private Roles roles;
 
 }
