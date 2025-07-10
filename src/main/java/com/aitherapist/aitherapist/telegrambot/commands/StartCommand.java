@@ -1,6 +1,5 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
-import com.aitherapist.aitherapist.db.dao.DataController;
 import com.aitherapist.aitherapist.db.dao.logic.UserRegistrationService;
 import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;

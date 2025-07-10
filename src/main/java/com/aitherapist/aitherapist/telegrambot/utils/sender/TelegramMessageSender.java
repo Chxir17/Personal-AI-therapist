@@ -19,4 +19,11 @@ public class TelegramMessageSender implements IMessageSender {
         SendMessage message = new SendMessage(String.valueOf(chatId), text);
         telegramExecutor.execute(message);
     }
+
+    @Override
+    public void sendMessage(SendMessage sendMessage) throws TelegramApiException {
+        telegramExecutor.execute(sendMessage);
+    }
+
+
 }
