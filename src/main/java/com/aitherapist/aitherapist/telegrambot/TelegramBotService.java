@@ -33,9 +33,24 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
 
     @Override
     public void onUpdateReceived(Update update) {
+
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            String chatId = update.getMessage().getChatId().toString();
+            if (update.getMessage().getText().startsWith("/start")) {
+                update.getCallbackQuery().setData(update.getMessage().getText());
+            }
+            else {
+                try {
+                    messagesHandler.handle(update);
+                } catch (TelegramApiException | JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         if (update.hasCallbackQuery()) {
             String callBackData = update.getCallbackQuery().getData();
             Long chatId = update.getMessage().getChatId();
+
             if (callBackData.startsWith("/")) {
                 try {
                     sendMessage(commandsHandler.handleCommand(update));
