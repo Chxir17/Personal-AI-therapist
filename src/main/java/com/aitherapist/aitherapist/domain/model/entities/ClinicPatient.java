@@ -3,7 +3,6 @@ package com.aitherapist.aitherapist.domain.model.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,22 +11,13 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ClinicPatient extends User implements IPatient {
-
-    private Integer idInClinic;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserActivityLog> activityLogs = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HealthData> healthDataList = new ArrayList<>();
+public class ClinicPatient extends Patient {
+    @Column(name = "clinic_id", nullable = false)
+    private Long clinicId;
 
     @ManyToMany(mappedBy = "patients")
     private List<Doctor> doctors = new ArrayList<>();
 
-
-    @Override
-    public List<HealthData> getHealthData() {
-        return this.healthDataList;
-    }
+    @Column(name = "medical_card_number")
+    private String medicalCardNumber;
 }

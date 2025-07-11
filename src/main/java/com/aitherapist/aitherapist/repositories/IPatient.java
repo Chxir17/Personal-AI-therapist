@@ -1,4 +1,4 @@
 package com.aitherapist.aitherapist.repositories;
 
-public interface IClinicPatient {
+public interface IPatient{
 }
