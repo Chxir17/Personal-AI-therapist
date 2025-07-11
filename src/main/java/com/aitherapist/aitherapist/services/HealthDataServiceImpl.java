@@ -4,6 +4,7 @@ import com.aitherapist.aitherapist.repositories.IHealthDataRepository;
 import com.aitherapist.aitherapist.repositories.IUserRepository;
 import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.domain.model.entities.User;
+import com.aitherapist.aitherapist.services.interfaces.IHealthDataService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

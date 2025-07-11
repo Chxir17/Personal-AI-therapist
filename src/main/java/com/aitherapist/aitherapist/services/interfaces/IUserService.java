@@ -1,4 +1,6 @@
-package com.aitherapist.aitherapist.services;
+package com.aitherapist.aitherapist.services.interfaces;
+import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 
 /**
@@ -13,4 +15,10 @@ public interface IUserService {
     void createUser(int userId, User user);
     void deleteUserIfExists(Integer id);
     User getUser(Integer id);
+    Boolean checkIfUserExists(Integer userId);
+    Roles getUserRoles(Integer userId);
+    Boolean isUserInClinic(Integer userId);
+    void changeUserRoles(Integer userId, Roles role);
+    void editUserInformation(User user, int id);
+    void editUserHealthData(User user, int id, HealthData healthData);
 }

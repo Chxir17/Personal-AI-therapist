@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.services;
+package com.aitherapist.aitherapist.services.interfaces;
 import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import java.util.List;
 
