@@ -9,5 +9,4 @@ import java.util.List;
 @Component
 public interface IPatient {
     List<HealthData> getHealthData();
-
 }

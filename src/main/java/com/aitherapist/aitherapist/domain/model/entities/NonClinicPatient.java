@@ -15,11 +15,16 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class NonClinicPatient extends User {
+public class NonClinicPatient extends User implements IPatient {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserActivityLog> activityLogs = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HealthData> healthDataList = new ArrayList<>();
+
+    @Override
+    public List<HealthData> getHealthData() {
+        return this.healthDataList;
+    }
 }

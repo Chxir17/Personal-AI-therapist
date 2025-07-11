@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.domain.model.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ClinicPatient extends User {
+public class ClinicPatient extends User implements IPatient {
 
     private Integer idInClinic;
 
@@ -23,4 +24,10 @@ public class ClinicPatient extends User {
 
     @ManyToMany(mappedBy = "patients")
     private List<Doctor> doctors = new ArrayList<>();
+
+
+    @Override
+    public List<HealthData> getHealthData() {
+        return this.healthDataList;
+    }
 }
