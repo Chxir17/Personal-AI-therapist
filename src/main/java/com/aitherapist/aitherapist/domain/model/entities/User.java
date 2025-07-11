@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.domain.model.entities;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -14,10 +15,9 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Entity
 @Table(name = "users")
-public class User {
+public abstract class User {
     @Id
     @Column(name = "id")
     @NonNull
@@ -32,13 +32,5 @@ public class User {
 
     @Column(name = "gender")
     private Boolean gender;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserActivityLog> activityLogs = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<HealthData> healthDataList = new ArrayList<>();
-
-    private Roles roles;
 
 }
