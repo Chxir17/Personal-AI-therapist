@@ -1,9 +1,9 @@
-package com.aitherapist.aitherapist.db.dao.services;
+package com.aitherapist.aitherapist.services;
 
-import com.aitherapist.aitherapist.db.dao.repositorys.IHealthDataRepository;
-import com.aitherapist.aitherapist.db.dao.repositorys.IUserRepository;
-import com.aitherapist.aitherapist.db.entities.HealthData;
-import com.aitherapist.aitherapist.db.entities.User;
+import com.aitherapist.aitherapist.repositories.IHealthDataRepository;
+import com.aitherapist.aitherapist.repositories.IUserRepository;
+import com.aitherapist.aitherapist.domain.model.entities.HealthData;
+import com.aitherapist.aitherapist.domain.model.entities.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

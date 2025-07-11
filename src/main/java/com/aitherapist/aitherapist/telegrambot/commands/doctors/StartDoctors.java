@@ -1,13 +1,12 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 
-import com.aitherapist.aitherapist.db.dao.logic.DoctorRegistrationService;
-import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
+import com.aitherapist.aitherapist.services.doctor.DoctorRegistrationService;
 import com.aitherapist.aitherapist.telegrambot.commands.IDoctorsCommands;
 import com.aitherapist.aitherapist.telegrambot.commands.IVerify;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.telegrambot.utils.Answers;
+import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import lombok.RequiredArgsConstructor;

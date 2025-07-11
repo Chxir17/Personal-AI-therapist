@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.db.entities;
+package com.aitherapist.aitherapist.domain.model.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;

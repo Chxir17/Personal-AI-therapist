@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.scheduled.notifications.algorithm;
 
-import com.aitherapist.aitherapist.db.entities.UserActivityLog;
+import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;

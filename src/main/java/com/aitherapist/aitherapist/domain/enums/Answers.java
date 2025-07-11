@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.utils;
+package com.aitherapist.aitherapist.domain.enums;
 
 public enum Answers {
     START_MESSAGE("Привет! Я ваш телеграм-бот. Вы уже зарегистрированы и вам надо написать свои симптомы чтобы я смог вам помочь."),

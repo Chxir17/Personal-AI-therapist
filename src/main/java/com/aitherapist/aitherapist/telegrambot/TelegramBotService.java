@@ -1,7 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
-import com.aitherapist.aitherapist.telegrambot.utils.BotProperties;
+import com.aitherapist.aitherapist.config.BotProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

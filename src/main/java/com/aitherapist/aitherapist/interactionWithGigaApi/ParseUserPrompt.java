@@ -8,7 +8,6 @@ import java.util.List;
 
 public class ParseUserPrompt {
 
-
     public static String initPromptParser(String userMessage) throws InterruptedException {
         String token = Llm.getGigaChatToken();
         String systemPrompt = """

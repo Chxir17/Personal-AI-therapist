@@ -1,7 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
-import com.aitherapist.aitherapist.db.dao.logic.UserRegistrationService;
-import com.aitherapist.aitherapist.telegrambot.utils.Answers;
+import com.aitherapist.aitherapist.services.registration.UserRegistrationService;
+import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

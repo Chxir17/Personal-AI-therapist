@@ -1,7 +1,6 @@
-package com.aitherapist.aitherapist.db.dao.services;
-import com.aitherapist.aitherapist.db.dao.repositorys.IUserRepository;
-import com.aitherapist.aitherapist.db.entities.User;
-import java.util.List;
+package com.aitherapist.aitherapist.services;
+import com.aitherapist.aitherapist.repositories.IUserRepository;
+import com.aitherapist.aitherapist.domain.model.entities.User;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

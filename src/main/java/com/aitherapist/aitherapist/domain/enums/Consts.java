@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist;
+package com.aitherapist.aitherapist.domain.enums;
 
 public enum Consts {
     START_MESSAGE("Welcome to our application!"),

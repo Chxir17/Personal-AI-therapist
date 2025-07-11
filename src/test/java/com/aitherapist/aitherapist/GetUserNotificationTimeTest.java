@@ -1,12 +1,10 @@
 package com.aitherapist.aitherapist;
 
-import com.aitherapist.aitherapist.db.entities.UserActivityLog;
+import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 import com.aitherapist.aitherapist.scheduled.notifications.algorithm.GetUserNotificationTime;
-import com.aitherapist.aitherapist.scheduled.notifications.algorithm.NotificationTimeAnalyzer;
-import com.aitherapist.aitherapist.db.dao.logic.UserActivityRegistrationService;
+import com.aitherapist.aitherapist.services.activity.UserActivityRegistrationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;

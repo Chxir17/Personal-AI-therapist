@@ -1,6 +1,5 @@
-package com.aitherapist.aitherapist.db.utils;
+package com.aitherapist.aitherapist.config;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;

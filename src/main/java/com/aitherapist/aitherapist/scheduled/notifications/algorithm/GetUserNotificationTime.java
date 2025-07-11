@@ -1,7 +1,7 @@
 package com.aitherapist.aitherapist.scheduled.notifications.algorithm;
 
-import com.aitherapist.aitherapist.db.dao.logic.UserActivityRegistrationService;
-import com.aitherapist.aitherapist.db.entities.UserActivityLog;
+import com.aitherapist.aitherapist.services.activity.UserActivityRegistrationService;
+import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;

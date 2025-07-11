@@ -1,6 +1,5 @@
-package com.aitherapist.aitherapist.db.dao.services;
-import com.aitherapist.aitherapist.db.entities.User;
-import java.util.List;
+package com.aitherapist.aitherapist.services;
+import com.aitherapist.aitherapist.domain.model.entities.User;
 
 /**
  * IUserService - Service interface for health data entity.

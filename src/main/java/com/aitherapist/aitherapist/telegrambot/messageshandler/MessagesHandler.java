@@ -1,14 +1,13 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
-import com.aitherapist.aitherapist.db.dao.DataController;
-import com.aitherapist.aitherapist.db.dao.logic.UserRegistrationService;
-import com.aitherapist.aitherapist.db.entities.HealthData;
-import com.aitherapist.aitherapist.db.entities.User;
+import com.aitherapist.aitherapist.services.registration.UserRegistrationService;
+import com.aitherapist.aitherapist.domain.model.entities.HealthData;
+import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
-import com.aitherapist.aitherapist.telegrambot.dto.MedicalAnalysisResult;
+import com.aitherapist.aitherapist.domain.model.entities.MedicalAnalysisResult;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.telegrambot.utils.Answers;
+import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

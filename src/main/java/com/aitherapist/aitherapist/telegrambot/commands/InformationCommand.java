@@ -1,13 +1,11 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
-import com.aitherapist.aitherapist.telegrambot.utils.Answers;
+import com.aitherapist.aitherapist.domain.enums.Answers;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
  * FIXME: to implement

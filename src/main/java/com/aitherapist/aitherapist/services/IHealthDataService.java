@@ -1,5 +1,5 @@
-package com.aitherapist.aitherapist.db.dao.services;
-import com.aitherapist.aitherapist.db.entities.HealthData;
+package com.aitherapist.aitherapist.services;
+import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import java.util.List;
 
 /**

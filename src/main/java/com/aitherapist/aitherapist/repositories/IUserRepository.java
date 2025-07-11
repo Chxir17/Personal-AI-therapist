@@ -1,6 +1,6 @@
-package com.aitherapist.aitherapist.db.dao.repositorys;
+package com.aitherapist.aitherapist.repositories;
 
-import com.aitherapist.aitherapist.db.entities.User;
+import com.aitherapist.aitherapist.domain.model.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

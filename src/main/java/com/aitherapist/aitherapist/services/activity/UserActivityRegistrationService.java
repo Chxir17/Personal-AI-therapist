@@ -1,6 +1,6 @@
-package com.aitherapist.aitherapist.db.dao.logic;
+package com.aitherapist.aitherapist.services.activity;
 
-import com.aitherapist.aitherapist.db.entities.UserActivityLog;
+import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
