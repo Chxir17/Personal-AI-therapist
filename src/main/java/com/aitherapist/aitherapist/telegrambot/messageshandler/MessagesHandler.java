@@ -6,8 +6,8 @@ import com.aitherapist.aitherapist.db.entities.HealthData;
 import com.aitherapist.aitherapist.db.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
-import com.aitherapist.aitherapist.telegrambot.commands.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.dto.MedicalAnalysisResult;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,11 +41,6 @@ public class MessagesHandler implements IHandler {
     private IMessageSender messageSender;
     private final ParseUserPrompt parseUserPrompt = new ParseUserPrompt();
     private final MakeMedicalRecommendation makeMedicalRecommendation = new MakeMedicalRecommendation();
-
-    @Override
-    public boolean canHandle(String messageText) {
-        return true;
-    }
 
     @Override
     public void handle(Update update) throws TelegramApiException, JsonProcessingException {

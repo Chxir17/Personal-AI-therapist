@@ -69,6 +69,18 @@ public class HealthData implements Serializable {
     @Column(name = "arrhythmia")
     private Boolean arrhythmia;
 
+    @Column(name = "chronic_diseases")
+    private String chronicDiseases;
+
+    @Column(name = "height")
+    private Double height;
+
+    @Column(name = "weight")
+    private Double weight;
+
+    @Column(name = "bad_habits")
+    private String badHabits;
+
     @Override
     public String toString() {
         return "HealthData{" +

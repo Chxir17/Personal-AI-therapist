@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class NotificationTimeAnalyzer {
-    public Map<DayOfWeek, LocalTime> getBestNotificationTimesForUser(List<UserActivityLog> userLogs) {
+    static public Map<DayOfWeek, LocalTime> getBestNotificationTimesForUser(List<UserActivityLog> userLogs) {
         List<UserActivityLog> sortedLogs = userLogs.stream().sorted(Comparator.comparing(UserActivityLog::getActionTime)).toList();
         Map<DayOfWeek, List<LocalTime>> timeByDay = new HashMap<>();
         for (int i = 0; i < sortedLogs.size(); i++) {
@@ -43,7 +43,7 @@ public class NotificationTimeAnalyzer {
         return result;
     }
 
-    private LocalTime mostCommonTime(List<LocalTime> times) {
+    static private LocalTime mostCommonTime(List<LocalTime> times) {
         if (times.isEmpty()) {
             return LocalTime.of(11, 0);
         }
@@ -70,7 +70,7 @@ public class NotificationTimeAnalyzer {
         }
     }
 
-    private LocalTime averageTime(List<LocalTime> times) {
+    static private LocalTime averageTime(List<LocalTime> times) {
         int totalMinutes = times.stream().mapToInt(time -> time.getHour() * 60 + time.getMinute()).sum();
         int avgMinutes = totalMinutes / times.size();
         int avgHour = avgMinutes / 60;

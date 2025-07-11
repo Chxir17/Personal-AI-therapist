@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.commands.contexts;
+package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
 
 import org.springframework.stereotype.Component;
 
