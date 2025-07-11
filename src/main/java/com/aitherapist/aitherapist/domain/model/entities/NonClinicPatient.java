@@ -1,16 +1,25 @@
 package com.aitherapist.aitherapist.domain.model.entities;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-//FIXME сделать анотации
-public class NonClinicPatient {
+
+/**
+ * NonClinicPatient - extends class User with main information.
+ * FIXME: mb delete all list in this class??
+ */
+@Entity
+@DiscriminatorValue("NON_CLINIC_PATIENT")
+@Getter
+@Setter
+@NoArgsConstructor
+public class NonClinicPatient extends User {
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserActivityLog> activityLogs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HealthData> healthDataList = new ArrayList<>();
 }

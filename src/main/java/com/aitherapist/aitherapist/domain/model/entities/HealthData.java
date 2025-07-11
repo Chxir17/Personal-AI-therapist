@@ -33,12 +33,9 @@ import java.io.Serializable;
 @Entity
 @Table(name = "health_data")
 public class HealthData implements Serializable {
-    @Serial
-    private static final long serialVersionUID = -5527566248002296042L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Integer id;
 
     @ManyToOne

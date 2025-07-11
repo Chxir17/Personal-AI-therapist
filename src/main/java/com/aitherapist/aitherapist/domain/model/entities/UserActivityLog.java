@@ -5,9 +5,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * UserActivityLog - for pusher message. Keep time user activity.
- */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "user_activity_logs")
 public class UserActivityLog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
