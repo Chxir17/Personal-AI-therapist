@@ -18,4 +18,9 @@ public abstract class Patient extends User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HealthData> healthDataList = new ArrayList<>();
+
+    @Override
+    public String getName() {
+        return super.getName();
+    }
 }

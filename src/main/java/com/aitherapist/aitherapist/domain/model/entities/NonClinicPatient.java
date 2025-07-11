@@ -14,4 +14,9 @@ public class NonClinicPatient extends Patient {
 
     @Column(name = "external_system_id")
     private Long externalSystemId;
+
+    @Override
+    public String getName() {
+        return super.getName();
+    }
 }

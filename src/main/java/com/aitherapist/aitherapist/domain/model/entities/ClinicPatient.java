@@ -20,4 +20,9 @@ public class ClinicPatient extends Patient {
 
     @Column(name = "medical_card_number")
     private String medicalCardNumber;
+
+    @Override
+    public String getName() {
+        return super.getName();
+    }
 }
