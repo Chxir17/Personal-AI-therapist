@@ -1,6 +1,14 @@
 package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.telegrambot.commands.*;
+import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
+import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.ChangeDoctorAccountData;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.GetLastParientMedicalData;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
+import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
+import  com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,14 +28,32 @@ public class CommandsHandler {
                            ChooseRoleCommand chooseRoleCommand,
                            DoctorCommand doctorCommand,
                            BotPatientCommand botPatientCommand,
-                           ClinicPatientCommand clinicPatientCommand) {
-        this.commands = Map.of(
-                "/start", startCommand,
-                "/information", informationCommand,
-                "/role", chooseRoleCommand,
-                "/doctor", doctorCommand,
-                "/botPatient", botPatientCommand,
-                "/clinicPatient", clinicPatientCommand
+                           ClinicPatientCommand clinicPatientCommand,
+                           SettingsPatientCommand settingsPatientCommand,
+                           SettingsDoctorCommand settingsDoctorCommand,
+                           GetLastMessageFromDoctor getLastMessageFromDoctor,
+                           SendMessageUser sendMessagePatient,
+                           GetLastParientMedicalData getLastParientMedicalData,
+                           SendMessageDoctor sendMessageDoctor,
+                           ChangeDoctorAccountData changeDoctorAccountData,
+                           com.aitherapist.aitherapist.telegrambot.commands.patients.ChangePatientAccountData changePatientAccountData,
+                           ChangeRoleCommand changeRoleCommand) {
+        this.commands = Map.ofEntries(
+                Map.entry("/start", startCommand),
+                Map.entry("/information", informationCommand),
+                Map.entry("/role", chooseRoleCommand),
+                Map.entry("/doctor", doctorCommand),
+                Map.entry("/botPatient", botPatientCommand),
+                Map.entry("/clinicPatient", clinicPatientCommand),
+                Map.entry("/settingsPatient", settingsPatientCommand),
+                Map.entry("/settingsDoctor", settingsDoctorCommand),
+                Map.entry("/getLastMessageDoctor", getLastMessageFromDoctor),
+                Map.entry("/sendMessageDoctor", sendMessageDoctor),
+                Map.entry("/sendMessageToPatient", sendMessagePatient),
+                Map.entry("/getLastRecords", getLastParientMedicalData),
+                Map.entry("/changeDoctorAccountData", changeDoctorAccountData),
+                Map.entry("/changePatientAccountData", changePatientAccountData),
+                Map.entry("/changeRole", changeRoleCommand)
         );
     }
 
