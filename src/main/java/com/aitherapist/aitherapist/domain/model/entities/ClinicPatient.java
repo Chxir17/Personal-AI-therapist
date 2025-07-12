@@ -6,23 +6,19 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@DiscriminatorValue("CLINIC_PATIENT")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@DiscriminatorValue("CLINIC_PATIENT")
 public class ClinicPatient extends Patient {
+
     @Column(name = "clinic_id", nullable = false)
     private Long clinicId;
-
-    @ManyToMany(mappedBy = "patients")
-    private List<Doctor> doctors = new ArrayList<>();
 
     @Column(name = "medical_card_number")
     private String medicalCardNumber;
 
-    @Override
-    public String getName() {
-        return super.getName();
-    }
+    @ManyToMany(mappedBy = "patients")
+    private List<Doctor> doctors = new ArrayList<>();
 }

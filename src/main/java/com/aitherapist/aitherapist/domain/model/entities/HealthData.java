@@ -23,8 +23,8 @@ public class HealthData implements Serializable {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 
     @Column(name = "blood_oxygen_level", columnDefinition = "DECIMAL(5,2)")
     private Double bloodOxygenLevel;
@@ -66,7 +66,7 @@ public class HealthData implements Serializable {
     public String toString() {
         return "HealthData{" +
                 "id=" + id +
-                ", user=" + (user != null ? user.getId() : "null") +
+                ", user=" + (patient != null ? patient.getId() : "null") +
                 ", bloodOxygenLevel=" + bloodOxygenLevel +
                 ", temperature=" + temperature +
                 ", hoursOfSleepToday=" + hoursOfSleepToday +

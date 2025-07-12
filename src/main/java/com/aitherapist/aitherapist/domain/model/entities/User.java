@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +23,7 @@ public abstract class User {
     @Column(nullable = false)
     private String name;
 
-    private Long age;
+    private Integer age;
     private Boolean gender;
 
     @Column(name = "phone_number")

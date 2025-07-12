@@ -6,12 +6,13 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@DiscriminatorValue("DOCTOR")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@DiscriminatorValue("DOCTOR")
 public class Doctor extends User {
+
     @Column(name = "license_number", unique = true)
     private String licenseNumber;
 
@@ -34,15 +35,17 @@ public class Doctor extends User {
     }
 
     public void removeAllPatients() {
-        patients.clear();
+        for (ClinicPatient patient : new ArrayList<>(patients)) {
+            removePatient(patient);
+        }
     }
 
-    public Patient getPatientById(Long patientId) {
-        return patients.stream().filter(patient -> patient.getId().equals(patientId)).findFirst().orElse(null);
+    public ClinicPatient getPatientById(Long patientId) {
+        return patients.stream().filter(p -> p.getId().equals(patientId)).findFirst().orElse(null);
     }
 
-    public List<HealthData> getUserHealthData(Long DoctorId, Long userId) {
-        Patient patient = getPatientById(userId);
-        return new ArrayList<>(patient.getHealthDataList());
+    public List<HealthData> getUserHealthData(Long userId) {
+        ClinicPatient patient = getPatientById(userId);
+        return patient != null ? patient.getHealthDataList() : new ArrayList<>();
     }
 }

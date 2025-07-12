@@ -15,11 +15,12 @@ import java.util.Objects;
 @DiscriminatorValue("PATIENT")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class Patient extends User {
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserActivityLog> activityLogs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HealthData> healthDataList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HealthData> healthDataList = new ArrayList<>();
+    private List<UserActivityLog> activityLogs = new ArrayList<>();
 
     public void editHealthData(HealthData healthData, Long healthDataId) {
         healthDataList.stream()
@@ -27,11 +28,11 @@ public abstract class Patient extends User {
                 .findFirst()
                 .ifPresentOrElse(
                         existingHd -> {
-                            BeanUtils.copyProperties(healthData, existingHd, "id", "user");
-                            existingHd.setUser(this);
+                            BeanUtils.copyProperties(healthData, existingHd, "id", "patient");
+                            existingHd.setPatient(this);
                         },
                         () -> {
-                            healthData.setUser(this);
+                            healthData.setPatient(this);
                             healthDataList.add(healthData);
                         }
                 );
@@ -39,10 +40,5 @@ public abstract class Patient extends User {
 
     public void removeHealthData(Long healthDataId) {
         healthDataList.removeIf(hd -> Objects.equals(hd.getId(), healthDataId));
-    }
-
-    @Override
-    public String getName() {
-        return super.getName();
     }
 }
