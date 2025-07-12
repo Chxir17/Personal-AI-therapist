@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,7 +24,7 @@ class DoctorServiceImpl implements IDoctorService {
     }
     @Override
     public Doctor getDoctor(Long doctorId) {
-        return doctorRepository.findById(doctorId).get();
+        return doctorRepository.findById(Math.toIntExact(doctorId)).get();
     }
 
     @Override
@@ -34,15 +36,15 @@ class DoctorServiceImpl implements IDoctorService {
     @Override
     public Patient getPatientById(Long doctorId, Long userId) {
         Doctor doctor = getDoctor(doctorId);
-        return doctor.getPatients().get(userId);
+        return doctor.getPatients().get(Math.toIntExact(userId));
     }
 
     @Override
     public void updatePatient(Long doctorId, Long userId, ClinicPatient patient) {
-        Doctor doctor = doctorRepository.findById(doctorId).get();
+        Doctor doctor = doctorRepository.findById(Math.toIntExact(doctorId)).get();
         List<ClinicPatient> lst = doctor.getPatients();
         for (ClinicPatient p : lst) {
-            if (p.getId() == userId) {
+            if (Objects.equals(p.getId(), userId)) {
                 lst.remove(p);
                 lst.add(p);
             }

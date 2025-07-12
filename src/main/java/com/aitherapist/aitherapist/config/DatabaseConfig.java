@@ -21,11 +21,12 @@ import javax.sql.DataSource;
 public class DatabaseConfig {
     @Value("${spring.datasource.url}")
     private String url;
+
     @Value("${spring.datasource.username}")
     private String username;
+
     @Value("${spring.datasource.password}")
     private String password;
-    //@Setter(AccessLevel.PROTECTED)
 
     @Bean
     public DataSource dataSource() {

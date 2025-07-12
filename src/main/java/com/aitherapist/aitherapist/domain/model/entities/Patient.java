@@ -6,6 +6,7 @@ import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -22,7 +23,7 @@ public abstract class Patient extends User {
 
     public void editHealthData(HealthData healthData, Long healthDataId) {
         healthDataList.stream()
-                .filter(hd -> hd.getId() == healthDataId)
+                .filter(hd -> Objects.equals(hd.getId(), healthDataId))
                 .findFirst()
                 .ifPresentOrElse(
                         existingHd -> {
@@ -37,7 +38,7 @@ public abstract class Patient extends User {
     }
 
     public void removeHealthData(Long healthDataId) {
-        healthDataList.removeIf(hd -> hd.getId() == healthDataId);
+        healthDataList.removeIf(hd -> Objects.equals(hd.getId(), healthDataId));
     }
 
     @Override

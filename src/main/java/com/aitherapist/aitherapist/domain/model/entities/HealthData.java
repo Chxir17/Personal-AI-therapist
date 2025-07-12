@@ -8,22 +8,6 @@ import java.io.Serial;
 import java.io.Serializable;
 
 
-/**
- * HealthData - custom Object for Hibernate
- * example how to create
- * User = User.builder()
- *     .name("John Doe")
- *     .age(30)
- *     .build();
- * HealthData data = HealthData.builder()
- *     .user(user)
- *     .pulse(75)
- *     .temperature(36.6)
- *     .build();
- *
- * user.getHealthDataList().add(data);
- * userRepository.save(user);
- */
 @Getter
 @Setter
 @NoArgsConstructor
