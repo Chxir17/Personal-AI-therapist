@@ -1,15 +1,14 @@
-package com.aitherapist.aitherapist.telegrambot.commands.doctors;
+package com.aitherapist.aitherapist.telegrambot.commands.clinicPatient;
 
-
+import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.IVerify;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -20,23 +19,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * StartDoctors - main class with this functions :
- *  1) verify Doctors
- *  2) send to user some message
- *  3)
- */
 @Component
-@RequiredArgsConstructor
-public class StartDoctors implements IVerify, ICommand {
-
+public class StartClinicPatient implements IVerify, ICommand {
     private String telephoneNumber;
     private IMessageSender messageSender;
+    private SendMessageUser sendMessageUser;
     @Autowired
-    public StartDoctors(TelegramMessageSender messageSender) {
+    public StartClinicPatient(TelegramMessageSender messageSender, SendMessageUser sendMessageUser) {
         this.messageSender = messageSender;
-
+        this.sendMessageUser = sendMessageUser;
     }
 
     /**
@@ -73,22 +64,20 @@ public class StartDoctors implements IVerify, ICommand {
      */
     @Override
     public SendMessage apply(Update update) throws TelegramApiException {
-        long chatId = update.getMessage().getChatId();
         boolean verStatus = verify(update);
         while(!verStatus){
             verStatus = verify(update);
         }
+        long chatId = update.getMessage().getChatId();
         Map<String, String> buttons = new HashMap<>();
-        buttons.put("Получить последние измерения пациента", "/getLastRecords");
-        buttons.put("Отправить сообщение пациенту","/sendMessageToPatient");
-        buttons.put("Настройки","/settingsDoctor");
+        buttons.put("Получить последние сообщения от доктора", "/getLastMessageDoctor");
+        buttons.put("Отправить сообщение доктору","/sendMessageDoctor");
+        buttons.put("Настройки","/settingsPatient");
         InlineKeyboardMarkup commands = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
-
         return SendMessage.builder()
                 .chatId(String.valueOf(chatId))
                 .text("Выберите Комманду")
                 .replyMarkup(commands)
                 .build();
     }
-
 }
