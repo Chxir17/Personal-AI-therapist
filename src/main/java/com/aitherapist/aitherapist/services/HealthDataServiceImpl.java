@@ -20,6 +20,7 @@ import java.util.List;
 @Transactional(readOnly=true)
 public class HealthDataServiceImpl implements IHealthDataService {
 
+
     @Autowired
     private IHealthDataRepository healthDataRepository;
 
@@ -27,16 +28,11 @@ public class HealthDataServiceImpl implements IHealthDataService {
     private IUserRepository userRepository;
 
     @Override
-    @Transactional
     public HealthData saveHealthDataInUser(Long userId, HealthData healthData) {
-        User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow(() -> new RuntimeException("user not found!" + userId));
-        healthData.setUser(user);
-        return healthDataRepository.save(healthData);
-
+        return null;
     }
 
     @Override
-    @Transactional
     public List<HealthData> fetchHealthDataList(Long userId) {
         User user = userRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
@@ -51,7 +47,6 @@ public class HealthDataServiceImpl implements IHealthDataService {
      * @return
      */
     @Override
-    @Transactional
     public HealthData updateHealthData(HealthData healthData, Long userId) {
         HealthData currentHealthData = healthDataRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -60,7 +55,6 @@ public class HealthDataServiceImpl implements IHealthDataService {
     }
 
     @Override
-    @Transactional
     public void deleteHealthData(Long userId) {
         HealthData healthData =  healthDataRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));

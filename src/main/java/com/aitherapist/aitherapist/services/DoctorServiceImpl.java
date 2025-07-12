@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 class DoctorServiceImpl implements IDoctorService {
     private final IDoctorRepository doctorRepository;
 
@@ -95,7 +97,7 @@ class DoctorServiceImpl implements IDoctorService {
     @Override
     public List<HealthData> getUserHealthData(Long doctorId, Long userId) {
         Doctor doctor = getDoctor(doctorId);
-        return doctor.getUserHealthData(doctorId, userId);
+        return doctor.getUserHealthData(userId);
     }
 
 }
