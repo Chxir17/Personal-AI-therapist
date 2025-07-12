@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.domain.model.entities;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,16 +17,20 @@ import java.time.LocalDateTime;
 public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
 
-    private Integer age;
+    private Long age;
     private Boolean gender;
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Roles role;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -32,4 +32,17 @@ public class Doctor extends User {
         patients.remove(patient);
         patient.getDoctors().remove(this);
     }
+
+    public void removeAllPatients() {
+        patients.clear();
+    }
+
+    public Patient getPatientById(Long patientId) {
+        return patients.stream().filter(patient -> patient.getId().equals(patientId)).findFirst().orElse(null);
+    }
+
+    public List<HealthData> getUserHealthData(Long DoctorId, Long userId) {
+        Patient patient = getPatientById(userId);
+        return new ArrayList<>(patient.getHealthDataList());
+    }
 }

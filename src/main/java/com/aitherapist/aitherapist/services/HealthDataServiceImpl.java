@@ -28,8 +28,8 @@ public class HealthDataServiceImpl implements IHealthDataService {
 
     @Override
     @Transactional
-    public HealthData saveHealthDataInUser(int userId, HealthData healthData) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user not found!" + userId));
+    public HealthData saveHealthDataInUser(Long userId, HealthData healthData) {
+        User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow(() -> new RuntimeException("user not found!" + userId));
         healthData.setUser(user);
         return healthDataRepository.save(healthData);
 
@@ -37,8 +37,8 @@ public class HealthDataServiceImpl implements IHealthDataService {
 
     @Override
     @Transactional
-    public List<HealthData> fetchHealthDataList(Integer userId) {
-        User user = userRepository.findById(userId)
+    public List<HealthData> fetchHealthDataList(Long userId) {
+        User user = userRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
         return healthDataRepository.findByUser(user);
     }
@@ -52,8 +52,8 @@ public class HealthDataServiceImpl implements IHealthDataService {
      */
     @Override
     @Transactional
-    public HealthData updateHealthData(HealthData healthData, Integer userId) {
-        HealthData currentHealthData = healthDataRepository.findById(userId)
+    public HealthData updateHealthData(HealthData healthData, Long userId) {
+        HealthData currentHealthData = healthDataRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
         BeanUtils.copyProperties(healthData, currentHealthData, "id"); // ignore id
         return healthDataRepository.save(currentHealthData);
@@ -61,8 +61,8 @@ public class HealthDataServiceImpl implements IHealthDataService {
 
     @Override
     @Transactional
-    public void deleteHealthData(Integer userId) {
-        HealthData healthData =  healthDataRepository.findById(userId)
+    public void deleteHealthData(Long userId) {
+        HealthData healthData =  healthDataRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
         healthDataRepository.delete(healthData);
     }

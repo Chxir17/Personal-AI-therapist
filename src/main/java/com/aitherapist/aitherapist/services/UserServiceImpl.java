@@ -21,35 +21,33 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements IUserService {
 
     @Autowired
-    private UserServiceImpl userService;
-
-    @Autowired
     private HealthDataServiceImpl healthDataService;
 
-    public void registerUser(Integer userId, User user) {
-        userService.createUser(userId, user);
+    @Autowired
+    private IUserRepository userRepository;
+
+    public void registerUser(Long userId, User user) {
+        createUser(userId, user);
     }
 
-    public Boolean isSignUp(Integer userId){
-        User user = userService.fetchUser(userId);
+    public Boolean isSignUp(Long userId){
+        User user = fetchUser(userId);
         return user != null;
     }
 
-    public String saveUserHealthData(Integer userId, HealthData healthData){
+    public String saveUserHealthData(Long userId, HealthData healthData){
         healthDataService.saveHealthDataInUser(userId, healthData);
         return "data success save!";
     }
 
-    public User getUserByUserId(Integer userId){
-        return userService.getUser(userId);
+    public User getUserByUserId(Long userId){
+        return getUser(userId);
     }
 
-    public void putHealthDataInUser(Integer userId, HealthData healthData){
+    public void putHealthDataInUser(Long userId, HealthData healthData){
         healthDataService.saveHealthDataInUser(userId, healthData);
     }
 
-    @Autowired
-    private IUserRepository userRepository;
 
     @Override
     @Transactional
@@ -59,8 +57,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public User fetchUser(Integer id) {
-        return userRepository.findById(id).orElse(null);
+    public User fetchUser(Long id) {
+        return userRepository.findById(Math.toIntExact(id)).orElse(null);
     }
 
     /**
@@ -72,8 +70,8 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     @Transactional
-    public User updateUser(User user, Integer id) {
-        User currentUser = userRepository.findById(id)
+    public User updateUser(User user, Long id) {
+        User currentUser = userRepository.findById(Math.toIntExact(id))
                 .orElseThrow(() -> new RuntimeException("User not found"));
         BeanUtils.copyProperties(user, currentUser, "id"); // ignore id, чтобы
         return userRepository.save(currentUser);
@@ -81,62 +79,62 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public void deleteUser(Integer id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(Math.toIntExact(id)).orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(user);
     }
 
     @Override
     @Transactional
-    public void createUser(int userId, User user) {
+    public void createUser(Long userId, User user) {
         user.setId(userId);
         userRepository.save(user);
     }
 
     @Override
-    public void deleteUserIfExists(Integer id) {
-        if (userRepository.findById(id).isPresent()) {
-            userRepository.delete(userRepository.findById(id).get());
+    public void deleteUserIfExists(Long id) {
+        if (userRepository.findById(Math.toIntExact(id)).isPresent()) {
+            userRepository.delete(userRepository.findById(Math.toIntExact(id)).get());
         }
     }
 
     @Override
-    public User getUser(Integer id) {
-        User user =  userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    public User getUser(Long id) {
+        User user =  userRepository.findById(Math.toIntExact(id)).orElseThrow(() -> new RuntimeException("User not found"));
         return user;
     }
 
     @Override
-    public Boolean checkIfUserExists(Integer userId) {
-        return userService.checkIfUserExists(userId);
+    public Boolean checkIfUserExists(Long userId) {
+        return checkIfUserExists(userId);
     }
 
     @Override
-    public Roles getUserRoles(Integer userId) {
-        User user = userService.fetchUser(userId);
+    public Roles getUserRoles(Long userId) {
+        User user = fetchUser(userId);
         return user.getRole();
     }
 
     @Override
-    public Boolean isUserInClinic(Integer userId) {
-        User user = userService.fetchUser(userId);
+    public Boolean isUserInClinic(Long userId) {
+        User user = fetchUser(userId);
        return user.getRole() == Roles.DOCTOR ||  user.getRole() == Roles.CLINIC_PATIENT;
     }
 
     @Override
-    public void changeUserRoles(Integer userId, Roles role) {
-        User user = userService.fetchUser(userId);
+    public void changeUserRoles(Long userId, Roles role) {
+        User user = fetchUser(userId);
         user.setRole(role);
         userRepository.save(user);
     }
 
     @Override
-    public void editUserInformation(User user, int id) {
-        userService.editUserInformation(user, id);
+    public void editUserInformation(User user, Long id) {
+        editUserInformation(user, id);
     }
 
     @Override
-    public void editUserHealthData(User user, int id, HealthData healthData) {
-        userService.editUserHealthData(user, id, healthData);
+    public void editUserHealthData(User user, Long id, HealthData healthData) {
+        editUserHealthData(user, id, healthData);
     }
 }

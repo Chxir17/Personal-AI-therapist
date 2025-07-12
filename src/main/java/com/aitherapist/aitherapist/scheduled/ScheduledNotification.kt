@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.scheduled
 
-import com.aitherapist.aitherapist.scheduled.NotificationStatus
+import com.aitherapist.aitherapist.domain.enums.NotificationStatus
 import jakarta.persistence.*
 import java.time.LocalDateTime
 

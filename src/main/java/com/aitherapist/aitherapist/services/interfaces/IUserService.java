@@ -9,16 +9,16 @@ import com.aitherapist.aitherapist.domain.model.entities.User;
  */
 public interface IUserService {
     User saveUser(User user);
-    User fetchUser(Integer id);
-    User updateUser(User user, Integer id);
-    void deleteUser(Integer id);
-    void createUser(int userId, User user);
-    void deleteUserIfExists(Integer id);
-    User getUser(Integer id);
-    Boolean checkIfUserExists(Integer userId);
-    Roles getUserRoles(Integer userId);
-    Boolean isUserInClinic(Integer userId);
-    void changeUserRoles(Integer userId, Roles role);
-    void editUserInformation(User user, int id);
-    void editUserHealthData(User user, int id, HealthData healthData);
+    User fetchUser(Long id);
+    User updateUser(User user, Long id);
+    void deleteUser(Long id);
+    void createUser(Long userId, User user);
+    void deleteUserIfExists(Long id);
+    User getUser(Long id);
+    Boolean checkIfUserExists(Long userId);
+    Roles getUserRoles(Long userId);
+    Boolean isUserInClinic(Long userId);
+    void changeUserRoles(Long userId, Roles role);
+    void editUserInformation(User user, Long id);
+    void editUserHealthData(User user, Long id, HealthData healthData);
 }

@@ -36,7 +36,7 @@ public class HealthData implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -52,7 +52,7 @@ public class HealthData implements Serializable {
     private Double hoursOfSleepToday;
 
     @Column(name = "pulse")
-    private Integer pulse;
+    private Long pulse;
 
     @Column(name = "pressure", columnDefinition = "VARCHAR(10)")
     private String pressure;

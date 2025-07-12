@@ -7,8 +7,8 @@ import java.util.List;
  * Defines methods for CRUD operations and additional business logic
  */
 public interface IHealthDataService {
-    HealthData saveHealthDataInUser(int userId, HealthData healthData);
-    List<HealthData> fetchHealthDataList(Integer userId);
-    HealthData updateHealthData(HealthData healthData, Integer userId);
-    void deleteHealthData(Integer userId);
+    HealthData saveHealthDataInUser(Long userId, HealthData healthData);
+    List<HealthData> fetchHealthDataList(Long userId);
+    HealthData updateHealthData(HealthData healthData, Long userId);
+    void deleteHealthData(Long userId);
 }

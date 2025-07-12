@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.scheduled
 
-import com.aitherapist.aitherapist.scheduled.NotificationStatus
+import com.aitherapist.aitherapist.domain.enums.NotificationStatus
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender
 import jakarta.annotation.PostConstruct
 import jakarta.transaction.Transactional
