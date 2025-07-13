@@ -1,11 +1,11 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
-import com.aitherapist.aitherapist.services.registration.UserRegistrationService;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
-import com.aitherapist.aitherapist.domain.model.entities.MedicalAnalysisResult;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
@@ -29,12 +29,10 @@ import org.springframework.context.annotation.Lazy;
 @Slf4j
 public class MessagesHandler implements IHandler {
     private final RestTemplate restTemplate = new RestTemplate();
-    private MedicalAnalysisResult medicalAnalysisResult;
     private final RegistrationContext registrationContext;
-    private final DataController dataController;
-    private final UserRegistrationService userRegistrationService;
+    private final UserServiceImpl userRegistrationService;
     private final ObjectMapper mapper = new ObjectMapper();
-
+    //FIXME че тут за параша нахуй Autowired + new от утилити классов
     @Autowired
     @Lazy
     private IMessageSender messageSender;
@@ -45,7 +43,7 @@ public class MessagesHandler implements IHandler {
     public void handle(Update update) throws TelegramApiException, JsonProcessingException {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
-        int userId = getUserId(update);
+        long userId = getUserId(update);
 
         if (registrationContext.isRegistrationInProgress(chatId)) {
             handleRegistration(chatId, userId, messageText);
@@ -54,11 +52,11 @@ public class MessagesHandler implements IHandler {
         }
     }
 
-    private int getUserId(Update update) {
+    private long getUserId(Update update) {
         return Math.toIntExact(update.getMessage().getFrom().getId());
     }
 
-    private void handleRegistration(long chatId, int userId, String messageText) throws TelegramApiException {
+    private void handleRegistration(long chatId, long userId, String messageText) throws TelegramApiException {
         try {
             User user = parseUserRegistrationData(messageText);
             registerUser(userId, user);
@@ -75,17 +73,20 @@ public class MessagesHandler implements IHandler {
         return mapper.readValue(cleanJson, User.class);
     }
 
-    private void registerUser(int userId, User user) {
+    private void registerUser(long userId, User user) {
         userRegistrationService.registerUser(userId, user);
     }
 
-    private void handleHealthData(long chatId, int userId, String messageText, Update update)
+    private void handleHealthData(long chatId, long userId, String messageText, Update update)
             throws TelegramApiException, JsonProcessingException {
         sendInitialResponse(chatId);
         HealthData healthData = parseHealthData(messageText);
         saveHealthData(userId, healthData);
         String recommendation = generateMedicalRecommendation(update);
-        sendRecommendation(chatId, recommendation);
+        if (recommendation != null) {
+            sendRecommendation(chatId, recommendation);
+        }
+
     }
 
     private HealthData parseHealthData(String messageText) throws JsonProcessingException {
@@ -100,13 +101,18 @@ public class MessagesHandler implements IHandler {
         return jsonResponse.replaceAll("```json|```", "").trim();
     }
 
-    private void saveHealthData(int userId, HealthData healthData) {
+    private void saveHealthData(long userId, HealthData healthData) {
         userRegistrationService.putHealthDataInUser(userId, healthData);
     }
 
     private String generateMedicalRecommendation(Update update) {
         User user = userRegistrationService.getUserByUserId(getUserId(update));
-        return MakeMedicalRecommendation.giveMedicalRecommendation(user);
+        if (user instanceof Patient patient) {
+            return MakeMedicalRecommendation.giveMedicalRecommendation(patient);
+        }
+        else {
+            return null;
+        }
     }
 
     private void sendInitialResponse(long chatId) throws TelegramApiException {

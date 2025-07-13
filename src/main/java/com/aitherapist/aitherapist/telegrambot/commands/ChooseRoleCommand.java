@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
-import com.aitherapist.aitherapist.services.registration.UserRegistrationService;
+import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
@@ -25,16 +25,16 @@ public class ChooseRoleCommand implements ICommand{
     RegistrationContext registrationContext;
 
     @Autowired
-    private UserRegistrationService userRegistrationService;
+    private UserServiceImpl userRegistrationService;
 
     @Override
     public SendMessage apply(Update update) throws TelegramApiException {
-        Long userId = update.getMessage().getFrom().getId();
+        long userId = update.getMessage().getFrom().getId();
         long chatId = update.getMessage().getChatId();
         InlineKeyboardMarkup replyKeyboardDoctor = createInlineRoleKeyboard();
 
 
-        if(!userRegistrationService.isSignUp(Math.toIntExact(userId))) {
+        if(!userRegistrationService.isSignUp(userId)) {
             registrationContext.startRegistration(chatId);
             return new SendMessage(String.valueOf(chatId), Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage());
         }

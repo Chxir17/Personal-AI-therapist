@@ -1,23 +1,12 @@
-package com.aitherapist.aitherapist.telegrambot.commands.doctors;
+package com.aitherapist.aitherapist.telegrambot.commands.clinicPatient;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-/**
- * FIXME: add some implementation.
- * SendMessageUser -
- */
-@Component
-@Getter
-@Setter
-public class SendMessageUser implements ICommand {
-
+public class SendMessageDoctor implements ICommand {
     public void sendToUserMessage(Long userId, String message, IMessageSender sender) throws TelegramApiException {
         sender.sendMessage(userId, message);
     }
