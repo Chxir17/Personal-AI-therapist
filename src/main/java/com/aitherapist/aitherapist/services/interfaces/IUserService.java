@@ -1,7 +1,9 @@
 package com.aitherapist.aitherapist.services.interfaces;
 import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.model.entities.HealthData;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.domain.model.entities.User;
+import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 
 /**
  * IUserService - Service interface for health data entity.
@@ -21,4 +23,7 @@ public interface IUserService {
     void changeUserRoles(Long userId, Roles role);
     void editUserInformation(User user, Long id);
     void editUserHealthData(User user, Long id, HealthData healthData);
+    void addActivityLog(User user, String actionType, Long messageId);
+    UserActivityLog getUserActivityLog(User user, Long id);
+    void editActivityLog(User user, Long id, UserActivityLog userActivityLog);
 }

@@ -1,15 +1,16 @@
 package com.aitherapist.aitherapist.services;
 import com.aitherapist.aitherapist.domain.enums.Roles;
-import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
+import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.repositories.IUserRepository;
-import com.aitherapist.aitherapist.domain.model.entities.User;
 
 import com.aitherapist.aitherapist.services.interfaces.IUserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * UserServiceImpl - implements IUserService (provides main operation)
@@ -127,4 +128,35 @@ public class UserServiceImpl implements IUserService {
     public void editUserHealthData(User user, Long id, HealthData healthData) {
         editUserHealthData(user, id, healthData);
     }
+
+    @Override
+    @Transactional
+    public void addActivityLog(User user, String actionType, Long messageId) {
+        UserActivityLog log = new UserActivityLog();
+        log.setUser(user);
+        log.setActionTime(LocalDateTime.now());
+        log.setActionType(actionType);
+        log.setMessageId(messageId);
+
+        user.getActivityLogs().add(log);
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserActivityLog getUserActivityLog(User user, Long id) {
+        return user.getActivityLogs().stream().filter(activityLog -> activityLog.getId().equals(id)).findFirst().get();
+    }
+
+    @Override
+    public void editActivityLog(User user, Long id, UserActivityLog userActivityLog) {
+        List<UserActivityLog> userActivityLogs = user.getActivityLogs();
+        for (UserActivityLog cur : userActivityLogs) {
+            if (cur.getId().equals(id)) {
+                userActivityLogs.remove(cur);
+                userActivityLogs.add(userActivityLog);
+                break;
+            }
+        }
+    }
 }
+

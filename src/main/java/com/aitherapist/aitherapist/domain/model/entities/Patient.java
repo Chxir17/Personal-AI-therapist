@@ -19,9 +19,6 @@ public abstract class Patient extends User {
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HealthData> healthDataList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserActivityLog> activityLogs = new ArrayList<>();
-
     public void editHealthData(HealthData healthData, Long healthDataId) {
         healthDataList.stream()
                 .filter(hd -> Objects.equals(hd.getId(), healthDataId))

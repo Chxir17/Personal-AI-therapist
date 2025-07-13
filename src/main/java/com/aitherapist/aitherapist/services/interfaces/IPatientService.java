@@ -16,5 +16,4 @@ public interface IPatientService {
     void deletePatientHealthData(Patient patient);
     List<HealthData> getPatientHealthData(Long patientId);
     boolean hasHealthData(Long patientId);
-    void addActivityLog(Patient patient, String actionType, Long messageId);
 }

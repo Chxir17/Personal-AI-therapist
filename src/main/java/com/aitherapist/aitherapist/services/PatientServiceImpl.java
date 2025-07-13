@@ -97,19 +97,5 @@ public class PatientServiceImpl implements IPatientService {
         return !patient.getHealthDataList().isEmpty();
     }
 
-    @Override
-    @Transactional
-    public void addActivityLog(Patient patient, String actionType, Long messageId) {
-        Patient existingPatient = patientRepository.findById(patient.getId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        UserActivityLog log = new UserActivityLog();
-        log.setUser(existingPatient);
-        log.setActionTime(LocalDateTime.now());
-        log.setActionType(actionType);
-        log.setMessageId(messageId);
-
-        existingPatient.getActivityLogs().add(log);
-        patientRepository.save(existingPatient);
-    }
 }
