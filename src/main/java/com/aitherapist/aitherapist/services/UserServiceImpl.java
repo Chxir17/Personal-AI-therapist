@@ -20,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements IUserService {
 
-    @Autowired
-    private HealthDataServiceImpl healthDataService;
 
     @Autowired
     private IUserRepository userRepository;
@@ -35,17 +33,9 @@ public class UserServiceImpl implements IUserService {
         return user != null;
     }
 
-    public String saveUserHealthData(Long userId, HealthData healthData){
-        healthDataService.saveHealthDataInUser(userId, healthData);
-        return "data success save!";
-    }
 
     public User getUserByUserId(Long userId){
         return getUser(userId);
-    }
-
-    public void putHealthDataInUser(Long userId, HealthData healthData){
-        healthDataService.saveHealthDataInUser(userId, healthData);
     }
 
 
