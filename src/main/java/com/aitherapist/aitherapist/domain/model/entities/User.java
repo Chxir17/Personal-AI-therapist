@@ -4,9 +4,12 @@ import com.aitherapist.aitherapist.domain.enums.Roles;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Getter
 @Setter
@@ -25,10 +28,10 @@ public abstract class User {
     @Column(nullable = false)
     private String name;
 
-    private Integer age;
-    private Boolean gender;
+    @Column(name = "birth_date")
+    private LocalDate birthDate; 
 
-    @Column(name = "phone_number")
+    private Boolean gender;
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
@@ -46,4 +49,39 @@ public abstract class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    public Integer getAge() {
+        if (birthDate == null) return null;
+        return Period.between(birthDate, LocalDate.now()).getYears();
+    }
+
+    public Integer getAgeInMonths() {
+        if (birthDate == null) return null;
+        return Period.between(birthDate, LocalDate.now()).getMonths();
+    }
+
+    public Integer getAgeInDays() {
+        if (birthDate == null) return null;
+        return Period.between(birthDate, LocalDate.now()).getDays();
+    }
+
+    public String getFormattedAge() {
+        if (birthDate == null) return "Не указана";
+
+        Period period = Period.between(birthDate, LocalDate.now());
+        return String.format("%d лет, %d месяцев, %d дней",
+                period.getYears(), period.getMonths(), period.getDays());
+    }
+
+    public int getYears() {
+        return (Period.between(birthDate, LocalDate.now()).getYears());
+    }
+
+    public int getMonths() {
+        return (Period.between(birthDate, LocalDate.now()).getMonths());
+    }
+
+    public int getDays() {
+        return (Period.between(birthDate, LocalDate.now()).getDays());
+    }
 }
