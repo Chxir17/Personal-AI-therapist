@@ -14,5 +14,5 @@ import java.util.List;
  * (for works with database. aka.dao)
  */
 @Repository
-public interface IHealthDataRepository extends JpaRepository<HealthData, Integer>  {
+public interface IHealthDataRepository extends JpaRepository<HealthData, Long>  {
 }

@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * JpaRepository - default java interface with methods(CRUD, ...) and add methods for Hibernate.
  * (for works with database. aka.dao)
  */
-public interface IUserRepository extends JpaRepository<User, Integer> {
+public interface IUserRepository extends JpaRepository<User, Long> {
 }

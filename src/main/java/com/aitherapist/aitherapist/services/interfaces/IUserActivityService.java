@@ -7,7 +7,7 @@ import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 
 import java.time.LocalDateTime;
 
-public interface IUserActivityServiceImpl {
+public interface IUserActivityService {
 
     void setUserMessage(String message, User user, Long activityId);
     void setUserTime(LocalDateTime time, User user, Long activityId);

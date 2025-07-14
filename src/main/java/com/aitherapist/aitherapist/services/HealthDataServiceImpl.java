@@ -1,9 +1,9 @@
 package com.aitherapist.aitherapist.services;
 
+import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IHealthDataRepository;
 import com.aitherapist.aitherapist.repositories.IPatientRepository;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.services.interfaces.IHealthDataService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,51 +12,56 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * HealthDataServiceImpl - provide main operation for db
- * IHealthDataRepository -  repository-interface. auto create interface with implemented main methods.
- */
 @Service
-@Transactional(readOnly=true)
+@Transactional(readOnly = true)
 public class HealthDataServiceImpl implements IHealthDataService {
-
-
-    @Autowired
-    private IHealthDataRepository healthDataRepository;
+    private final IPatientRepository patientRepository;
+    private final IHealthDataRepository healthDataRepository;
 
     @Autowired
-    private IPatientRepository patientRepository;
+    public HealthDataServiceImpl(IPatientRepository patientRepository,
+                                 IHealthDataRepository healthDataRepository) {
+        this.patientRepository = patientRepository;
+        this.healthDataRepository = healthDataRepository;
+    }
 
     @Override
+    @Transactional
     public HealthData saveHealthDataInUser(Long userId, HealthData healthData) {
-        return null;
+        Patient patient = patientRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        healthData = healthDataRepository.save(healthData);
+        patient.getHealthDataList().add(healthData);
+        patientRepository.save(patient);
+        return healthData;
     }
 
     @Override
     public List<HealthData> fetchHealthDataList(Long id) {
-        Patient patient = patientRepository.findById(id).get();
-        return patient.getHealthDataList();
+        return patientRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found"))
+                .getHealthDataList();
     }
 
-    /**
-     * findById, copyProperties - function from spring.
-     * replace multi set.properties.
-     * @param healthData
-     * @param userId
-     * @return
-     */
     @Override
+    @Transactional
     public HealthData updateHealthData(HealthData healthData, Long userId) {
-        HealthData currentHealthData = healthDataRepository.findById(Math.toIntExact(userId))
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        BeanUtils.copyProperties(healthData, currentHealthData, "id"); // ignore id
+        HealthData currentHealthData = healthDataRepository.findById(healthData.getId())
+                .orElseThrow(() -> new RuntimeException("Health data not found"));
+
+        patientRepository.findById(userId)
+                .filter(p -> p.getHealthDataList().contains(currentHealthData))
+                .orElseThrow(() -> new RuntimeException("Invalid user-healthdata relation"));
+
+        BeanUtils.copyProperties(healthData, currentHealthData, "id");
         return healthDataRepository.save(currentHealthData);
     }
 
     @Override
-    public void deleteHealthData(Long userId) {
-        HealthData healthData =  healthDataRepository.findById(Math.toIntExact(userId))
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    @Transactional
+    public void deleteHealthData(Long healthDataId) {
+        HealthData healthData = healthDataRepository.findById(healthDataId)
+                .orElseThrow(() -> new RuntimeException("Health data not found"));
         healthDataRepository.delete(healthData);
     }
 }

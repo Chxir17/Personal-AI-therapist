@@ -29,4 +29,8 @@ public class NotificationConfig {
 
     @Column(name = "custom_message", columnDefinition = "TEXT")
     private String customMessage;
+
+    public Boolean isNotificationEnabled() {
+        return this.notificationsEnabled;
+    }
 }

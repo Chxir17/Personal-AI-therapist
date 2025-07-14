@@ -41,9 +41,6 @@ public class HealthData implements Serializable {
     @Column(name = "pressure", columnDefinition = "VARCHAR(10)")
     private String pressure;
 
-    @Column(name = "sugar", columnDefinition = "DECIMAL(4,2)")
-    private Double sugar;
-
     @Column(name = "heart_pain")
     private Boolean heartPain;
 
@@ -72,7 +69,6 @@ public class HealthData implements Serializable {
                 ", hoursOfSleepToday=" + hoursOfSleepToday +
                 ", pulse=" + pulse +
                 ", pressure=" + pressure +
-                ", sugar=" + sugar +
                 ", heartPain=" + heartPain +
                 ", arrhythmia=" + arrhythmia +
                 '}';
