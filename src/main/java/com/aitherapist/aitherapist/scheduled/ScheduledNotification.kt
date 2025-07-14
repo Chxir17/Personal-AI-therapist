@@ -22,7 +22,7 @@ class ScheduledNotification(
     @Column(name = "telegram_chat_id", nullable = false)
     val telegramChatId: Long,
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     val message: String,
 
     @Column(name = "trigger_time", nullable = false)

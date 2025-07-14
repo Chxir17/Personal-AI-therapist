@@ -78,7 +78,6 @@ public class HistoryPatients implements ICommand {
                             "💤 <b>Сон:</b> %.1f часов",
                     data.getPulse() != null ? data.getPulse() : 0,
                     data.getPressure() != null ? data.getPressure() : "не измерялось",
-                    data.getSugar() != null ? data.getSugar() : 0,
                     data.getTemperature() != null ? data.getTemperature() : 0,
                     data.getHoursOfSleepToday() != null ? data.getHoursOfSleepToday() : 0
             ));
