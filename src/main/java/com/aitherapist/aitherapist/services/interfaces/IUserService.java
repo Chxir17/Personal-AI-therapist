@@ -14,7 +14,6 @@ public interface IUserService {
     User fetchUser(Long id);
     User updateUser(User user, Long id);
     void deleteUser(Long id);
-    void createUser(Long userId, User user);
     void deleteUserIfExists(Long id);
     User getUser(Long id);
     Boolean checkIfUserExists(Long userId);
@@ -26,4 +25,7 @@ public interface IUserService {
     void addActivityLog(User user, String actionType, Long messageId);
     UserActivityLog getUserActivityLog(User user, Long id);
     void editActivityLog(User user, Long id, UserActivityLog userActivityLog);
+    Boolean isSignUp(Long userId);
+    User getUserByUserId(Long userId);
+    void registerUser(Long userId, User user);
 }

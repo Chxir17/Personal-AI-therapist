@@ -30,6 +30,7 @@ open class TelegramNotificationService(
         triggerTime: LocalDateTime,
         internalUserId: Long? = null
     ): Long {
+        // check that input time in future.
         require(triggerTime.isAfter(LocalDateTime.now())) {
             "Trigger time must be in the future"
         }

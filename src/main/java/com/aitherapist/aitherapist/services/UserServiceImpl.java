@@ -25,16 +25,21 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private IUserRepository userRepository;
 
+    @Override
+    @Transactional
     public void registerUser(Long userId, User user) {
-        createUser(userId, user);
+        saveUser(user);
     }
 
+    @Override
+    @Transactional
     public Boolean isSignUp(Long userId){
         User user = fetchUser(userId);
         return user != null;
     }
 
-
+    @Override
+    @Transactional
     public User getUserByUserId(Long userId){
         return getUser(userId);
     }
@@ -73,13 +78,6 @@ public class UserServiceImpl implements IUserService {
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(user);
-    }
-
-    @Override
-    @Transactional
-    public void createUser(Long userId, User user) {
-        user.setId(userId);
-        userRepository.save(user);
     }
 
     @Override
