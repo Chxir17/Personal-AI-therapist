@@ -49,7 +49,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public User fetchUser(Long id) {
-        return userRepository.findById(Math.toIntExact(id)).orElse(null);
+        return userRepository.findById(id).orElse(null);
     }
 
     /**
@@ -62,7 +62,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public User updateUser(User user, Long id) {
-        User currentUser = userRepository.findById(Math.toIntExact(id))
+        User currentUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         BeanUtils.copyProperties(user, currentUser, "id"); // ignore id, чтобы
         return userRepository.save(currentUser);
@@ -71,7 +71,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public void deleteUser(Long id) {
-        User user = userRepository.findById(Math.toIntExact(id)).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(user);
     }
 
@@ -84,14 +84,14 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public void deleteUserIfExists(Long id) {
-        if (userRepository.findById(Math.toIntExact(id)).isPresent()) {
-            userRepository.delete(userRepository.findById(Math.toIntExact(id)).get());
+        if (userRepository.findById(id).isPresent()) {
+            userRepository.delete(userRepository.findById(id).get());
         }
     }
 
     @Override
     public User getUser(Long id) {
-        User user =  userRepository.findById(Math.toIntExact(id)).orElseThrow(() -> new RuntimeException("User not found"));
+        User user =  userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         return user;
     }
 
