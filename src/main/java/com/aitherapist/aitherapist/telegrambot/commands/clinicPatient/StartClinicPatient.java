@@ -20,7 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class StartClinicPatient implements IVerify, ICommand {
+//public class StartClinicPatient implements ICommand {
+public class StartClinicPatient {
     private String telephoneNumber;
     private IMessageSender messageSender;
     private SendMessageUser sendMessageUser;
@@ -36,25 +37,6 @@ public class StartClinicPatient implements IVerify, ICommand {
      * @return
      * @throws TelegramApiException
      */
-    @Override
-    public boolean verify(Update update) throws TelegramApiException {
-        if (Verification.isContactRequest(update)) {
-            messageSender.sendMessage(SendMessage.builder()
-                    .chatId(update.getMessage().getChatId().toString())
-                    .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
-                    .replyMarkup(Verification.createContactRequestKeyboard())
-                    .build());
-        }
-        this.telephoneNumber = update.getMessage().getText();
-        if (Verification.verify(update, this.telephoneNumber)) {
-            messageSender.sendMessage(SendMessage.builder().chatId(update.getMessage().getChatId().toString()).text(Answers.VERIFICAATION_SUCCESS.getMessage()).build());
-            return true;
-        } else {
-            messageSender.sendMessage(SendMessage.builder().chatId(update.getMessage().getChatId().toString()).text(Answers.VERIFICAATION_ERROR.getMessage()).build());
-            return false;
-        }
-    }
-
     /**
      * g
      * Get telephone number and set to field
@@ -62,22 +44,22 @@ public class StartClinicPatient implements IVerify, ICommand {
      * @param update
      * @return
      */
-    @Override
-    public SendMessage apply(Update update) throws TelegramApiException {
-        boolean verStatus = verify(update);
-        while(!verStatus){
-            verStatus = verify(update);
-        }
-        long chatId = update.getMessage().getChatId();
-        Map<String, String> buttons = new HashMap<>();
-        buttons.put("Получить последние сообщения от доктора", "/getLastMessageDoctor");
-        buttons.put("Отправить сообщение доктору","/sendMessageDoctor");
-        buttons.put("Настройки","/settingsPatient");
-        InlineKeyboardMarkup commands = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
-        return SendMessage.builder()
-                .chatId(String.valueOf(chatId))
-                .text("Выберите Комманду")
-                .replyMarkup(commands)
-                .build();
-    }
+//    @Override
+//    public SendMessage apply(Update update) throws TelegramApiException {
+//        boolean verStatus = verify(update);
+//        while(!verStatus){
+//            verStatus = verify(update);
+//        }
+//        long chatId = update.getMessage().getChatId();
+//        Map<String, String> buttons = new HashMap<>();
+//        buttons.put("Получить последние сообщения от доктора", "/getLastMessageDoctor");
+//        buttons.put("Отправить сообщение доктору","/sendMessageDoctor");
+//        buttons.put("Настройки","/settingsPatient");
+//        InlineKeyboardMarkup commands = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
+//        return SendMessage.builder()
+//                .chatId(String.valueOf(chatId))
+//                .text("Выберите Комманду")
+//                .replyMarkup(commands)
+//                .build();
+//    }
 }

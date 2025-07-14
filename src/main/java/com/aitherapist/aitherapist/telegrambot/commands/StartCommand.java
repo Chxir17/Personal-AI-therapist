@@ -22,26 +22,42 @@ public class StartCommand implements ICommand {
     private final RegistrationContext registrationContext;
 
     @Autowired
-    public StartCommand(IMessageSender messageSender, UserServiceImpl userRegistrationService, RegistrationContext registrationContext) {
+    public StartCommand(IMessageSender messageSender,
+                        UserServiceImpl userRegistrationService,
+                        RegistrationContext registrationContext) {
         this.messageSender = messageSender;
         this.userRegistrationService = userRegistrationService;
         this.registrationContext = registrationContext;
     }
 
     @Override
-    public SendMessage apply(Update update) throws TelegramApiException {
-        Long userId = update.getMessage().getFrom().getId();
-        long chatId = update.getMessage().getChatId();
+    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        Long userId = extractUserId(update);
+        if (userId == null) {
+            throw new TelegramApiException("Error value. Can't find userId");
+        }
+        if (!registrationContext.isContain(userId)) {
+            registrationContext.startRegistration(userId);
+        }
+        long chatId;
 
-        if(!userRegistrationService.isSignUp(userId)) {
+        if (update.hasCallbackQuery()) {
+            chatId = update.getCallbackQuery().getMessage().getChatId();
+        } else {
+            chatId = update.getMessage().getChatId();
+        }
+
+        if (!userRegistrationService.isSignUp(userId)) {
             Map<String, String> buttons = new HashMap<>();
-            buttons.put("Доктор", "/doctor");
+            buttons.put("Доктор", "/startDoctor");
             buttons.put("Пациент не привязанный к клинике", "/clinicPatient");
             buttons.put("Пациент привязанный к клинике", "/botPatient");
+
             InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 3);
             registrationContext.startRegistration(chatId);
+
             messageSender.sendMessage(new SendMessage(String.valueOf(chatId),
-                    Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage())); //FIXME сообщение о предназначении бота
+                    Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage()));
 
             return SendMessage.builder()
                     .chatId(String.valueOf(chatId))
@@ -51,4 +67,15 @@ public class StartCommand implements ICommand {
         }
         return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
     }
+
+    private Long extractUserId(Update update) {
+        if (update.hasMessage()) {
+            return update.getMessage().getFrom().getId();
+        }
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getFrom().getId();
+        }
+        return null;
+    }
+
 }

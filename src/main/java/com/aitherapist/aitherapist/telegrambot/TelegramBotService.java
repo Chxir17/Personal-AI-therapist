@@ -2,9 +2,11 @@ package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -20,6 +22,8 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final BotProperties botProperties;
     private final CommandsHandler commandsHandler;
     private final @Lazy MessagesHandler messagesHandler;
+    @Autowired
+    private RegistrationContext registrationContext;
 
     @Override
     public String getBotToken() {
@@ -33,39 +37,55 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
 
     @Override
     public void onUpdateReceived(Update update) {
-
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String chatId = update.getMessage().getChatId().toString();
-            if (update.getMessage().getText().startsWith("/start")) {
-                update.getCallbackQuery().setData(update.getMessage().getText());
+        try {
+            if (update.hasMessage() && update.getMessage().hasText()) {
+                System.out.println(1);
+                handleMessageUpdate(update, registrationContext);
+            } else if (update.hasCallbackQuery()) {
+                System.out.println(2);
+                handleCallbackQueryUpdate(update, registrationContext);
+            } else if (update.getMessage().hasContact()) {
+                System.out.println(3);
+                handleContactUpdate(update, registrationContext);
             }
-            else {
-                try {
-                    messagesHandler.handle(update);
-                } catch (TelegramApiException | JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        } catch (Exception e) {
+            log.error("Error processing update", e);
+            sendErrorMessage(update);
         }
-        if (update.hasCallbackQuery()) {
-            String callBackData = update.getCallbackQuery().getData();
-            Long chatId = update.getMessage().getChatId();
+    }
 
-            if (callBackData.startsWith("/")) {
-                try {
-                    sendMessage(commandsHandler.handleCommand(update));
-                } catch (TelegramApiException e) {
-                    log.error("Error handling command", e);
-                    throw new RuntimeException(e);
-                }
-            } else {
-                try {
-                    messagesHandler.handle(update);
-                } catch (TelegramApiException | JsonProcessingException e) {
-                    log.error("Error handling message", e);
-                    throw new RuntimeException(e);
-                }
+    private void handleContactUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
+        execute(messagesHandler.handleVerify(update, registrationContext));
+    }
+
+    private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
+        String messageText = update.getMessage().getText();
+        if (messageText.startsWith("/")) {
+            sendMessage(commandsHandler.handleCommand(update, registrationContext));
+        } else {
+            messagesHandler.handle(update, registrationContext);
+        }
+    }
+
+    private void handleCallbackQueryUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
+        String callBackData = update.getCallbackQuery().getData();
+        System.out.println("callBackData: " + callBackData);
+        if (callBackData != null && callBackData.startsWith("/")) {
+            sendMessage(commandsHandler.handleCommand(update, registrationContext));
+        } else {
+            messagesHandler.handle(update, registrationContext);
+        }
+    }
+
+    private void sendErrorMessage(Update update) {
+        try {
+            Long chatId = update.hasMessage() ? update.getMessage().getChatId() :
+                    update.hasCallbackQuery() ? update.getCallbackQuery().getMessage().getChatId() : null;
+            if (chatId != null) {
+                sendMessage(new SendMessage(chatId.toString(), "Произошла ошибка. Пожалуйста, попробуйте еще раз."));
             }
+        } catch (TelegramApiException ex) {
+            log.error("Failed to send error message", ex);
         }
     }
 

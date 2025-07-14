@@ -16,4 +16,6 @@ public interface IPatientService {
     void deletePatientHealthData(Patient patient);
     List<HealthData> getPatientHealthData(Long patientId);
     boolean hasHealthData(Long patientId);
+    void editPatientHealthData(Long patientId, HealthData healthData);
+    void addPatientHealthData(Long id, HealthData healthData);
 }

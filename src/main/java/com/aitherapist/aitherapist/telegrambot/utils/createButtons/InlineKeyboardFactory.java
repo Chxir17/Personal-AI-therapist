@@ -4,6 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,5 +42,18 @@ public class InlineKeyboardFactory {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
         return markup;
+    }
+
+    public static InlineKeyboardMarkup createDoctorDefaultKeyboard() {
+        Map<String, String> buttonMap = new LinkedHashMap<>(); // сохраняем порядок
+        buttonMap.put("📊 Последние данные", "/getLastRecords");
+        buttonMap.put("💬 Сообщение пациенту", "/sendMessageToPatient");
+        buttonMap.put("⚙️ Настройки", "/settingsDoctor");
+
+        // ➕ Новые кнопки:
+        buttonMap.put("📅 Запись на приём", "/scheduleAppointment");
+        buttonMap.put("📁 История пациентов", "/patientHistory");
+
+        return createInlineKeyboard(buttonMap, 2);
     }
 }

@@ -15,7 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class StartNonClinicPatient implements ICommand {
     @Override
-    public SendMessage apply(Update update) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         long chatId = update.getMessage().getChatId();
         return new SendMessage(String.valueOf(chatId),Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage());
     }

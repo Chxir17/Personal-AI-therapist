@@ -1,6 +1,5 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
-
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.IVerify;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
@@ -20,75 +19,77 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * StartDoctors - main class with this functions :
- *  1) verify Doctors
- *  2) send to user some message
- *  3)
- */
 @Component
 @RequiredArgsConstructor
-public class StartDoctors implements IVerify, ICommand {
-
-    private String telephoneNumber;
-    private IMessageSender messageSender;
+public class StartDoctors implements ICommand {
     @Autowired
-    public StartDoctors(TelegramMessageSender messageSender) {
-        this.messageSender = messageSender;
+    public Verification verification;
 
+    private final IMessageSender messageSender;
+    private String expectedPhoneNumber;
+
+    @Override
+    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        try {
+            Long userId = extractUserId(update);
+            if (userId == null) {
+                throw new TelegramApiException("Cannot extract user ID from update");
+            }
+            if (!registrationContext.isVerify(userId)) {
+                return requestPhoneNumber(getChatId(update));
+            } else {
+                InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorDefaultKeyboard();
+                return SendMessage.builder()
+                        .chatId(update.getMessage().getChatId().toString())
+                        .text("Вы уже верифицированы. Выберите действие:")
+                        .replyMarkup(keyboard)
+                        .build();
+            }
+
+        } catch (Exception e) {
+            throw new TelegramApiException("Error processing doctor start", e);
+        }
     }
 
-    /**
-     * verify user. If user hide telephone number-> create buttom and request.
-     * @param update
-     * @return
-     * @throws TelegramApiException
-     */
-    @Override
-    public boolean verify(Update update) throws TelegramApiException {
-        if (Verification.isContactRequest(update)) {
-            messageSender.sendMessage(SendMessage.builder()
-                    .chatId(update.getMessage().getChatId().toString())
-                    .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
-                    .replyMarkup(Verification.createContactRequestKeyboard())
-                    .build());
-        }
-        this.telephoneNumber = update.getMessage().getText();
-        if (Verification.verify(update, this.telephoneNumber)) {
-            messageSender.sendMessage(SendMessage.builder().chatId(update.getMessage().getChatId().toString()).text(Answers.VERIFICAATION_SUCCESS.getMessage()).build());
-            return true;
-        } else {
-            messageSender.sendMessage(SendMessage.builder().chatId(update.getMessage().getChatId().toString()).text(Answers.VERIFICAATION_ERROR.getMessage()).build());
-            return false;
-        }
+    private SendMessage requestPhoneNumber(Long chatId) {
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .replyMarkup(verification.createContactRequestKeyboard())
+                .build();
     }
 
-    /**
-     * g
-     * Get telephone number and set to field
-     *
-     * @param update
-     * @return
-     */
-    @Override
-    public SendMessage apply(Update update) throws TelegramApiException {
-        long chatId = update.getMessage().getChatId();
-        boolean verStatus = verify(update);
-        while(!verStatus){
-            verStatus = verify(update);
-        }
+    private SendMessage showDoctorMenu(Long chatId) {
         Map<String, String> buttons = new HashMap<>();
         buttons.put("Получить последние измерения пациента", "/getLastRecords");
-        buttons.put("Отправить сообщение пациенту","/sendMessageToPatient");
-        buttons.put("Настройки","/settingsDoctor");
+        buttons.put("Отправить сообщение пациенту", "/sendMessageToPatient");
+        buttons.put("Настройки", "/settingsDoctor");
+
         InlineKeyboardMarkup commands = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
 
         return SendMessage.builder()
-                .chatId(String.valueOf(chatId))
-                .text("Выберите Комманду")
+                .chatId(chatId.toString())
+                .text("Выберите команду")
                 .replyMarkup(commands)
                 .build();
+    }
+
+    private Long getChatId(Update update) {
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getMessage().getChatId();
+        } else {
+            return update.getMessage().getChatId();
+        }
+    }
+
+    private Long extractUserId(Update update) {
+        if (update.hasMessage()) {
+            return update.getMessage().getFrom().getId();
+        }
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getFrom().getId();
+        }
+        return null;
     }
 
 }

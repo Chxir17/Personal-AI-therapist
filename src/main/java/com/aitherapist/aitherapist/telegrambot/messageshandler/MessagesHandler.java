@@ -1,13 +1,17 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
+import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
@@ -29,10 +35,14 @@ import org.springframework.context.annotation.Lazy;
 @Slf4j
 public class MessagesHandler implements IHandler {
     private final RestTemplate restTemplate = new RestTemplate();
-    private final RegistrationContext registrationContext;
-    private final UserServiceImpl userRegistrationService;
+    private RegistrationContext registrationContext;
+    @Autowired
+    private final Verification verification;
+    @Autowired
+    PatientServiceImpl patientService;
+    @Autowired
+    private final UserServiceImpl userService;
     private final ObjectMapper mapper = new ObjectMapper();
-    //FIXME че тут за параша нахуй Autowired + new от утилити классов
     @Autowired
     @Lazy
     private IMessageSender messageSender;
@@ -40,15 +50,67 @@ public class MessagesHandler implements IHandler {
     private final MakeMedicalRecommendation makeMedicalRecommendation = new MakeMedicalRecommendation();
 
     @Override
-    public void handle(Update update) throws TelegramApiException, JsonProcessingException {
+    public void handle(Update update,RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
+        this.registrationContext = registrationContext;
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
 
         if (registrationContext.isRegistrationInProgress(chatId)) {
             handleRegistration(chatId, userId, messageText);
-        } else {
+        }
+        else {
             handleHealthData(chatId, userId, messageText, update);
+        }
+    }
+
+    public SendMessage handleVerify(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        Long userId = update.getMessage().getFrom().getId();
+        Long chatId = update.getMessage().getChatId();
+
+        if (registrationContext.isVerify(userId)) {
+            return new SendMessage(chatId.toString(), "Ты уже зарегистрирован");
+        } else {
+            if (Verification.verify(update, update.getMessage().getContact().getPhoneNumber())) {
+                registrationContext.setVerify(userId, Status.VERIFIED);
+                InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorDefaultKeyboard();
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text("✅ Верификация успешна. Выберите действие:")
+                        .replyMarkup(keyboard)
+                        .build();
+            } else {
+                return new SendMessage(chatId.toString(),
+                        Answers.VERIFICAATION_ERROR.getMessage());
+            }
+        }
+    }
+
+
+    public boolean verify(Update update) throws TelegramApiException {
+        Long chatId = getChatId(update);
+        if (update.hasMessage() && update.getMessage().hasContact()) {
+            String actualPhoneNumber = update.getMessage().getContact().getPhoneNumber();
+            boolean isValid = verification.verify(update, actualPhoneNumber);
+
+            if (isValid) {
+                messageSender.sendMessage(new SendMessage(chatId.toString(),
+                        Answers.VERIFICAATION_SUCCESS.getMessage()));
+                return true;
+            } else {
+                messageSender.sendMessage(new SendMessage(chatId.toString(),
+                        Answers.VERIFICAATION_ERROR.getMessage()));
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private Long getChatId(Update update) {
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getMessage().getChatId();
+        } else {
+            return update.getMessage().getChatId();
         }
     }
 
@@ -74,7 +136,7 @@ public class MessagesHandler implements IHandler {
     }
 
     private void registerUser(long userId, User user) {
-        userRegistrationService.registerUser(userId, user);
+        userService.registerUser(userId, user);
     }
 
     private void handleHealthData(long chatId, long userId, String messageText, Update update)
@@ -102,11 +164,11 @@ public class MessagesHandler implements IHandler {
     }
 
     private void saveHealthData(long userId, HealthData healthData) {
-        userRegistrationService.putHealthDataInUser(userId, healthData);
+        patientService.addPatientHealthData(userId, healthData);
     }
 
     private String generateMedicalRecommendation(Update update) {
-        User user = userRegistrationService.getUserByUserId(getUserId(update));
+        User user = userService.getUserByUserId(getUserId(update));
         if (user instanceof Patient patient) {
             return MakeMedicalRecommendation.giveMedicalRecommendation(patient);
         }
@@ -135,4 +197,5 @@ public class MessagesHandler implements IHandler {
             log.error("Failed to send error message", ex);
         }
     }
+
 }

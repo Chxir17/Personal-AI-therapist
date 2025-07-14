@@ -2,24 +2,22 @@ package com.aitherapist.aitherapist.services;
 
 import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
-import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
-import com.aitherapist.aitherapist.repositories.IPatient;
+import com.aitherapist.aitherapist.repositories.IPatientRepository;
 import com.aitherapist.aitherapist.services.interfaces.IPatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @Transactional
 public class PatientServiceImpl implements IPatientService {
 
-    private final IPatient patientRepository;
+    private final IPatientRepository patientRepository;
 
     @Autowired
-    public PatientServiceImpl(IPatient patientRepository) {
+    public PatientServiceImpl(IPatientRepository patientRepository) {
         this.patientRepository = patientRepository;
     }
 
@@ -68,6 +66,28 @@ public class PatientServiceImpl implements IPatientService {
         existingPatient.editHealthData(healthData, healthData.getId());
         patientRepository.save(existingPatient);
     }
+
+    @Override
+    @Transactional
+    public void addPatientHealthData(Long id, HealthData healthData) {
+        Patient existingPatient = patientRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        existingPatient.editHealthData(healthData, healthData.getId());
+        patientRepository.save(existingPatient);
+    }
+
+
+    @Override
+    @Transactional
+    public void editPatientHealthData(Long patientId, HealthData healthData) {
+        Patient existingPatient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        existingPatient.editHealthData(healthData, healthData.getId());
+        patientRepository.save(existingPatient);
+    }
+
 
     @Override
     @Transactional

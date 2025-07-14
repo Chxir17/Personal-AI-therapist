@@ -2,8 +2,8 @@ package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
-import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
@@ -80,7 +80,7 @@ public class GetLastParientMedicalData implements ICommand {
     }
 
     @Override
-    public SendMessage apply(Update update) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         long chatId = update.getMessage().getChatId();
         long doctorId = update.getMessage().getFrom().getId();
         Doctor doctor =  doctorService.getDoctor(doctorId);

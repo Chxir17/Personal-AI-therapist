@@ -1,9 +1,9 @@
 package com.aitherapist.aitherapist.services;
 
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IHealthDataRepository;
-import com.aitherapist.aitherapist.repositories.IUserRepository;
+import com.aitherapist.aitherapist.repositories.IPatientRepository;
 import com.aitherapist.aitherapist.domain.model.entities.HealthData;
-import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.services.interfaces.IHealthDataService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class HealthDataServiceImpl implements IHealthDataService {
     private IHealthDataRepository healthDataRepository;
 
     @Autowired
-    private IUserRepository userRepository;
+    private IPatientRepository patientRepository;
 
     @Override
     public HealthData saveHealthDataInUser(Long userId, HealthData healthData) {
@@ -33,10 +33,9 @@ public class HealthDataServiceImpl implements IHealthDataService {
     }
 
     @Override
-    public List<HealthData> fetchHealthDataList(Long userId) {
-        User user = userRepository.findById(Math.toIntExact(userId))
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-        return healthDataRepository.findByUser(user);
+    public List<HealthData> fetchHealthDataList(Long id) {
+        Patient patient = patientRepository.findById(id).get();
+        return patient.getHealthDataList();
     }
 
     /**

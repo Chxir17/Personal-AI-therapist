@@ -16,17 +16,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
-class DoctorServiceImpl implements IDoctorService {
+@Transactional(readOnly=true)
+public class DoctorServiceImpl implements IDoctorService {
     private final IDoctorRepository doctorRepository;
 
     @Autowired
     public DoctorServiceImpl(IDoctorRepository doctorRepository) {
         this.doctorRepository = doctorRepository;
     }
+
     @Override
     public Doctor getDoctor(Long doctorId) {
-        return doctorRepository.findById(Math.toIntExact(doctorId)).get();
+        return doctorRepository.findById(Math.toIntExact(doctorId))
+                .orElseThrow(() -> new RuntimeException("Доктор с ID " + doctorId + " не найден"));
     }
 
     @Override

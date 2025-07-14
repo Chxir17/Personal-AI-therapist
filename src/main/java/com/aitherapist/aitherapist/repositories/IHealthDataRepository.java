@@ -15,5 +15,4 @@ import java.util.List;
  */
 @Repository
 public interface IHealthDataRepository extends JpaRepository<HealthData, Integer>  {
-    List<HealthData> findByUser(User user);  // Spring Data JPA auto implement methods.
 }

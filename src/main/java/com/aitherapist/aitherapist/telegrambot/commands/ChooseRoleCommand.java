@@ -28,7 +28,7 @@ public class ChooseRoleCommand implements ICommand{
     private UserServiceImpl userRegistrationService;
 
     @Override
-    public SendMessage apply(Update update) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         long userId = update.getMessage().getFrom().getId();
         long chatId = update.getMessage().getChatId();
         InlineKeyboardMarkup replyKeyboardDoctor = createInlineRoleKeyboard();

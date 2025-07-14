@@ -1,16 +1,22 @@
 package com.aitherapist.aitherapist.telegrambot;
 
+import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.ChangeDoctorAccountData;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.GetLastParientMedicalData;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.HistoryPatients;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
+import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.ChangePatientAccountData;
 import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
-import  com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -22,27 +28,31 @@ import java.util.Map;
 @Component
 public class CommandsHandler {
     private final Map<String, ICommand> commands;
+    @Autowired
+    public Verification verification;
+    @Autowired
+    public TelegramMessageSender messageSender;
 
     public CommandsHandler(StartCommand startCommand,
                            InformationCommand informationCommand,
                            ChooseRoleCommand chooseRoleCommand,
-                           DoctorCommand doctorCommand,
+                           StartDoctors doctorCommand,
                            BotPatientCommand botPatientCommand,
                            ClinicPatientCommand clinicPatientCommand,
                            SettingsPatientCommand settingsPatientCommand,
                            SettingsDoctorCommand settingsDoctorCommand,
                            GetLastMessageFromDoctor getLastMessageFromDoctor,
                            SendMessageUser sendMessagePatient,
-                           GetLastParientMedicalData getLastParientMedicalData,
+                           HistoryPatients getLastParientMedicalData,
                            SendMessageDoctor sendMessageDoctor,
-                           ChangeDoctorAccountData changeDoctorAccountData,
-                           com.aitherapist.aitherapist.telegrambot.commands.patients.ChangePatientAccountData changePatientAccountData,
+                           ChangePatientAccountData changeDoctorAccountData,
+                           ChangePatientAccountData changePatientAccountData,
                            ChangeRoleCommand changeRoleCommand) {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
                 Map.entry("/information", informationCommand),
                 Map.entry("/role", chooseRoleCommand),
-                Map.entry("/doctor", doctorCommand),
+                Map.entry("/startDoctor", doctorCommand),
                 Map.entry("/botPatient", botPatientCommand),
                 Map.entry("/clinicPatient", clinicPatientCommand),
                 Map.entry("/settingsPatient", settingsPatientCommand),
@@ -57,17 +67,35 @@ public class CommandsHandler {
         );
     }
 
-    public SendMessage handleCommand(Update update) throws TelegramApiException {
-        String messageText = update.getCallbackQuery().getData();
-        String command = messageText.split(" ")[0];
-        long chatId = update.getMessage().getChatId();
+    public SendMessage handleCommand(Update update, RegistrationContext registrationContext) throws TelegramApiException {
 
-        var commandHandler = commands.get(command);
-        if (commandHandler != null) {
-            return commandHandler.apply(update);
-        } else {
-            log.warn("Unknown command received: {}", command);
-            return new SendMessage(String.valueOf(chatId), "Unknown command. Please try again.");
+        try {
+            String messageText;
+            long chatId;
+
+            if (update.hasCallbackQuery()) {
+                messageText = update.getCallbackQuery().getData();
+                chatId = update.getCallbackQuery().getMessage().getChatId();
+            } else if (update.hasMessage()) {
+                messageText = update.getMessage().hasText() ? update.getMessage().getText() : "";
+                chatId = update.getMessage().getChatId();
+            } else {
+                log.warn("Unsupported update type");
+                return null;
+            }
+
+
+            String command = messageText.contains(" ") ? messageText.split(" ")[0] : messageText;
+            ICommand commandHandler = commands.get(command);
+
+            if (commandHandler != null) {
+                return commandHandler.apply(update, registrationContext);
+            } else {
+                return new SendMessage(String.valueOf(chatId), "Неизвестная команда");
+            }
+        } catch (Exception e) {
+            log.error("Error handling command", e);
+            throw e;
         }
     }
 }

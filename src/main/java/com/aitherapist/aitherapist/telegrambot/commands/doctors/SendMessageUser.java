@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,7 @@ public class SendMessageUser implements ICommand {
     }
 
     @Override
-    public SendMessage apply(Update update) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         return null;
         //FIXME надо доробтать архитектуру юзера наверное чтобы был функционал принять посмотреть сообщения от врача и добавить какие то лист с сообщениями куда это будет класться и методы к нему
     }
