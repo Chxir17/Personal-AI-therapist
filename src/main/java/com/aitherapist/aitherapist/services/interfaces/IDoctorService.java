@@ -13,10 +13,10 @@ public interface IDoctorService {
     Patient getPatientById(Long doctorId, Long userId);
     void updatePatient(Long doctorId, Long userId, ClinicPatient patient);
     void deletePatient(Long doctorId, ClinicPatient patient);
-    void createPatient(Long doctorId, ClinicPatient patient);
+    ClinicPatient createPatient(Long doctorId, ClinicPatient patient);
     void deleteAllPatients(Long doctorId);
-    void updateUserHealthData(Long doctorId, Long userId, HealthData healthData);
-    void createUserHealthData(Long doctorId, Long userId, HealthData healthData);
-    void deleteUserHealthData(Long doctorId, Long userId, HealthData healthData);
+    HealthData updateUserHealthData(Long doctorId, Long userId, HealthData healthData);
+    HealthData createUserHealthData(Long doctorId, Long userId, HealthData healthData);
+    void deleteUserHealthData(Long doctorId, Long userId, Long healthDataId);
     List<HealthData> getUserHealthData(Long doctorId, Long userId);
 }

@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IDoctorRepository;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,59 +47,81 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     @Transactional
-    public void updatePatient(Long doctorId, Long userId, ClinicPatient patient) {
-        Doctor doctor = getDoctor(doctorId);
-        List<ClinicPatient> patients = doctor.getPatients().stream()
-                .filter(p -> !p.getId().equals(userId))
-                .collect(Collectors.toList());
-        patients.add(patient);
-        doctor.setPatients(patients);
+    public void updatePatient(Long doctorId, Long patientId, ClinicPatient updatedPatient) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new EntityNotFoundException("Doctor not found with id: " + doctorId));
+        ClinicPatient existingPatient = doctor.getPatients().stream()
+                .filter(p -> p.getId().equals(patientId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Patient not found with id: " + patientId + " for doctor: " + doctorId));
+
+        updatedPatient.setId(patientId);
+        updatedPatient.getDoctors().addAll(existingPatient.getDoctors());
+        updatedPatient.setHealthDataList(existingPatient.getHealthDataList());
+        doctor.getPatients().remove(existingPatient);
+        doctor.getPatients().add(updatedPatient);
         doctorRepository.save(doctor);
     }
 
     @Override
     @Transactional
     public void deletePatient(Long doctorId, ClinicPatient patient) {
-        Doctor doctor = getDoctor(doctorId);
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new EntityNotFoundException("Доктор не найден"));
+        boolean patientExists = doctor.getPatients().stream()
+                .anyMatch(p -> p.getId().equals(patient.getId()));
+
+        if (!patientExists) {
+            throw new EntityNotFoundException("Пациент не найден у указанного доктора");
+        }
         doctor.removePatient(patient);
-        doctorRepository.save(doctor);
     }
 
     @Override
     @Transactional
-    public void createPatient(Long doctorId, ClinicPatient patient) {
-        Doctor doctor = getDoctor(doctorId);
+    public ClinicPatient createPatient(Long doctorId, ClinicPatient patient) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new EntityNotFoundException("Доктор не найден"));
+
+        if (patient.getId() != null && doctor.getPatients().stream()
+                .anyMatch(p -> p.getId().equals(patient.getId()))) {
+            throw new IllegalStateException("Пациент уже существует");
+        }
+
         doctor.addPatient(patient);
-        doctorRepository.save(doctor);
+        return patient;
     }
 
     @Override
     @Transactional
     public void deleteAllPatients(Long doctorId) {
-        Doctor doctor = getDoctor(doctorId);
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new EntityNotFoundException("Доктор не найден"));
         doctor.removeAllPatients();
-        doctorRepository.save(doctor);
     }
 
     @Override
     @Transactional
-    public void updateUserHealthData(Long doctorId, Long userId, HealthData healthData) {
-        Patient patient = getPatientById(doctorId, userId);
+    public HealthData updateUserHealthData(Long doctorId, Long patientId, HealthData healthData) {
+        ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
         patient.editHealthData(healthData, healthData.getId());
+        return healthData;
     }
 
     @Override
     @Transactional
-    public void createUserHealthData(Long doctorId, Long userId, HealthData healthData) {
-        Patient patient = getPatientById(doctorId, userId);
-        patient.editHealthData(healthData, healthData.getId());
+    public HealthData createUserHealthData(Long doctorId, Long patientId, HealthData healthData) {
+        ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
+        healthData.setId(null); //
+        patient.editHealthData(healthData, -1L);
+        return healthData;
     }
 
     @Override
     @Transactional
-    public void deleteUserHealthData(Long doctorId, Long userId, HealthData healthData) {
-        Patient patient = getPatientById(doctorId, userId);
-        patient.removeHealthData(healthData.getId());
+    public void deleteUserHealthData(Long doctorId, Long patientId, Long healthDataId) {
+        ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
+        patient.removeHealthData(healthDataId);
     }
 
     @Override
