@@ -15,9 +15,8 @@ public interface IDoctorService {
     void deletePatient(Long doctorId, ClinicPatient patient);
     ClinicPatient createPatient(Long doctorId, ClinicPatient patient);
     void deleteAllPatients(Long doctorId);
-    DailyHealthData updateUserHealthData(Long doctorId, Long userId, DailyHealthData dailyHealthData);
-    DailyHealthData createUserHealthData(Long doctorId, Long userId, DailyHealthData dailyHealthData);
     void deleteUserHealthData(Long doctorId, Long userId, Long healthDataId);
     List<DailyHealthData> getUserHealthData(Long doctorId, Long userId);
     Doctor createDoctor(Long id, Doctor doctor);
+    List<DailyHealthData> getDailyHealthData(Long id, Long userId, Long healthDataId);
 }

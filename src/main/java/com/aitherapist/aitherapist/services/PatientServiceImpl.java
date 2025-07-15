@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.services;
 
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IPatientRepository;
 import com.aitherapist.aitherapist.services.interfaces.IPatientService;
@@ -37,8 +38,8 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional(readOnly = true)
-    public Patient findById(Long id) {
-        return patientRepository.findById(id)
+    public Patient findById(Long userId) {
+        return patientRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
     }
 
@@ -50,8 +51,8 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional
-    public void deleteById(Long id) {
-        Patient patient = patientRepository.findById(id)
+    public void deleteById(Long userId) {
+        Patient patient = patientRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         patientRepository.delete(patient);
@@ -59,39 +60,60 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional
-    public void editPatientHealthData(Patient patient, DailyHealthData dailyHealthData) {
+    public void editPatientDailyHealthData(Patient patient, DailyHealthData dailyHealthData) {
         Patient existingPatient = patientRepository.findById(patient.getId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        existingPatient.editHealthData(dailyHealthData, dailyHealthData.getId());
+        existingPatient.editDailyHealthData(dailyHealthData, dailyHealthData.getId());
         patientRepository.save(existingPatient);
     }
 
     @Override
     @Transactional
-    public void addPatientHealthData(Long id, DailyHealthData dailyHealthData) {
-        Patient existingPatient = patientRepository.findById(id)
+    public void addPatientDailyHealthData(Long userId, DailyHealthData dailyHealthData) {
+        Patient existingPatient = patientRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        existingPatient.editHealthData(dailyHealthData, dailyHealthData.getId());
+        existingPatient.editDailyHealthData(dailyHealthData, dailyHealthData.getId());
         patientRepository.save(existingPatient);
+    }
+
+    @Override
+    public void setInitialDailyHealthDataToUser(Long userId, InitialHealthData initialHealthData) {
+        Patient existingPatient = patientRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        existingPatient.setInitialData(initialHealthData);
+    }
+
+    @Override
+    public InitialHealthData getInitialDailyHealthData(Long userId) {
+        Patient existingPatient = patientRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        return existingPatient.getInitialData();
+    }
+
+    @Override
+    public void deleteInitialDailyHealthData(Long userId) {
+        Patient patient =  patientRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        patient.setInitialData(null);
     }
 
 
     @Override
     @Transactional
-    public void editPatientHealthData(Long patientId, DailyHealthData dailyHealthData) {
+    public void editPatientDailyHealthData(Long patientId, DailyHealthData dailyHealthData) {
         Patient existingPatient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        existingPatient.editHealthData(dailyHealthData, dailyHealthData.getId());
+        existingPatient.editDailyHealthData(dailyHealthData, dailyHealthData.getId());
         patientRepository.save(existingPatient);
     }
 
 
     @Override
     @Transactional
-    public void deletePatientHealthData(Patient patient) {
+    public void deletePatientDailyHealthData(Patient patient) {
         Patient existingPatient = patientRepository.findById(patient.getId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
@@ -101,7 +123,7 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DailyHealthData> getPatientHealthData(Long patientId) {
+    public List<DailyHealthData> getPatientDailyHealthData(Long patientId) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
@@ -110,7 +132,7 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean hasHealthData(Long patientId) {
+    public boolean hasDailyHealthData(Long patientId) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 

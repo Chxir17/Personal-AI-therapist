@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.services.interfaces;
 
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 
 import java.util.List;
@@ -10,10 +11,14 @@ public interface IPatientService {
     Patient findById(Long id);
     Patient findByName(String name);
     void deleteById(Long id);
-    void editPatientHealthData(Patient patient, DailyHealthData dailyHealthData);
-    void deletePatientHealthData(Patient patient);
-    List<DailyHealthData> getPatientHealthData(Long patientId);
-    boolean hasHealthData(Long patientId);
-    void editPatientHealthData(Long patientId, DailyHealthData dailyHealthData);
-    void addPatientHealthData(Long id, DailyHealthData dailyHealthData);
+    void editPatientDailyHealthData(Patient patient, DailyHealthData dailyHealthData);
+    void deletePatientDailyHealthData(Patient patient);
+    List<DailyHealthData> getPatientDailyHealthData(Long patientId);
+    boolean hasDailyHealthData(Long patientId);
+    void editPatientDailyHealthData(Long patientId, DailyHealthData dailyHealthData);
+    void addPatientDailyHealthData(Long id, DailyHealthData dailyHealthData);
+
+    void setInitialDailyHealthDataToUser(Long userId, InitialHealthData initialHealthData);
+    InitialHealthData getInitialDailyHealthData(Long userId);
+    void deleteInitialDailyHealthData(Long userId);
 }

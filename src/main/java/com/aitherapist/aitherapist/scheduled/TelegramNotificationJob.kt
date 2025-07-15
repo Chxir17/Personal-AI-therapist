@@ -26,7 +26,7 @@ class TelegramNotificationJob : Job {
         val chatId = dataMap.getLong("telegramChatId")
         val message = dataMap.getString("message")
         val notificationId = dataMap.getLong("notificationId")
-
+        val dataLinks = dataMap.getString("dataLinks")
         try {
             telegramSender.sendMessage(chatId, message)
 

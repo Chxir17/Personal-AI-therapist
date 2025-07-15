@@ -8,6 +8,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,14 +48,14 @@ public class StartDoctors implements ICommand {
         buttons.put("Изменить параметры", "/editParameters");
 
         return SendMessage.builder()
-                .chatId(String.valueOf(getChatId(update)))
+                .chatId(String.valueOf(TelegramIdUtils.getChatId(update)))
                 .text(message + "\nВыберите команду")
                 .replyMarkup(InlineKeyboardFactory.createInlineKeyboard(buttons, 2))
                 .build();
     }
 
     private SendMessage handleQuestionnaire(Update update, Long userId) throws JsonProcessingException, InterruptedException {
-        Long chatId = getChatId(update);
+        Long chatId = TelegramIdUtils.getChatId(update);
 
         if (!update.hasMessage()) {
             if (currentRegistrationStep == 1) {
@@ -114,10 +115,10 @@ public class StartDoctors implements ICommand {
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) {
-        Long userId = extractUserId(update);
+        Long userId = TelegramIdUtils.extractUserId(update);
         if (userId == null) {
             return SendMessage.builder()
-                    .chatId(getChatId(update).toString())
+                    .chatId(TelegramIdUtils.getChatId(update).toString())
                     .text("Не удалось определить пользователя")
                     .build();
         }
@@ -127,17 +128,17 @@ public class StartDoctors implements ICommand {
                 return handleQuestionnaire(update, userId);
             } catch (Exception e) {
                 return SendMessage.builder()
-                        .chatId(getChatId(update).toString())
+                        .chatId(TelegramIdUtils.getChatId(update).toString())
                         .text("Ошибка обработки данных")
                         .build();
             }
         }
 
         if (!registrationContext.isVerify(userId)) {
-            return requestPhoneNumber(getChatId(update));
+            return requestPhoneNumber(TelegramIdUtils.getChatId(update));
         }
         return SendMessage.builder()
-                .chatId(getChatId(update).toString())
+                .chatId(TelegramIdUtils.getChatId(update).toString())
                 .text("Вы уже верифицированы. Выберите действие:")
                 .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
                 .build();
@@ -151,17 +152,7 @@ public class StartDoctors implements ICommand {
                 .build();
     }
 
-    private Long getChatId(Update update) {
-        return update.hasCallbackQuery() ?
-                update.getCallbackQuery().getMessage().getChatId() :
-                update.getMessage().getChatId();
-    }
 
-    private Long extractUserId(Update update) {
-        return update.hasMessage() ?
-                update.getMessage().getFrom().getId() :
-                update.hasCallbackQuery() ?
-                        update.getCallbackQuery().getFrom().getId() :
-                        null;
-    }
+
+
 }
