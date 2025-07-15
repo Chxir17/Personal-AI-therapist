@@ -1,31 +1,24 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
-import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
-import com.aitherapist.aitherapist.telegrambot.commands.IVerify;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
-import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
-import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import javax.print.Doc;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +31,10 @@ public class StartDoctors implements ICommand {
     @Autowired
     private final DoctorServiceImpl doctorService;
     private int currentRegistrationStep = 1;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
     private StringBuilder userInput = new StringBuilder();
 
     private SendMessage acceptOrEditDoctorInfo(Doctor doctor, Update update) {
@@ -57,7 +53,7 @@ public class StartDoctors implements ICommand {
                 .build();
     }
 
-    private SendMessage handleQuestionnaire(Update update, Long userId) throws JsonProcessingException {
+    private SendMessage handleQuestionnaire(Update update, Long userId) throws JsonProcessingException, InterruptedException {
         Long chatId = getChatId(update);
 
         if (!update.hasMessage()) {
@@ -71,9 +67,11 @@ public class StartDoctors implements ICommand {
         }
 
         String text = update.getMessage().getText();
-
+        System.out.println(text);
+        System.out.println(currentRegistrationStep);
         switch (currentRegistrationStep) {
             case 1:
+                System.out.println("--");
                 userInput.append("name: ").append(text).append("\n");
                 currentRegistrationStep++;
                 return SendMessage.builder()
@@ -91,9 +89,14 @@ public class StartDoctors implements ICommand {
 
             case 3:
                 userInput.append("gender: ").append(text).append("\n");
-                String response = ParseUserPrompt.initPromptParser(userInput.toString());
-                doctor = mapper.readValue(response, Doctor.class);
+                System.out.println("11111111");
+                String response = ParseUserPrompt.doctorRegistrationParser(userInput.toString());
+                System.out.println(response);
+                String jsonWithType = "{\"user_type\":\"DOCTOR\"," + response.substring(1);
+
+                Doctor doctor = mapper.readValue(jsonWithType, Doctor.class);
                 doctorService.createDoctor(userId, doctor);
+
                 return acceptOrEditDoctorInfo(doctor, update);
 
             default:
@@ -116,7 +119,7 @@ public class StartDoctors implements ICommand {
                     .build();
         }
 
-        if (registrationContext.getStatus(userId) == Status.FIRST_PART_REGISTRATION) {
+        if (registrationContext.getStatus(userId) == Status.FIRST_PART_REGISTRATION_DOCTOR) {
             try {
                 return handleQuestionnaire(update, userId);
             } catch (Exception e) {

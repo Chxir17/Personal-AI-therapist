@@ -2,7 +2,7 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
 
 public enum Status {
     NONE,
-    FIRST_PART_REGISTRATION,
+    FIRST_PART_REGISTRATION_DOCTOR,
     SECOND_PART_REGISTRATION,
     WAITING_VERIFICATION,
     VERIFIED,

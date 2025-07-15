@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.domain.model.entities;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
@@ -39,6 +40,7 @@ public abstract class User {
     private String name;
 
     @Column(name = "birth_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
 
     private Boolean gender;
