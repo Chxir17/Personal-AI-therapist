@@ -1,7 +1,10 @@
 package com.aitherapist.aitherapist.domain.model.entities;
 
+import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,5 +50,15 @@ public class Doctor extends User {
     public List<HealthData> getUserHealthData(Long userId) {
         ClinicPatient patient = getPatientById(userId);
         return patient != null ? patient.getHealthDataList() : new ArrayList<>();
+    }
+
+    public SendMessage showDoctorMenu(Long chatId) {
+        InlineKeyboardMarkup commands = InlineKeyboardFactory.createDoctorDefaultKeyboard();
+
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text("Выберите команду")
+                .replyMarkup(commands)
+                .build();
     }
 }

@@ -116,7 +116,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         execute(messagesHandler.handleVerify(update, registrationContext));
     }
 
-    private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
+    private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String messageText = update.getMessage().getText();
         if (messageText.startsWith("/")) {
             sendMessage(commandsHandler.handleCommand(update, registrationContext));
@@ -125,7 +125,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         }
     }
 
-    private void handleCallbackQueryUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
+    private void handleCallbackQueryUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String callBackData = update.getCallbackQuery().getData();
         System.out.println("callBackData: " + callBackData);
         if (callBackData != null && callBackData.startsWith("/")) {

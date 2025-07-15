@@ -59,20 +59,7 @@ public class StartDoctors implements ICommand {
                 .build();
     }
 
-    private SendMessage showDoctorMenu(Long chatId) {
-        Map<String, String> buttons = new HashMap<>();
-        buttons.put("Получить последние измерения пациента", "/getLastRecords");
-        buttons.put("Отправить сообщение пациенту", "/sendMessageToPatient");
-        buttons.put("Настройки", "/settingsDoctor");
 
-        InlineKeyboardMarkup commands = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
-
-        return SendMessage.builder()
-                .chatId(chatId.toString())
-                .text("Выберите команду")
-                .replyMarkup(commands)
-                .build();
-    }
 
     private Long getChatId(Update update) {
         if (update.hasCallbackQuery()) {

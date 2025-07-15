@@ -4,11 +4,15 @@ import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
+import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.StartClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.GetLastParientMedicalData;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.HistoryPatients;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
+import com.aitherapist.aitherapist.telegrambot.commands.initDataEditor.*;
+import com.aitherapist.aitherapist.telegrambot.commands.medicalEditor.*;
+import com.aitherapist.aitherapist.telegrambot.commands.nonClinicPatient.StartNonClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.ChangePatientAccountData;
 import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -33,25 +37,41 @@ public class CommandsHandler {
     @Autowired
     public TelegramMessageSender messageSender;
 
-    public CommandsHandler(StartCommand startCommand,
-                           InformationCommand informationCommand,
-                           ChooseRoleCommand chooseRoleCommand,
-                           StartDoctors doctorCommand,
-                           BotPatientCommand botPatientCommand,
-                           ClinicPatientCommand clinicPatientCommand,
-                           SettingsPatientCommand settingsPatientCommand,
-                           SettingsDoctorCommand settingsDoctorCommand,
-                           GetLastMessageFromDoctor getLastMessageFromDoctor,
-                           SendMessageUser sendMessagePatient,
-                           HistoryPatients getLastParientMedicalData,
-                           SendMessageDoctor sendMessageDoctor,
-                           ChangePatientAccountData changeDoctorAccountData,
-                           ChangePatientAccountData changePatientAccountData,
-                           ChangeRoleCommand changeRoleCommand) {
+    public CommandsHandler(
+            StartCommand startCommand,
+            InformationCommand informationCommand,
+            StartDoctors doctorCommand,
+            StartNonClinicPatient botPatientCommand,
+            StartClinicPatient clinicPatientCommand,
+            SettingsPatientCommand settingsPatientCommand,
+            SettingsDoctorCommand settingsDoctorCommand,
+            GetLastMessageFromDoctor getLastMessageFromDoctor,
+            SendMessageUser sendMessagePatient,
+            HistoryPatients getLastParientMedicalData,
+            SendMessageDoctor sendMessageDoctor,
+            ChangePatientAccountData changeDoctorAccountData,
+            ChangePatientAccountData changePatientAccountData,
+            ChangeRoleCommand changeRoleCommand,
+
+            EditName editNameCommand,
+            EditBirthDate editBirthDateCommand,
+            EditGender editGenderCommand,
+
+            EditArrhythmia editArrhythmiaCommand,
+            EditChronicDiseases editChronicDiseasesCommand,
+            EditHeight editHeightCommand,
+            EditWeight editWeightCommand,
+            EditBadHabits editBadHabitsCommand,
+
+            EditParameters editParametersCommand,
+            EditMedicalData editMedicalDataCommand,
+
+            AcceptInitData acceptInitDataCommand,
+            AcceptMedicalData acceptMedicalDataCommand
+    ) {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
                 Map.entry("/information", informationCommand),
-                Map.entry("/role", chooseRoleCommand),
                 Map.entry("/startDoctor", doctorCommand),
                 Map.entry("/botPatient", botPatientCommand),
                 Map.entry("/clinicPatient", clinicPatientCommand),
@@ -63,7 +83,23 @@ public class CommandsHandler {
                 Map.entry("/getLastRecords", getLastParientMedicalData),
                 Map.entry("/changeDoctorAccountData", changeDoctorAccountData),
                 Map.entry("/changePatientAccountData", changePatientAccountData),
-                Map.entry("/changeRole", changeRoleCommand)
+                Map.entry("/changeRole", changeRoleCommand),
+
+                Map.entry("/editName", editNameCommand),
+                Map.entry("/editBirthDate", editBirthDateCommand),
+                Map.entry("/editGender", editGenderCommand),
+
+                Map.entry("/editArrhythmia", editArrhythmiaCommand),
+                Map.entry("/editChronicDiseases", editChronicDiseasesCommand),
+                Map.entry("/editHeight", editHeightCommand),
+                Map.entry("/editWeight", editWeightCommand),
+                Map.entry("/editBadHabits", editBadHabitsCommand),
+
+                Map.entry("/editParameters", editParametersCommand),
+                Map.entry("/editMedicalData", editMedicalDataCommand),
+
+                Map.entry("/acceptInitData", acceptInitDataCommand),
+                Map.entry("/acceptMedicalData", acceptMedicalDataCommand)
         );
     }
 

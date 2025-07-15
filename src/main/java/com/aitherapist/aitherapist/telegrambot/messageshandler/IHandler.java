@@ -8,5 +8,5 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  * IMessageHandler -
  */
 public interface IHandler {
-    void handle(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException;
+    void handle(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException;
 }
