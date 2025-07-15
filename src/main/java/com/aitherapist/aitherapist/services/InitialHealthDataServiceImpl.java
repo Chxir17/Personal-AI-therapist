@@ -21,6 +21,7 @@ public class InitialHealthDataServiceImpl implements IInitialHealthDataService {
 
     @Override
     @Transactional
+    
     public InitialHealthData getInitialHealthDataByUserId(IInitialHealthDataService initialHealthDataService, Long userId) {
         return initialHealthDataService.getInitialHealthDataByUserId(initialHealthDataService, userId);
     }
