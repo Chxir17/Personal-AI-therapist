@@ -1,9 +1,6 @@
 package com.aitherapist.aitherapist.services;
 
-import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
-import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
-import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.repositories.IDoctorRepository;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
 import jakarta.persistence.EntityNotFoundException;
@@ -102,23 +99,6 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     @Transactional
-    public DailyHealthData updateUserHealthData(Long doctorId, Long patientId, DailyHealthData dailyHealthData) {
-        ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
-        patient.editHealthData(dailyHealthData, dailyHealthData.getId());
-        return dailyHealthData;
-    }
-
-    @Override
-    @Transactional
-    public DailyHealthData createUserHealthData(Long doctorId, Long patientId, DailyHealthData dailyHealthData) {
-        ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
-        dailyHealthData.setId(null); //
-        patient.editHealthData(dailyHealthData, -1L);
-        return dailyHealthData;
-    }
-
-    @Override
-    @Transactional
     public void deleteUserHealthData(Long doctorId, Long patientId, Long healthDataId) {
         ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
         patient.removeHealthData(healthDataId);
@@ -149,5 +129,12 @@ public class DoctorServiceImpl implements IDoctorService {
             doctorInput.setId(null);
             return doctorRepository.save(doctorInput);
         }
+    }
+
+    @Override
+    public List<DailyHealthData> getDailyHealthData(Long id, Long userId, Long healthDataId) {
+        Doctor doctor = doctorRepository.getById(id);
+        ClinicPatient clinicPatient = doctor.getPatientById(userId);
+        return clinicPatient.getDailyHealthDataList();
     }
 }

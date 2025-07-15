@@ -78,7 +78,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
 
     private void handleCallbackQueryUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String callBackData = update.getCallbackQuery().getData();
-        System.out.println("callBackData: " + callBackData);
         if (callBackData != null && callBackData.startsWith("/")) {
             sendMessage(commandsHandler.handleCommand(update, registrationContext));
         } else {

@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.initDataEditor;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -17,7 +18,7 @@ public class EditParameters implements ICommand {
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        Long chatId = update.getMessage().getChatId();
+        Long chatId = TelegramIdUtils.getChatId(update);
 
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("Изменить имя", "/editName");

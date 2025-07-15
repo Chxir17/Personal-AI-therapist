@@ -48,10 +48,6 @@ public class MessagesHandler implements IHandler {
     @Autowired
     PatientServiceImpl patientService;
     @Autowired
-    private SecondPartReg secondPartReg;
-    @Autowired
-    private FirstPartReg firstPartReg;
-    @Autowired
     private final UserServiceImpl userService;
     @Autowired
     private final HealthDataServiceImpl healthDataServiceImpl;
@@ -98,8 +94,6 @@ public class MessagesHandler implements IHandler {
             handleEditBadHabits(update);
         } else if (registrationContext.getStatus(userId) == Status.GIVING_PATIENT_ID) {
             handleGivePatientIdStatus(update);
-        } else {
-            handleHealthData(chatId, userId, messageText, update);
         }
     }
 
@@ -124,7 +118,6 @@ public class MessagesHandler implements IHandler {
     public void handleEditName(Update update) {
         try {
             String message = update.getMessage().getText();
-            //String cleanJson = ParseUserPrompt.initPromptParser(message);//FIXME переписать на подходящий метод
             User parsedUser = mapper.readValue("cleanJson", User.class);
 
             Long userId = update.getMessage().getFrom().getId();
@@ -386,7 +379,7 @@ public class MessagesHandler implements IHandler {
 
     private void acceptOrEditInitInfo(User user, Update update) throws TelegramApiException {
         Map<String, String> buttons = new HashMap<>();
-        String message = "Вы ввели:\n Имя - " + user.getName() + "\n Дата рождения - " + user.getAge() + "\n Пол - " + user.getGender();
+        String message = "Вы ввели:\n Имя - " + user.getName() + "\n Дата рождения - " + user.getBirthDate() + "(" + user.getAge() + " лет)" + "\n Пол - " + (user.getGender() == true ? "Муж":"Жен");
         messageSender.sendMessage(update.getMessage().getChatId(), message);
         buttons.put("Принять", "/acceptInitData");
         buttons.put("Изменить параметры", "/editParameters");
@@ -419,21 +412,6 @@ public class MessagesHandler implements IHandler {
         registrationContext.setStatus(doctorId, Status.NONE);
     }
 
-    private void registerUser(long userId, User user) {
-        userService.registerUser(userId, user);
-    }
-
-    private void handleHealthData(long chatId, long userId, String messageText, Update update)
-            throws TelegramApiException, JsonProcessingException {
-        sendInitialResponse(chatId);
-        DailyHealthData dailyHealthData = parseHealthData(messageText);
-        saveHealthData(userId, dailyHealthData);
-        String recommendation = generateMedicalRecommendation(update);
-        if (recommendation != null) {
-            sendRecommendation(chatId, recommendation);
-        }
-
-    }
 
     private DailyHealthData parseHealthData(String messageText) throws JsonProcessingException {
         String rawJsonResponse = ParseUserPrompt.dailyQuestionnaireParser(messageText);
@@ -445,10 +423,6 @@ public class MessagesHandler implements IHandler {
 
     private String cleanJsonResponse(String jsonResponse) {
         return jsonResponse.replaceAll("```json|```", "").trim();
-    }
-
-    private void saveHealthData(long userId, DailyHealthData dailyHealthData) {
-        patientService.addPatientHealthData(userId, dailyHealthData);
     }
 
     private String generateMedicalRecommendation(Update update) {

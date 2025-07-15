@@ -10,13 +10,6 @@ import java.util.Map;
 
 public class InlineKeyboardFactory {
 
-    /**
-     * Создает клавиатуру из Map: ключ — текст кнопки, значение — callbackData
-     *
-     * @param buttonMap отображение текста кнопок на callback data
-     * @param buttonsPerRow сколько кнопок в одном ряду (по умолчанию 1, если < 1)
-     * @return InlineKeyboardMarkup
-     */
     public static InlineKeyboardMarkup createInlineKeyboard(Map<String, String> buttonMap, int buttonsPerRow) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
@@ -45,15 +38,20 @@ public class InlineKeyboardFactory {
     }
 
     public static InlineKeyboardMarkup createDoctorDefaultKeyboard() {
-        Map<String, String> buttonMap = new LinkedHashMap<>(); // сохраняем порядок
+        Map<String, String> buttonMap = new LinkedHashMap<>();
         buttonMap.put("📊 Последние данные", "/getLastRecords");
         buttonMap.put("💬 Сообщение пациенту", "/sendMessageToPatient");
         buttonMap.put("⚙️ Настройки", "/settingsDoctor");
-
-        // ➕ Новые кнопки:
         buttonMap.put("📅 Запись на приём", "/scheduleAppointment");
         buttonMap.put("📁 История пациентов", "/patientHistory");
+        return createInlineKeyboard(buttonMap, 2);
+    }
 
+    public static InlineKeyboardMarkup createDoctorSettingsKeyboard() {
+        Map<String, String> buttonMap = new LinkedHashMap<>();
+        buttonMap.put("✏️ Редактировать профиль", "/changeDoctorAccountData");
+        buttonMap.put("🔄 Сменить роль пользователя", "/changeRole");
+        buttonMap.put("🔙 Вернуться в главное меню", "/doctorMenu");
         return createInlineKeyboard(buttonMap, 2);
     }
 }
