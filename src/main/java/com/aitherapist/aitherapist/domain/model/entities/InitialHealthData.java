@@ -21,10 +21,6 @@ public class InitialHealthData implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
-    private Patient patient;
-
     @Column(name = "heart_pain")
     private Boolean heartPain;
 
@@ -48,7 +44,6 @@ public class InitialHealthData implements Serializable{
     public String toString() {
         return "InitialHealthData{" +
                 "id=" + id +
-                ", user=" + (patient != null ? patient.getId() : "null") +
                 ", heartPain=" + heartPain +
                 ", arrhythmia=" + arrhythmia +
                 ", chronicDiseases='" + chronicDiseases + '\'' +

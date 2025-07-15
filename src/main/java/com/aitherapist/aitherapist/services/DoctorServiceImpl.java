@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -128,8 +130,24 @@ public class DoctorServiceImpl implements IDoctorService {
     }
 
     @Override
-    public void createDoctor(Long id, Doctor doctor) {
-        doctor.setId(id);
-        doctorRepository.save(doctor);
+    @Transactional
+    public Doctor createDoctor(Long userId, Doctor doctorInput) {
+        Optional<Doctor> existingDoctor = doctorRepository.findById(userId);
+
+        if (existingDoctor.isPresent()) {
+            Doctor existing = existingDoctor.get();
+            existing.setName(doctorInput.getName());
+            existing.setGender(doctorInput.getGender());
+            existing.setBirthDate(doctorInput.getBirthDate());
+            existing.setPhoneNumber(doctorInput.getPhoneNumber());
+            existing.setLicenseNumber(doctorInput.getLicenseNumber());
+            existing.setRole(doctorInput.getRole());
+            existing.setUpdatedAt(LocalDateTime.now());
+
+            return doctorRepository.save(existing);
+        } else {
+            doctorInput.setId(null);
+            return doctorRepository.save(doctorInput);
+        }
     }
 }

@@ -89,15 +89,18 @@ public class StartDoctors implements ICommand {
 
             case 3:
                 userInput.append("gender: ").append(text).append("\n");
-                System.out.println("11111111");
                 String response = ParseUserPrompt.doctorRegistrationParser(userInput.toString());
-                System.out.println(response);
-                String jsonWithType = "{\"user_type\":\"DOCTOR\"," + response.substring(1);
-
-                Doctor doctor = mapper.readValue(jsonWithType, Doctor.class);
-                doctorService.createDoctor(userId, doctor);
-
-                return acceptOrEditDoctorInfo(doctor, update);
+                String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
+                try {
+                    Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
+                    Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
+                    return acceptOrEditDoctorInfo(savedDoctor, update);
+                } catch (Exception e) {
+                    return SendMessage.builder()
+                            .chatId(chatId.toString())
+                            .text("Произошла ошибка при сохранении данных: " + e.getMessage() + ". Попробуйте еще раз.")
+                            .build();
+                }
 
             default:
                 currentRegistrationStep = 0;
@@ -133,7 +136,6 @@ public class StartDoctors implements ICommand {
         if (!registrationContext.isVerify(userId)) {
             return requestPhoneNumber(getChatId(update));
         }
-
         return SendMessage.builder()
                 .chatId(getChatId(update).toString())
                 .text("Вы уже верифицированы. Выберите действие:")

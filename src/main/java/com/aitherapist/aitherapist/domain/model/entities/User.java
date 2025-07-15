@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.domain.model.entities;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
@@ -35,13 +36,15 @@ import java.util.Map;
 public abstract class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)
     private String name;
 
     @Column(name = "birth_date")
+    @JsonProperty("birthDate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
 
@@ -110,18 +113,4 @@ public abstract class User {
         return sb.toString();
     }
 
-    public static Map<String, String> makeMetaInformation(User user) {
-        var result = new LinkedHashMap<String, String>();
-        result.put("name", makeDataList(List.of(user.getName())));
-        result.put("age", makeDataList(List.of(user.getAge() != null ? String.valueOf(user.getAge()) : "null")));
-        result.put("male", makeDataList(List.of(user.getGender() != null ? String.valueOf(user.getGender()) : "null")));
-        if (user instanceof Patient patient){
-            var data = patient.getDataList().get(0);
-            result.put("weight", makeDataList(List.of(data.getWeight() != null ? String.valueOf(data.getWeight()) : "null")));
-            result.put("height", makeDataList(List.of(data.getHeight() != null ? String.valueOf(data.getHeight()) : "null")));
-            result.put("chronicDiseases", makeDataList(List.of(data.getChronicDiseases() != null ? String.valueOf(data.getChronicDiseases()) : "null")));
-            result.put("badHabits", makeDataList(List.of(data.getBadHabits() != null ? String.valueOf(data.getBadHabits()) : "null")));
-        }
-        return result;
-    }
 }
