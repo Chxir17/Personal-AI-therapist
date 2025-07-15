@@ -2,10 +2,12 @@ package com.aitherapist.aitherapist.interactionWithGigaApi;
 
 import chat.giga.model.completion.ChatMessage;
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Component
 public class ParseUserPrompt {
 
     public static String initPromptParser(String userMessage) throws InterruptedException {
@@ -116,13 +118,4 @@ public class ParseUserPrompt {
         return response;
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        String userPrompt1 = "Я Саша мне 19 я родился в России много подтягиваюсь на турнике и еще я много пью колу. мой рост 197 вес 70000 г";
-        String userPrompt2 = "I'am Sasha and I'm 19. I was born in Russia. I love do push ups and also i drink a lot cola. My parameters is 197 and 70";
-        String userPrompt = "давление и температура как у всех. пульс 80 и сильно болит голова чо мне делать???";
-        String userHealthData = "";
-//        String response = initPromptParser(userPrompt);
-        String response = dailyQuestionnaireParser(userPrompt);
-        System.out.println(response);
-    }
 }

@@ -128,4 +128,10 @@ public class DoctorServiceImpl implements IDoctorService {
     public List<HealthData> getUserHealthData(Long doctorId, Long userId) {
         return getPatientById(doctorId, userId).getHealthDataList();
     }
+
+    @Override
+    public void createDoctor(Long id, Doctor doctor) {
+        doctor.setId(id);
+        doctorRepository.save(doctor);
+    }
 }

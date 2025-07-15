@@ -45,14 +45,6 @@ public class StartCommand implements ICommand {
             chatId = update.getMessage().getChatId();
         }
 
-        if (!registrationContext.isContain(userId)) {
-            messageSender.sendMessage(chatId, Answers.WRITE_INITIAL_INFO.getMessage());
-            registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION);
-            return new SendMessage(String.valueOf(chatId), Answers.WRITE_INITIAL_INFO.getMessage());
-
-        }
-
-
         if (!userRegistrationService.isSignUp(userId)) {
             Map<String, String> buttons = new HashMap<>();
             buttons.put("Доктор", "/startDoctor");
