@@ -1,7 +1,5 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
-import com.aitherapist.aitherapist.domain.model.FirstPartReg;
-import com.aitherapist.aitherapist.domain.model.SecondPartReg;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;

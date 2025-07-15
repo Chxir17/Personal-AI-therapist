@@ -35,7 +35,7 @@ public class StartClinicPatient implements ICommand {
     private SendMessageUser sendMessageUser;
     private Patient patient;
     private int currentRegistrationStep = 1;
-    private StringBuilder userInput = new StringBuilder(); // Используем StringBuilder для эффективности
+    private StringBuilder userInput = new StringBuilder();
     private PatientServiceImpl patientService;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -136,6 +136,7 @@ public class StartClinicPatient implements ICommand {
                 userInput.setLength(0);
             }
         }
+        return null;
     }
 
     /**

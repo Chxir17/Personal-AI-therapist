@@ -9,9 +9,9 @@ import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
  * Defines methods for CRUD operations and additional business logic
  */
 public interface IUserService {
-    User saveUser(User user);
+    void saveUser(User user);
     User fetchUser(Long id);
-    User updateUser(User user, Long id);
+    void updateUser(User user, Long id);
     void deleteUser(Long id);
     void deleteUserIfExists(Long id);
     User getUser(Long id);

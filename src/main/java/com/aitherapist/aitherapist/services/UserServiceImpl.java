@@ -47,8 +47,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 
     @Override
@@ -60,17 +60,17 @@ public class UserServiceImpl implements IUserService {
     /**
      * findById, copyProperties - function from spring.
      * replace multi set.properties.
+     *
      * @param user
      * @param id
-     * @return save in db and return User
      */
     @Override
     @Transactional
-    public User updateUser(User user, Long id) {
+    public void updateUser(User user, Long id) {
         User currentUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         BeanUtils.copyProperties(user, currentUser, "id"); // ignore id, чтобы
-        return userRepository.save(currentUser);
+        userRepository.save(currentUser);
     }
 
     @Override

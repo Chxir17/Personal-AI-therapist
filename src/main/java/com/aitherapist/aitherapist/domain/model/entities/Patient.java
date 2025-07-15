@@ -20,7 +20,7 @@ public abstract class Patient extends User {
     private InitialHealthData initialData;
     public void editInitialData(DailyHealthData dailyHealthData, Long healthDataId) {}
 
-    public void editHealthData(DailyHealthData dailyHealthData, Long healthDataId) {
+    public void editDailyHealthData(DailyHealthData dailyHealthData, Long healthDataId) {
         dailyHealthDataList.stream()
                 .filter(hd -> Objects.equals(hd.getId(), healthDataId))
                 .findFirst()
