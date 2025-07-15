@@ -14,11 +14,11 @@ public class RegistrationContext {
      * @param chatId
      */
     public void startRegistration(long chatId) {
-        mapOfUserStatus.put(chatId, Status.REGISTRATION);
+        mapOfUserStatus.put(chatId, Status.FIRST_PART_REGISTRATION);
     }
 
     public boolean isRegistrationInProgress(long chatId) {
-        return mapOfUserStatus.getOrDefault(chatId, Status.NONE) == Status.REGISTRATION;
+        return mapOfUserStatus.getOrDefault(chatId, Status.NONE) == Status.FIRST_PART_REGISTRATION;
     }
 
     public Status getStatus(long userId) {

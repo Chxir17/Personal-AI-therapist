@@ -28,7 +28,7 @@ public class PatientServiceImpl implements IPatientService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         existingPatient.setName(patient.getName());
-        existingPatient.setAge(patient.getAge());
+        existingPatient.setBirthDate(patient.getBirthDate());
         existingPatient.setGender(patient.getGender());
         existingPatient.setPhoneNumber(patient.getPhoneNumber());
 

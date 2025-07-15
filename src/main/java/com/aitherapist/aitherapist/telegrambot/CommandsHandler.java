@@ -5,7 +5,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.StartClinicPatient;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.GetLastParientMedicalData;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.GetLastPatientMedicalData;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.HistoryPatients;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;

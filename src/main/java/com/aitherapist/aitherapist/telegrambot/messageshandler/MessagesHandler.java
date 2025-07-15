@@ -148,7 +148,7 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
 
-            existingUser.setAge(parsedUser.getAge()); // допустим, возраст это дата рождения
+            existingUser.setBirthDate(parsedUser.getBirthDate());
             userService.updateUser(existingUser, userId);
             registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION);
             acceptOrEditInitInfo(existingUser, update);

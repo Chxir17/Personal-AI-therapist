@@ -73,9 +73,6 @@ public abstract class Patient extends User {
                 history.stream().map(HealthData::getPressure).toList()
         ));
 
-        result.put("sugar", makeDataList(
-                history.stream().map(HealthData::getSugar).toList()
-        ));
 
         result.put("heartPain", makeDataList(
                 history.stream().map(HealthData::getHeartPain).toList()

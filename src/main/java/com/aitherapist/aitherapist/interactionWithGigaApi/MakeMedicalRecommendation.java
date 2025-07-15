@@ -6,9 +6,12 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
 import java.util.*;
 import com.aitherapist.aitherapist.domain.model.entities.User;
+
+import static com.aitherapist.aitherapist.domain.model.entities.Patient.makeDataList;
+
 public class MakeMedicalRecommendation {
-
-
+    //FIXME: переписать
+    public static User user;
 
     public static Map<String, String> MakeMetaInformation(Patient patient) {
         var result = new LinkedHashMap<String, String>();
