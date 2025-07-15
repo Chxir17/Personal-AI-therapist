@@ -10,18 +10,7 @@ public class MakeMedicalRecommendation {
 
 
 
-    private static <T> String makeDataList(List<T> values){
-        StringBuilder sb = new StringBuilder();
-        for (T val : values) {
-            sb.append(val).append(", ");
-        }
-        if (!values.isEmpty()) {
-            sb.setLength(sb.length() - 2);
-        }
-        return sb.toString();
-    }
-
-    public static Map<String, String> MakeMetaInformation(User user) {
+    public static Map<String, String> MakeMetaInformation(Patient patient) {
         var result = new LinkedHashMap<String, String>();
         result.put("name", makeDataList(List.of(user.getName())));
         result.put("age", makeDataList(List.of(user.getAge() != null ? String.valueOf(user.getAge()) : "null")));
@@ -68,7 +57,7 @@ public class MakeMedicalRecommendation {
     public static String giveMedicalRecommendation(Patient patient){
         String token = Llm.getGigaChatToken();
         Map<String,String> metaInfo = MakeMedicalRecommendation.MakeMetaInformation(patient);
-        Map<String,String> parametersHistory = MakeMedicalRecommendation.buildMedicalHistory(patient);
+        Map<String,String> parametersHistory = patient.buildMedicalHistory();
         String systemPrompt = """
                 [Роль для модели]: Ты — опытный терапевт.
                 [Задача]: Проанализируй медицинские данные пациента и напиши ему личную рекомендацию по улучшению здоровья. В рекомендациях используй формальный стиль обращения, акцентируй внимание на сильных и слабых сторонах здоровья пациента, давай советы по основным аспектам жизни (питание, активность, режим дня). Сообщение должно быть структурировано и не превышать 800 символов без пробелов.

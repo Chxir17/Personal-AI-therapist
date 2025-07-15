@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.beans.BeanUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 @Setter
@@ -37,5 +35,56 @@ public abstract class Patient extends User {
 
     public void removeHealthData(Long healthDataId) {
         healthDataList.removeIf(hd -> Objects.equals(hd.getId(), healthDataId));
+    }
+
+    public static <T> String makeDataList(List<T> values){
+        StringBuilder sb = new StringBuilder();
+        for (T val : values) {
+            sb.append(val).append(", ");
+        }
+        if (!values.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
+        return sb.toString();
+    }
+
+    public Map<String, String> buildMedicalHistory() {
+        var result = new LinkedHashMap<String, String>();
+
+        List<HealthData> history = this.getHealthDataList();
+
+        result.put("bloodOxygenLevel", makeDataList(
+                history.stream().map(HealthData::getBloodOxygenLevel).toList()
+        ));
+
+        result.put("temperature", makeDataList(
+                history.stream().map(HealthData::getTemperature).toList()
+        ));
+
+        result.put("hoursOfSleepToday", makeDataList(
+                history.stream().map(HealthData::getHoursOfSleepToday).toList()
+        ));
+
+        result.put("pulse", makeDataList(
+                history.stream().map(HealthData::getPulse).toList()
+        ));
+
+        result.put("pressure", makeDataList(
+                history.stream().map(HealthData::getPressure).toList()
+        ));
+
+        result.put("sugar", makeDataList(
+                history.stream().map(HealthData::getSugar).toList()
+        ));
+
+        result.put("heartPain", makeDataList(
+                history.stream().map(HealthData::getHeartPain).toList()
+        ));
+
+        result.put("arrhythmia", makeDataList(
+                history.stream().map(HealthData::getArrhythmia).toList()
+        ));
+
+        return result;
     }
 }

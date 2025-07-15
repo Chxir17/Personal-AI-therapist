@@ -7,22 +7,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RegistrationContext {
-    private final Map<Long, Status> registrationInProgress = new ConcurrentHashMap<>();
+    private final Map<Long, Status> mapOfUserStatus = new ConcurrentHashMap<>();
 
     /**
      * Need initianal information. next promt is main
      * @param chatId
      */
     public void startRegistration(long chatId) {
-        registrationInProgress.put(chatId, Status.STARTED);
+        mapOfUserStatus.put(chatId, Status.REGISTRATION);
     }
 
     public boolean isRegistrationInProgress(long chatId) {
-        return registrationInProgress.getOrDefault(chatId, Status.NONE) == Status.STARTED;
+        return mapOfUserStatus.getOrDefault(chatId, Status.NONE) == Status.REGISTRATION;
     }
 
-    public Status getStatus(long chatId) {
-        return registrationInProgress.get(chatId);
+    public Status getStatus(long userId) {
+        return mapOfUserStatus.get(userId);
     }
 
     public boolean isVerify(Long id) {
@@ -30,19 +30,20 @@ public class RegistrationContext {
     }
 
     public void setVerify(Long userId, Status status) {
-        registrationInProgress.put(userId, status);
+        mapOfUserStatus.put(userId, status);
     }
 
+    public void setStatus(Long userId, Status status){mapOfUserStatus.put(userId, status);}
 
     public void completeRegistration(long chatId) {
-        registrationInProgress.remove(chatId);
+        mapOfUserStatus.remove(chatId);
     }
 
     public void deleteRegistration(long chatId) {
-        registrationInProgress.remove(chatId);
+        mapOfUserStatus.remove(chatId);
     }
 
     public boolean isContain(Long id) {
-        return registrationInProgress.containsKey(id);
+        return mapOfUserStatus.containsKey(id);
     }
 }

@@ -2,8 +2,19 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
 
 public enum Status {
     NONE,
-    STARTED,
+    FIRST_PART_REGISTRATION,
+    SECOND_PART_REGISTRATION,
     WAITING_VERIFICATION,
     VERIFIED,
     NON_VERIFIED,
+    GIVING_PATIENT_ID,
+    REWRITE_PATIENT_PARAMETERS,
+    EDIT_NAME,
+    EDIT_BIRTH_DATE,
+    EDIT_GENDER,
+    EDIT_ARRHYTHMIA,
+    EDIT_CHRONIC_DISEASES,
+    EDIT_HEIGHT,
+    EDIT_WEIGHT,
+    EDIT_BAD_HABITS,
 }

@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.telegrambot.commands;
 
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +37,6 @@ public class StartCommand implements ICommand {
         if (userId == null) {
             throw new TelegramApiException("Error value. Can't find userId");
         }
-        if (!registrationContext.isContain(userId)) {
-            registrationContext.startRegistration(userId);
-        }
         long chatId;
 
         if (update.hasCallbackQuery()) {
@@ -47,11 +45,19 @@ public class StartCommand implements ICommand {
             chatId = update.getMessage().getChatId();
         }
 
+        if (!registrationContext.isContain(userId)) {
+            messageSender.sendMessage(chatId, Answers.WRITE_INITIAL_INFO.getMessage());
+            registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION);
+            return new SendMessage(String.valueOf(chatId), Answers.WRITE_INITIAL_INFO.getMessage());
+
+        }
+
+
         if (!userRegistrationService.isSignUp(userId)) {
             Map<String, String> buttons = new HashMap<>();
             buttons.put("Доктор", "/startDoctor");
             buttons.put("Пациент не привязанный к клинике", "/clinicPatient");
-            buttons.put("Пациент привязанный к клинике", "/botPatient");
+            buttons.put("Пациент клиники", "/botPatient");
 
             InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 3);
             registrationContext.startRegistration(chatId);
