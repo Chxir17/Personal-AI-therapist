@@ -11,7 +11,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -98,5 +100,31 @@ public abstract class User {
 
     public int getDays() {
         return (Period.between(birthDate, LocalDate.now()).getDays());
+    }
+
+    public static <T> String makeDataList(List<T> values){
+        StringBuilder sb = new StringBuilder();
+        for (T val : values) {
+            sb.append(val).append(", ");
+        }
+        if (!values.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
+        return sb.toString();
+    }
+
+    public static Map<String, String> makeMetaInformation(User user) {
+        var result = new LinkedHashMap<String, String>();
+        result.put("name", makeDataList(List.of(user.getName())));
+        result.put("age", makeDataList(List.of(user.getAge() != null ? String.valueOf(user.getAge()) : "null")));
+        result.put("male", makeDataList(List.of(user.getGender() != null ? String.valueOf(user.getGender()) : "null")));
+        if (user instanceof Patient patient){
+            var data = patient.getDataList().get(0);
+            result.put("weight", makeDataList(List.of(data.getWeight() != null ? String.valueOf(data.getWeight()) : "null")));
+            result.put("height", makeDataList(List.of(data.getHeight() != null ? String.valueOf(data.getHeight()) : "null")));
+            result.put("chronicDiseases", makeDataList(List.of(data.getChronicDiseases() != null ? String.valueOf(data.getChronicDiseases()) : "null")));
+            result.put("badHabits", makeDataList(List.of(data.getBadHabits() != null ? String.valueOf(data.getBadHabits()) : "null")));
+        }
+        return result;
     }
 }

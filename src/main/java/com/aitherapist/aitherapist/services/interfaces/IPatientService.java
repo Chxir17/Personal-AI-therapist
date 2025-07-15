@@ -1,9 +1,7 @@
 package com.aitherapist.aitherapist.services.interfaces;
 
-import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
+import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
@@ -12,10 +10,10 @@ public interface IPatientService {
     Patient findById(Long id);
     Patient findByName(String name);
     void deleteById(Long id);
-    void editPatientHealthData(Patient patient, HealthData healthData);
+    void editPatientHealthData(Patient patient, dailyHealthData dailyHealthData);
     void deletePatientHealthData(Patient patient);
-    List<HealthData> getPatientHealthData(Long patientId);
+    List<dailyHealthData> getPatientHealthData(Long patientId);
     boolean hasHealthData(Long patientId);
-    void editPatientHealthData(Long patientId, HealthData healthData);
-    void addPatientHealthData(Long id, HealthData healthData);
+    void editPatientHealthData(Long patientId, dailyHealthData dailyHealthData);
+    void addPatientHealthData(Long id, dailyHealthData dailyHealthData);
 }

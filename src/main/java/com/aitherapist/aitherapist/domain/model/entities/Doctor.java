@@ -47,9 +47,9 @@ public class Doctor extends User {
         return patients.stream().filter(p -> p.getId().equals(patientId)).findFirst().orElse(null);
     }
 
-    public List<HealthData> getUserHealthData(Long userId) {
+    public List<dailyHealthData> getUserHealthData(Long userId) {
         ClinicPatient patient = getPatientById(userId);
-        return patient != null ? patient.getHealthDataList() : new ArrayList<>();
+        return patient != null ? patient.getDailyHealthDataList() : new ArrayList<>();
     }
 
     public SendMessage showDoctorMenu(Long chatId) {

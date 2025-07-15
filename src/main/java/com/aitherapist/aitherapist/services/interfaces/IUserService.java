@@ -1,7 +1,6 @@
 package com.aitherapist.aitherapist.services.interfaces;
 import com.aitherapist.aitherapist.domain.enums.Roles;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
-import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 
@@ -21,7 +20,7 @@ public interface IUserService {
     Boolean isUserInClinic(Long userId);
     void changeUserRoles(Long userId, Roles role);
     void editUserInformation(User user, Long id);
-    void editUserHealthData(User user, Long id, HealthData healthData);
+    void editUserHealthData(User user, Long id, dailyHealthData dailyHealthData);
     void addActivityLog(User user, String actionType, Long messageId);
     UserActivityLog getUserActivityLog(User user, Long id);
     void editActivityLog(User user, Long id, UserActivityLog userActivityLog);

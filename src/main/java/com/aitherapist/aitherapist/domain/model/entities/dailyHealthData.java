@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import jakarta.persistence.*;
-import java.io.Serial;
+
 import java.io.Serializable;
 
 
@@ -16,7 +16,7 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "health_data")
-public class HealthData implements Serializable {
+public class dailyHealthData implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,27 +41,10 @@ public class HealthData implements Serializable {
     @Column(name = "pressure", columnDefinition = "VARCHAR(10)")
     private String pressure;
 
-    @Column(name = "heart_pain")
-    private Boolean heartPain;
-
-    @Column(name = "arrhythmia")
-    private Boolean arrhythmia;
-
-    @Column(name = "chronic_diseases")
-    private String chronicDiseases;
-
-    @Column(name = "height")
-    private Double height;
-
-    @Column(name = "weight")
-    private Double weight;
-
-    @Column(name = "bad_habits")
-    private String badHabits;
 
     @Override
     public String toString() {
-        return "HealthData{" +
+        return "dailyHealthData{" +
                 "id=" + id +
                 ", user=" + (patient != null ? patient.getId() : "null") +
                 ", bloodOxygenLevel=" + bloodOxygenLevel +
@@ -69,8 +52,6 @@ public class HealthData implements Serializable {
                 ", hoursOfSleepToday=" + hoursOfSleepToday +
                 ", pulse=" + pulse +
                 ", pressure=" + pressure +
-                ", heartPain=" + heartPain +
-                ", arrhythmia=" + arrhythmia +
                 '}';
     }
 }

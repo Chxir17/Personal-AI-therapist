@@ -4,11 +4,11 @@ import com.aitherapist.aitherapist.domain.model.FirstPartReg;
 import com.aitherapist.aitherapist.domain.model.SecondPartReg;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.services.HealthDataServiceImpl;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
@@ -74,6 +74,7 @@ public class MessagesHandler implements IHandler {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
+        System.out.println("in handle mesage");
         if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
@@ -271,7 +272,7 @@ public class MessagesHandler implements IHandler {
 //                //String response = ParseUserPrompt.initPromptParser(secondPartReg.toString()); //FIXME подставить подходящий парсер
 //                //String cleanJson = cleanJsonResponse(response);
 //                String cleanJson = "";
-//                HealthData healthData = mapper.readValue(cleanJson, HealthData.class);
+//                dailyHealthData healthData = mapper.readValue(cleanJson, dailyHealthData.class);
 //
 //                Long userId = update.getMessage().getFrom().getId();
 //                healthDataServiceImpl.saveHealthDataInUser(userId, healthData);
@@ -284,11 +285,11 @@ public class MessagesHandler implements IHandler {
 //        try {
 //            String message = update.getMessage().getText();
 //            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            HealthData parsedData = mapper.readValue(cleanJson, HealthData.class);
+//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
 //
 //            Long userId = update.getMessage().getFrom().getId();
 //
-//            HealthData healthData = patientService.getPatientHealthData(userId).setArrhythmia(parsedData.getArrhythmia());
+//            dailyHealthData healthData = patientService.getPatientHealthData(userId).setArrhythmia(parsedData.getArrhythmia());
 //              //FIXME как достать одну хелз дату причём та которая не изменяется каждый день?
 //            userService.updateUser(user);
 //            acceptOrEditMedicalInitData(healthData, update)
@@ -301,7 +302,7 @@ public class MessagesHandler implements IHandler {
 //        try {
 //            String message = update.getMessage().getText();
 //            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            HealthData parsedData = mapper.readValue(cleanJson, HealthData.class);
+//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
 //
 //            Long userId = update.getMessage().getFrom().getId();
 //            User user = userService.getUserByUserId(userId);
@@ -319,7 +320,7 @@ public class MessagesHandler implements IHandler {
 //        try {
 //            String message = update.getMessage().getText();
 //            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            HealthData parsedData = mapper.readValue(cleanJson, HealthData.class);
+//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
 //
 //            Long userId = update.getMessage().getFrom().getId();
 //            User user = userService.getUserByUserId(userId);
@@ -337,7 +338,7 @@ public class MessagesHandler implements IHandler {
 //        try {
 //            String message = update.getMessage().getText();
 //            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            HealthData parsedData = mapper.readValue(cleanJson, HealthData.class);
+//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
 //
 //            Long userId = update.getMessage().getFrom().getId();
 //            User user = userService.getUserByUserId(userId);
@@ -354,7 +355,7 @@ public class MessagesHandler implements IHandler {
 //        try {
 //            String message = update.getMessage().getText();
 //            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            HealthData parsedData = mapper.readValue(cleanJson, HealthData.class);
+//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
 //
 //            Long userId = update.getMessage().getFrom().getId();
 //            User user = userService.getUserByUserId(userId);
@@ -368,10 +369,10 @@ public class MessagesHandler implements IHandler {
 //        }
     }
 
-    private void acceptOrEditMedicalInitData(HealthData healthData, Update update) throws TelegramApiException {
+    private void acceptOrEditMedicalInitData(dailyHealthData dailyHealthData, Update update) throws TelegramApiException {
         Map<String, String> buttons = new HashMap<>();
-        String message = "Вы ввели:\n Аритмия - " + healthData.getArrhythmia() + "\n Хронические заболевания - " + healthData.getChronicDiseases() + "\n Вес - "
-                + healthData.getHeight() + "\n Вес - " + healthData.getWeight() + "\n Вредные привычки - " + healthData.getBadHabits();
+        String message = "Вы ввели:\n Аритмия - " + dailyHealthData.getArrhythmia() + "\n Хронические заболевания - " + dailyHealthData.getChronicDiseases() + "\n Вес - "
+                + dailyHealthData.getHeight() + "\n Вес - " + dailyHealthData.getWeight() + "\n Вредные привычки - " + dailyHealthData.getBadHabits();
         messageSender.sendMessage(update.getMessage().getChatId(), message);
         buttons.put("Принять", "/acceptMedicalData");
         buttons.put("Изменить параметры", "/editMedicalData");
@@ -427,8 +428,8 @@ public class MessagesHandler implements IHandler {
     private void handleHealthData(long chatId, long userId, String messageText, Update update)
             throws TelegramApiException, JsonProcessingException {
         sendInitialResponse(chatId);
-        HealthData healthData = parseHealthData(messageText);
-        saveHealthData(userId, healthData);
+        dailyHealthData dailyHealthData = parseHealthData(messageText);
+        saveHealthData(userId, dailyHealthData);
         String recommendation = generateMedicalRecommendation(update);
         if (recommendation != null) {
             sendRecommendation(chatId, recommendation);
@@ -436,20 +437,20 @@ public class MessagesHandler implements IHandler {
 
     }
 
-    private HealthData parseHealthData(String messageText) throws JsonProcessingException {
+    private dailyHealthData parseHealthData(String messageText) throws JsonProcessingException {
         String rawJsonResponse = ParseUserPrompt.dailyQuestionnaireParser(messageText);
 
         String cleanJson = cleanJsonResponse(rawJsonResponse);
         System.out.println(cleanJson);
-        return mapper.readValue(cleanJson, HealthData.class);
+        return mapper.readValue(cleanJson, dailyHealthData.class);
     }
 
     private String cleanJsonResponse(String jsonResponse) {
         return jsonResponse.replaceAll("```json|```", "").trim();
     }
 
-    private void saveHealthData(long userId, HealthData healthData) {
-        patientService.addPatientHealthData(userId, healthData);
+    private void saveHealthData(long userId, dailyHealthData dailyHealthData) {
+        patientService.addPatientHealthData(userId, dailyHealthData);
     }
 
     private String generateMedicalRecommendation(Update update) {
