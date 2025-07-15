@@ -1,8 +1,10 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +65,17 @@ public class StartCommand implements ICommand {
                     .replyMarkup(replyKeyboardDoctor)
                     .build();
         }
-        return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
+        registrationContext.start(chatId);
+        Roles roles = userRegistrationService.getUserRoles(userId);
+        if (roles == Roles.DOCTOR) {
+            return SendMessage.builder()
+                    .chatId(TelegramIdUtils.getChatId(update))
+                    .text(Answers.START_MESSAGE.getMessage())
+                    .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
+                    .build();
+        }
+        else if()
+
     }
 
     private Long extractUserId(Update update) {

@@ -17,6 +17,10 @@ public class RegistrationContext {
         mapOfUserStatus.put(chatId, Status.FIRST_PART_REGISTRATION_DOCTOR);
     }
 
+    public void start(long chatId) {
+        mapOfUserStatus.put(chatId, Status.ALREADY_REGISTER);
+    }
+
     public boolean isRegistrationInProgress(long chatId) {
         return mapOfUserStatus.getOrDefault(chatId, Status.NONE) == Status.FIRST_PART_REGISTRATION_DOCTOR;
     }

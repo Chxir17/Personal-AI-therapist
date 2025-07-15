@@ -17,4 +17,5 @@ public enum Status {
     EDIT_HEIGHT,
     EDIT_WEIGHT,
     EDIT_BAD_HABITS,
+    ALREADY_REGISTER
 }
