@@ -1,11 +1,13 @@
 package com.aitherapist.aitherapist.telegrambot.commands.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
@@ -33,9 +35,10 @@ public class StartClinicPatient implements ICommand {
     private String telephoneNumber;
     private IMessageSender messageSender;
     private SendMessageUser sendMessageUser;
-    private Patient patient;
+    private ClinicPatient patient;
     private int currentRegistrationStep = 1;
-    private StringBuilder userInput = new StringBuilder();
+    private UserServiceImpl userService;
+    private StringBuilder userInput = new StringBuilder(); // Используем StringBuilder для эффективности
     private PatientServiceImpl patientService;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -53,11 +56,12 @@ public class StartClinicPatient implements ICommand {
 
     private void acceptOrEditMedicalInitData(InitialHealthData dailyHealthData, Update update) throws TelegramApiException {
         Map<String, String> buttons = new HashMap<>();
-        String message = "Вы ввели:\n Аритмия - " + dailyHealthData.getArrhythmia() + "\n Хронические заболевания - " + dailyHealthData.getChronicDiseases() + "\n Вес - "
+        String message = "Вы ввели:\n Имя - " + patient.getName() + "\n Дата рождения - " + patient.getAge() + "\n Пол - " + patient.getGender() +
+                "\n Аритмия - " + dailyHealthData.getArrhythmia() + "\n Хронические заболевания - " + dailyHealthData.getChronicDiseases() + "\n Вес - "
                 + dailyHealthData.getHeight() + "\n Вес - " + dailyHealthData.getWeight() + "\n Вредные привычки - " + dailyHealthData.getBadHabits();
         messageSender.sendMessage(update.getMessage().getChatId(), message);
-        buttons.put("Принять", "/acceptMedicalData");
-        buttons.put("Изменить параметры", "/editMedicalData");
+        buttons.put("Принять", "/acceptClinicPatientInitData");
+        buttons.put("Изменить параметры", "/editPatientMedicalData");
 
         InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
 
@@ -69,74 +73,97 @@ public class StartClinicPatient implements ICommand {
     }
 
     private SendMessage handleQuestionnaire(Update update) throws TelegramApiException, InterruptedException, JsonProcessingException {
-        String text = update.getMessage().getText();
-        Long chatId = update.getMessage().getChatId();
         if (!update.hasMessage()) {
-            if (currentRegistrationStep == 1) {
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.GIVE_NAME.getMessage())
-                        .build();
-            }
             return null;
         }
+
+        String text = update.getMessage().getText();
+        Long chatId = update.getMessage().getChatId();
         Long userId = update.getMessage().getFrom().getId();
 
         switch (currentRegistrationStep) {
             case 1 -> {
                 userInput.append("name: ").append(text).append("\n");
                 currentRegistrationStep++;
-                messageSender.sendMessage(chatId, Answers.AGE.getMessage());
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text(Answers.AGE.getMessage())
+                        .build();
             }
             case 2 -> {
                 userInput.append("age: ").append(text).append("\n");
                 currentRegistrationStep++;
-                messageSender.sendMessage(chatId, Answers.GENDER.getMessage());
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text(Answers.GENDER.getMessage())
+                        .build();
             }
             case 3 -> {
                 userInput.append("gender: ").append(text).append("\n");
                 currentRegistrationStep++;
-                messageSender.sendMessage(chatId, "Есть ли у вас аритмия?");
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text("Есть ли у вас аритмия?")
+                        .build();
             }
             case 4 -> {
                 userInput.append("arrhythmia: ").append(text).append("\n");
                 currentRegistrationStep++;
-                messageSender.sendMessage(chatId, "Есть ли у вас хронические заболевания?");
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text("Есть ли у вас хронические заболевания?")
+                        .build();
             }
             case 5 -> {
                 userInput.append("chronicDiseases: ").append(text).append("\n");
                 currentRegistrationStep++;
-                messageSender.sendMessage(chatId, "Введите ваш рост (в сантиметрах):");
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text("Введите ваш рост (в сантиметрах):")
+                        .build();
             }
             case 6 -> {
                 userInput.append("height: ").append(text).append("\n");
                 currentRegistrationStep++;
-                messageSender.sendMessage(chatId, "Введите ваш вес (в килограммах):");
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text("Введите ваш вес (в килограммах):")
+                        .build();
             }
             case 7 -> {
                 userInput.append("weight: ").append(text).append("\n");
                 currentRegistrationStep++;
-                messageSender.sendMessage(chatId, "Есть ли у вас вредные привычки?");
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text("Есть ли у вас вредные привычки?")
+                        .build();
             }
             case 8 -> {
                 userInput.append("badHabits: ").append(text).append("\n");
                 String response = ParseUserPrompt.patientRegistrationParser(userInput.toString());
                 String jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
 
-                InitialHealthData healthData = mapper.readValue(jsonWithType, InitialHealthData.class);
-                patient = mapper.readValue(jsonWithType, Patient.class);
-                patient.setInitialData(healthData);
+                InitialHealthData initialHealthData = mapper.readValue(jsonWithType, InitialHealthData.class);
+                patient = mapper.readValue(jsonWithType, ClinicPatient.class);
+                patient.setInitialData(initialHealthData);
+                userService.saveUser(patient);
+
                 acceptOrEditMedicalInitData(healthData, update);
-                currentRegistrationStep = 0;
-                userInput.setLength(0); // Очищаем буфер после завершения регистрации
-            }
-            default -> {
-                messageSender.sendMessage(chatId, "Неизвестный шаг регистрации");
+
                 currentRegistrationStep = 0;
                 userInput.setLength(0);
+
+                return null; // сообщение уже отправлено внутри acceptOrEditMedicalInitData
+            }
+            default -> {
+                currentRegistrationStep = 0;
+                userInput.setLength(0);
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text("Неизвестный шаг регистрации")
+                        .build();
             }
         }
-        return null;
     }
 
     /**

@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class AcceptMedicalData implements ICommand {
+public class AcceptClinicPatientInitData implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         long chatId = update.getMessage().getChatId();

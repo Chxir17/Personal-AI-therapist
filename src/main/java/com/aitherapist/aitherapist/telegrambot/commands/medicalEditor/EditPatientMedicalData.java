@@ -15,12 +15,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
-public class EditMedicalData implements ICommand {
+public class EditPatientMedicalData implements ICommand {
 
     private final IMessageSender messageSender;
 
     @Autowired
-    public EditMedicalData(IMessageSender messageSender) {
+    public EditPatientMedicalData(IMessageSender messageSender) {
         this.messageSender = messageSender;
     }
 
@@ -29,11 +29,15 @@ public class EditMedicalData implements ICommand {
         Long chatId = update.getMessage().getChatId();
 
         Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("Изменить имя", "/editName");
+        buttons.put("Изменить дату рождения", "/editBirthDate");
+        buttons.put("Изменить пол", "/editGender");
         buttons.put("Аритмия", "/editArrhythmia");
         buttons.put("Хронические заболевания", "/editChronicDiseases");
         buttons.put("Рост", "/editHeight");
         buttons.put("Вес", "/editWeight");
         buttons.put("Вредные привычки", "/editBadHabits");
+
 
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
 

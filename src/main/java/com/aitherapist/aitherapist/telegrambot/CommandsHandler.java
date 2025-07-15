@@ -1,11 +1,9 @@
 package com.aitherapist.aitherapist.telegrambot;
 
-import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.StartClinicPatient;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.GetLastPatientMedicalData;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.HistoryPatients;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;
@@ -17,7 +15,6 @@ import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.ChangePa
 import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,10 +61,10 @@ public class CommandsHandler {
             EditBadHabits editBadHabitsCommand,
 
             EditParameters editParametersCommand,
-            EditMedicalData editMedicalDataCommand,
+            EditPatientMedicalData editMedicalDataCommand,
 
             AcceptInitData acceptInitDataCommand,
-            AcceptMedicalData acceptMedicalDataCommand
+            AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
     ) {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
@@ -96,10 +93,10 @@ public class CommandsHandler {
                 Map.entry("/editBadHabits", editBadHabitsCommand),
 
                 Map.entry("/editParameters", editParametersCommand),
-                Map.entry("/editMedicalData", editMedicalDataCommand),
+                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
 
                 Map.entry("/acceptInitData", acceptInitDataCommand),
-                Map.entry("/acceptMedicalData", acceptMedicalDataCommand)
+                Map.entry("/acceptClinicPatientInitData", acceptClinicPatientInitDataCommand)
         );
     }
 
@@ -137,6 +134,11 @@ public class CommandsHandler {
 
     public void inProgressQuestionnaireDoctor(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         ICommand commandHandler = commands.get("/startDoctor");
+
+        messageSender.sendMessage(commandHandler.apply(update, registrationContext));
+    }
+    public void inProgressQuestionnairePatient(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/clinicPatient");
 
         messageSender.sendMessage(commandHandler.apply(update, registrationContext));
     }
