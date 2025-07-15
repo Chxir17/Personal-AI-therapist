@@ -20,12 +20,8 @@ public class EditParameters implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
 
-        Map<String, String> buttons = new LinkedHashMap<>();
-        buttons.put("Изменить имя", "/editName");
-        buttons.put("Изменить дату рождения", "/editBirthDate");
-        buttons.put("Изменить пол", "/editGender");
 
-        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createInlineKeyboard(buttons, 1);
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditDoctorData();
 
         return SendMessage.builder()
                 .chatId(chatId.toString())

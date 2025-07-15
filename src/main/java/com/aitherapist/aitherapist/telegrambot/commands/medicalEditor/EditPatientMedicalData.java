@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.medicalEditor;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +27,9 @@ public class EditPatientMedicalData implements ICommand {
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        Long chatId = update.getMessage().getChatId();
+        Long chatId = TelegramIdUtils.getChatId(update);
 
-        Map<String, String> buttons = new LinkedHashMap<>();
-        buttons.put("Изменить имя", "/editName");
-        buttons.put("Изменить дату рождения", "/editBirthDate");
-        buttons.put("Изменить пол", "/editGender");
-        buttons.put("Аритмия", "/editArrhythmia");
-        buttons.put("Хронические заболевания", "/editChronicDiseases");
-        buttons.put("Рост", "/editHeight");
-        buttons.put("Вес", "/editWeight");
-        buttons.put("Вредные привычки", "/editBadHabits");
-
-
-        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditClinicPatientData();
 
         return SendMessage.builder()
                 .chatId(chatId.toString())

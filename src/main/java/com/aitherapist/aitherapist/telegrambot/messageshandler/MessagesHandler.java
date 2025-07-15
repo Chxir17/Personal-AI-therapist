@@ -1,13 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
-import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.Patient;
-import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
-import com.aitherapist.aitherapist.services.DoctorServiceImpl;
-import com.aitherapist.aitherapist.services.HealthDataServiceImpl;
-import com.aitherapist.aitherapist.services.PatientServiceImpl;
-import com.aitherapist.aitherapist.services.UserServiceImpl;
-import com.aitherapist.aitherapist.domain.model.entities.User;
+import com.aitherapist.aitherapist.domain.model.entities.*;
+import com.aitherapist.aitherapist.services.*;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
@@ -61,6 +55,9 @@ public class MessagesHandler implements IHandler {
     private PatientServiceImpl patientServiceImpl;
     @Autowired
     private CommandsHandler commandsHandler;
+
+    InitialHealthDataServiceImpl initialHealthDataService;
+
 
     @Override
     public void handle(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
@@ -117,7 +114,7 @@ public class MessagesHandler implements IHandler {
 
     public void handleEditName(Update update) {
         try {
-            String message = update.getMessage().getText();
+            String message = update.getMessage().getText();//FIXME
             User parsedUser = mapper.readValue("cleanJson", User.class);
 
             Long userId = update.getMessage().getFrom().getId();
@@ -272,92 +269,105 @@ public class MessagesHandler implements IHandler {
 //        }
 //    }
 
+    private void acceptOrEditMedicalInitData(InitialHealthData dailyHealthData, Update update) throws TelegramApiException {
+        Map<String, String> buttons = new HashMap<>();
+        String message = "Вы ввели:\n Имя - " + patient.getName() + "\n Дата рождения - " + patient.getAge() + "\n Пол - " + patient.getGender() +
+                "\n Аритмия - " + dailyHealthData.getArrhythmia() + "\n Хронические заболевания - " + dailyHealthData.getChronicDiseases() + "\n Вес - "
+                + dailyHealthData.getHeight() + "\n Вес - " + dailyHealthData.getWeight() + "\n Вредные привычки - " + dailyHealthData.getBadHabits();
+        messageSender.sendMessage(update.getMessage().getChatId(), message);
+        buttons.put("Принять", "/acceptClinicPatientInitData");
+        buttons.put("Изменить параметры", "/editPatientMedicalData");
+
+        InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
+
+        messageSender.sendMessage(SendMessage.builder()
+                .chatId(String.valueOf(update.getMessage().getChatId()))
+                .text("Выберите команду")
+                .replyMarkup(replyKeyboardDoctor)
+                .build());
+    }
+
     public void handleEditArrhythmia(Update update) {
-//        try {
-//            String message = update.getMessage().getText();
-//            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
-//
-//            Long userId = update.getMessage().getFrom().getId();
-//
-//            dailyHealthData healthData = patientService.getPatientHealthData(userId).setArrhythmia(parsedData.getArrhythmia());
-//              //FIXME как достать одну хелз дату причём та которая не изменяется каждый день?
-//            userService.updateUser(user);
-//            acceptOrEditMedicalInitData(healthData, update)
-//        } catch (Exception e) {
-//            e.printStackTrace(); // лучше логировать
-//        }
+        try {
+            String message = update.getMessage().getText();
+            Long userId = update.getMessage().getFrom().getId();
+
+            //String cleanJson = ParseUserPrompt.initPromptParser(message); //FIXME использовать новыф метод
+            Patient patient = patientService.findById(userId);
+            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData parsedData = mapper.readValue(message, InitialHealthData.class);
+            initialHealthData.setArrhythmia(parsedData.getArrhythmia());
+
+            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            //FIXME как достать одну хелз дату причём та которая не изменяется каждый день?
+
+            acceptOrEditMedicalInitData(initialHealthData, update);
+        } catch (Exception e) {
+            e.printStackTrace(); // лучше логировать
+        }
     }
 
     public void handleEditChronicDiseases(Update update) {
-//        try {
-//            String message = update.getMessage().getText();
-//            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
-//
-//            Long userId = update.getMessage().getFrom().getId();
-//            User user = userService.getUserByUserId(userId);
-//
-//            healthData.setChronicDiseases(parsedData.getChronicDiseases());
-//          //FIXME как достать одну хелз дату причём та которая не изменяется каждый день?
-//            userService.updateUser(user);
-//            acceptOrEditMedicalInitData(healthData, update)
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            String message = update.getMessage().getText();
+            Long userId = update.getMessage().getFrom().getId();
+
+            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData parsedData = mapper.readValue(message, InitialHealthData.class);
+            initialHealthData.setChronicDiseases(parsedData.getChronicDiseases());
+
+            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            acceptOrEditMedicalInitData(initialHealthData, update);
+        } catch (Exception e) {
+            e.printStackTrace(); // TODO: заменить на логгер
+        }
     }
 
     public void handleEditHeight(Update update) {
-//        try {
-//            String message = update.getMessage().getText();
-//            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
-//
-//            Long userId = update.getMessage().getFrom().getId();
-//            User user = userService.getUserByUserId(userId);
-//
-//            healthData.setHeight(parsedData.getHeight());
-//             //FIXME как достать одну хелз дату причём та которая не изменяется каждый день?
-//            userService.updateUser(user);
-//            acceptOrEditMedicalInitData(healthData, update)
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            String message = update.getMessage().getText();
+            Long userId = update.getMessage().getFrom().getId();
+
+            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData parsedData = mapper.readValue(message, InitialHealthData.class);
+            initialHealthData.setHeight(parsedData.getHeight());
+
+            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            acceptOrEditMedicalInitData(initialHealthData, update);
+        } catch (Exception e) {
+            e.printStackTrace(); // TODO: заменить на логгер
+        }
     }
 
     public void handleEditWeight(Update update) {
-//        try {
-//            String message = update.getMessage().getText();
-//            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
-//
-//            Long userId = update.getMessage().getFrom().getId();
-//            User user = userService.getUserByUserId(userId);
-//            healthData.setWeight(parsedData.getWeight());
-//           //FIXME как достать одну хелз дату причём та которая не изменяется каждый день?
-//            userService.updateUser(user);
-//            acceptOrEditMedicalInitData(healthData, update)
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//      }
-    }
+        try {
+            String message = update.getMessage().getText();
+            Long userId = update.getMessage().getFrom().getId();
 
+            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData parsedData = mapper.readValue(message, InitialHealthData.class);
+            initialHealthData.setWeight(parsedData.getWeight());
+
+            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            acceptOrEditMedicalInitData(initialHealthData, update);
+        } catch (Exception e) {
+            e.printStackTrace(); // TODO: заменить на логгер
+        }
+    }
     public void handleEditBadHabits(Update update) {
-//        try {
-//            String message = update.getMessage().getText();
-//            String cleanJson = ParseUserPrompt.initPromptParser(message);
-//            dailyHealthData parsedData = mapper.readValue(cleanJson, dailyHealthData.class);
-//
-//            Long userId = update.getMessage().getFrom().getId();
-//            User user = userService.getUserByUserId(userId);
-//
-//            healthData.setBadHabits(parsedData.getBadHabits());
-//             //FIXME как достать одну хелз дату причём та которая не изменяется каждый день?
-//            userService.updateUser(user);
-//            acceptOrEditMedicalInitData(healthData, update)
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            String message = update.getMessage().getText();
+            Long userId = update.getMessage().getFrom().getId();
+
+            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData parsedData = mapper.readValue(message, InitialHealthData.class);
+            initialHealthData.setBadHabits(parsedData.getBadHabits());
+
+            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            acceptOrEditMedicalInitData(initialHealthData, update);
+        } catch (Exception e) {
+            e.printStackTrace(); // TODO: заменить на логгер
+        }
     }
 
 //    private void acceptOrEditMedicalInitData(dailyHealthData dailyHealthData, Update update) throws TelegramApiException {

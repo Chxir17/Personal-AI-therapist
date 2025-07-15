@@ -5,6 +5,7 @@ import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
+import com.aitherapist.aitherapist.services.InitialHealthDataServiceImpl;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
@@ -44,6 +45,8 @@ public class StartClinicPatient implements ICommand {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+    @Autowired
+    InitialHealthDataServiceImpl initialHealthDataService;
 
     @Autowired
     public Verification verification;
@@ -144,11 +147,12 @@ public class StartClinicPatient implements ICommand {
                 String jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
 
                 InitialHealthData initialHealthData = mapper.readValue(jsonWithType, InitialHealthData.class);
+                initialHealthDataService.putInitialHealthDataByUserId(initialHealthData, userId);
                 patient = mapper.readValue(jsonWithType, ClinicPatient.class);
                 patient.setInitialData(initialHealthData);
                 userService.saveUser(patient);
-
-                acceptOrEditMedicalInitData(healthData, update);
+                initialHealthDataService.putInitialHealthDataByUserId(initialHealthData, userId);
+                acceptOrEditMedicalInitData(initialHealthData, update);
 
                 currentRegistrationStep = 0;
                 userInput.setLength(0);
