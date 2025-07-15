@@ -134,4 +134,10 @@ public class CommandsHandler {
             throw e;
         }
     }
+
+    public void inProgressQuestionnaireDoctor(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/startDoctor");
+
+        messageSender.sendMessage(commandHandler.apply(update, registrationContext));
+    }
 }

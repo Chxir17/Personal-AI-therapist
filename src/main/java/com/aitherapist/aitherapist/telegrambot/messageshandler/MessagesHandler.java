@@ -12,6 +12,7 @@ import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
@@ -64,6 +65,8 @@ public class MessagesHandler implements IHandler {
     private final MakeMedicalRecommendation makeMedicalRecommendation = new MakeMedicalRecommendation();
     private DoctorServiceImpl doctorService;
     private PatientServiceImpl patientServiceImpl;
+    @Autowired
+    private CommandsHandler commandsHandler;
 
     @Override
     public void handle(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
@@ -84,6 +87,9 @@ public class MessagesHandler implements IHandler {
         else if(registrationContext.getStatus(userId) == Status.EDIT_CHRONIC_DISEASES){
             handleEditChronicDiseases(update);
         }
+        else if(registrationContext.getStatus(userId) == Status.FIRST_PART_REGISTRATION_DOCTOR){
+            commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
+        }
         else if(registrationContext.getStatus(userId) == Status.EDIT_HEIGHT){
             handleEditHeight(update);
         }
@@ -101,17 +107,17 @@ public class MessagesHandler implements IHandler {
 
     public void handleEditBirthDate(Update update) {
         try {
-//            String message = update.getMessage().getText();
-//            String cleanJson = ParseUserPrompt.initPromptParser(message); //FIXME переписать на подходящий метод
-//            User parsedUser = mapper.readValue(cleanJson, User.class);
-//
-//            Long userId = update.getMessage().getFrom().getId();
-//            User existingUser = userService.getUserByUserId(userId);
-//
-//            existingUser.setBirthDate(parsedUser.getBirthDate());
-//            userService.updateUser(existingUser, userId);
-//            registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION);
-//            acceptOrEditInitInfo(existingUser, update);
+            String message = update.getMessage().getText();
+            //String cleanJson = ParseUserPrompt.initPromptParser(message); //FIXME переписать на подходящий метод
+            User parsedUser = mapper.readValue("cleanJson", User.class);
+
+            Long userId = update.getMessage().getFrom().getId();
+            User existingUser = userService.getUserByUserId(userId);
+
+            existingUser.setBirthDate(parsedUser.getBirthDate());
+            userService.updateUser(existingUser, userId);
+            registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION_DOCTOR);
+            acceptOrEditInitInfo(existingUser, update);
         } catch (Exception e) {
             e.printStackTrace(); // лучше логировать
         }
@@ -119,17 +125,17 @@ public class MessagesHandler implements IHandler {
 
     public void handleEditName(Update update) {
         try {
-//            String message = update.getMessage().getText();
-//            String cleanJson = ParseUserPrompt.initPromptParser(message);//FIXME переписать на подходящий метод
-//            User parsedUser = mapper.readValue(cleanJson, User.class);
-//
-//            Long userId = update.getMessage().getFrom().getId();
-//            User existingUser = userService.getUserByUserId(userId);
-//
-//            existingUser.setName(parsedUser.getName());
-//            userService.updateUser(existingUser, userId);
-//            registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION);
-//            acceptOrEditInitInfo(existingUser, update);
+            String message = update.getMessage().getText();
+            //String cleanJson = ParseUserPrompt.initPromptParser(message);//FIXME переписать на подходящий метод
+            User parsedUser = mapper.readValue("cleanJson", User.class);
+
+            Long userId = update.getMessage().getFrom().getId();
+            User existingUser = userService.getUserByUserId(userId);
+
+            existingUser.setName(parsedUser.getName());
+            userService.updateUser(existingUser, userId);
+            registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION_DOCTOR);
+            acceptOrEditInitInfo(existingUser, update);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -137,17 +143,17 @@ public class MessagesHandler implements IHandler {
 
     public void handleEditGender(Update update) {
         try {
-//            String message = update.getMessage().getText();
-//            String cleanJson = ParseUserPrompt.initPromptParser(message);//FIXME переписать на подходящий метод
-//            User parsedUser = mapper.readValue(cleanJson, User.class);
-//
-//            Long userId = update.getMessage().getFrom().getId();
-//            User existingUser = userService.getUserByUserId(userId);
-//
-//            existingUser.setGender(parsedUser.getGender());
-//            userService.updateUser(existingUser, userId);
-//            registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION);
-//            acceptOrEditInitInfo(existingUser, update);
+            String message = update.getMessage().getText();
+            //String cleanJson = ParseUserPrompt.initPromptParser(message);//FIXME переписать на подходящий метод
+            User parsedUser = mapper.readValue("cleanJson", User.class);
+
+            Long userId = update.getMessage().getFrom().getId();
+            User existingUser = userService.getUserByUserId(userId);
+
+            existingUser.setGender(parsedUser.getGender());
+            userService.updateUser(existingUser, userId);
+            registrationContext.setStatus(userId, Status.FIRST_PART_REGISTRATION_DOCTOR);
+            acceptOrEditInitInfo(existingUser, update);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -394,11 +400,6 @@ public class MessagesHandler implements IHandler {
                 .text("Выберите команду")
                 .replyMarkup(replyKeyboardDoctor)
                 .build());
-    }
-
-    private void handleRewritePatientParameters(Update update) throws InterruptedException {
-//        String response = ParseUserPrompt.initPromptParser(update.getMessage().getText());
-
     }
 
     private void handleGivePatientIdStatus(Update update) throws TelegramApiException {
