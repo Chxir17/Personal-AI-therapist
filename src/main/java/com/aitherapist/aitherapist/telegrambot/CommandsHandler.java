@@ -5,10 +5,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.StartClinicPatient;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.GetLastPatientMedicalData;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.HistoryPatients;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.initDataEditor.*;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalEditor.*;
@@ -45,6 +42,7 @@ public class CommandsHandler {
             StartClinicPatient clinicPatientCommand,
             SettingsPatientCommand settingsPatientCommand,
             SettingsDoctorCommand settingsDoctorCommand,
+            DoctorMenu doctorMenu,
             GetLastMessageFromDoctor getLastMessageFromDoctor,
             SendMessageUser sendMessagePatient,
             HistoryPatients getLastParientMedicalData,
@@ -65,12 +63,14 @@ public class CommandsHandler {
 
             EditParameters editParametersCommand,
             EditMedicalData editMedicalDataCommand,
-
+            DoctorPatientsMenu doctorPatientsMenu,
             AcceptInitData acceptInitDataCommand,
             AcceptMedicalData acceptMedicalDataCommand
     ) {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
+                Map.entry("/doctorMenu", doctorMenu),
+                Map.entry("/doctorPatientsMenu", doctorPatientsMenu),
                 Map.entry("/information", informationCommand),
                 Map.entry("/startDoctor", doctorCommand),
                 Map.entry("/botPatient", botPatientCommand),

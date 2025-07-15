@@ -42,7 +42,7 @@ public class InlineKeyboardFactory {
         buttonMap.put("📊 Последние данные", "/getLastRecords");
         buttonMap.put("💬 Сообщение пациенту", "/sendMessageToPatient");
         buttonMap.put("⚙️ Настройки", "/settingsDoctor");
-        buttonMap.put("📅 Запись на приём", "/scheduleAppointment");
+        buttonMap.put("📅 Пацинты ", "/doctorPatientsMenu");
         buttonMap.put("📁 История пациентов", "/patientHistory");
         return createInlineKeyboard(buttonMap, 2);
     }
@@ -54,4 +54,13 @@ public class InlineKeyboardFactory {
         buttonMap.put("🔙 Вернуться в главное меню", "/doctorMenu");
         return createInlineKeyboard(buttonMap, 2);
     }
+
+    public static InlineKeyboardMarkup createPatientManagementKeyboard() {
+        Map<String, String> buttonMap = new LinkedHashMap<>();
+        buttonMap.put("➕ Добавить пациента", "/addPatient");
+        buttonMap.put("👥 Список пациентов", "/patientList");
+        buttonMap.put("ℹ️ Информация о пациенте", "/patientInfo");
+        return createInlineKeyboard(buttonMap, 2);
+    }
+
 }
