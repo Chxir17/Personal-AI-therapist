@@ -63,4 +63,15 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 2);
     }
 
+    public static InlineKeyboardMarkup createPatientDefaultKeyboard() {
+        Map<String, String> buttonMap = new LinkedHashMap<>();
+        buttonMap.put("📊 Ввести daily данные", "/inputDailyData");
+        buttonMap.put("💬 Написать доктору", "/writeToDoctor");
+        buttonMap.put("👤 Мой профиль", "/myProfile");
+        buttonMap.put("⚙️ Настройки", "/patientSettings");
+        buttonMap.put("📈 История показателей", "/myHealthHistory");
+        return createInlineKeyboard(buttonMap, 2);
+    }
+
+
 }

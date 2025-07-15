@@ -152,7 +152,4 @@ public class StartDoctors implements ICommand {
                 .build();
     }
 
-
-
-
 }
