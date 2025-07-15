@@ -96,5 +96,11 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 2);
     }
 
+    public static InlineKeyboardMarkup createAcceptOrEditKeyboard() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("✅ Принять", "/acceptInitData");
+        buttons.put("✏️ Изменить", "/editParameters");
+        return createInlineKeyboard(buttons, 2);
+    }
 
 }

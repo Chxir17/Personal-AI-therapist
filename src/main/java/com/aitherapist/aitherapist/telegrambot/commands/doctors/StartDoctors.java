@@ -21,6 +21,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
@@ -39,18 +40,24 @@ public class StartDoctors implements ICommand {
     private StringBuilder userInput = new StringBuilder();
 
     private SendMessage acceptOrEditDoctorInfo(Doctor doctor, Update update) {
-        Map<String, String> buttons = new HashMap<>();
-        String message = "Вы ввели:\n Имя - " + doctor.getName() +
-                "\n Дата рождения - " + doctor.getAge() +
-                "\n Пол - " + doctor.getGender();
+        String genderDisplay = doctor.getGender() ? "♂ Мужской" : "♀ Женский";
 
-        buttons.put("Принять", "/acceptInitData");
-        buttons.put("Изменить параметры", "/editParameters");
+        String message = String.format("""
+        📝 *Вы ввели данные:*
+        
+        👤 *Имя:* %s
+        🎂 *Возраст:* %d лет
+        🚻 *Пол:* %s
+        """,
+                doctor.getName(),
+                doctor.getAge(),
+                genderDisplay);
 
         return SendMessage.builder()
                 .chatId(String.valueOf(TelegramIdUtils.getChatId(update)))
-                .text(message + "\nВыберите команду")
-                .replyMarkup(InlineKeyboardFactory.createInlineKeyboard(buttons, 2))
+                .text(message + "\n\nВыберите действие:")
+                .parseMode("Markdown")
+                .replyMarkup(InlineKeyboardFactory.createAcceptOrEditKeyboard())
                 .build();
     }
 

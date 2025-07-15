@@ -10,7 +10,7 @@ import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
  */
 public interface IUserService {
     void saveUser(User user);
-    User fetchUser(Long id);
+    User fetchUserByTelegramId(Long id);
     void updateUser(User user, Long id);
     void deleteUser(Long id);
     void deleteUserIfExists(Long id);

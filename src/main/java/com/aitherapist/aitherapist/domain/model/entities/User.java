@@ -41,7 +41,7 @@ public abstract class User {
     private Long id;
 
     @Column(name = "telegram_id", unique = true)
-    private String telegramId;
+    private Long telegramId;
 
     @Column(nullable = false)
     private String name;

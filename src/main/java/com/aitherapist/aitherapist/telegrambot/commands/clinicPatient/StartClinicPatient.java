@@ -57,22 +57,37 @@ public class StartClinicPatient implements ICommand {
         this.sendMessageUser = sendMessageUser;
     }
 
-    private void acceptOrEditMedicalInitData(InitialHealthData dailyHealthData, Update update) throws TelegramApiException {
-        Map<String, String> buttons = new HashMap<>();
-        String message = "Вы ввели:\n Имя - " + patient.getName() + "\n Дата рождения - " + patient.getAge() + "\n Пол - " + patient.getGender() +
-                "\n Аритмия - " + dailyHealthData.getArrhythmia() + "\n Хронические заболевания - " + dailyHealthData.getChronicDiseases() + "\n Вес - "
-                + dailyHealthData.getHeight() + "\n Вес - " + dailyHealthData.getWeight() + "\n Вредные привычки - " + dailyHealthData.getBadHabits();
-        messageSender.sendMessage(update.getMessage().getChatId(), message);
-        buttons.put("Принять", "/acceptClinicPatientInitData");
-        buttons.put("Изменить параметры", "/editPatientMedicalData");
+    private SendMessage acceptOrEditMedicalInitData(InitialHealthData dailyHealthData, Update update) {
+        String genderDisplay = patient.getGender() ? "♂ Мужской" : "♀ Женский";
 
-        InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
+        String message = String.format("""
+        📝 *Вы ввели данные:*
+        
+        👤 *Имя:* %s
+        🎂 *Дата рождения:* %s
+        🚻 *Пол:* %s
+        
+        💓 *Аритмия:* %s
+        🏥 *Хронические заболевания:* %s
+        📏 *Рост:* %s
+        ⚖️ *Вес:* %s
+        🚬 *Вредные привычки:* %s
+        """,
+                patient.getName(),
+                patient.getAge(),
+                genderDisplay,
+                dailyHealthData.getArrhythmia(),
+                dailyHealthData.getChronicDiseases(),
+                dailyHealthData.getHeight(),
+                dailyHealthData.getWeight(),
+                dailyHealthData.getBadHabits());
 
-        messageSender.sendMessage(SendMessage.builder()
+        return SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text("Выберите команду")
-                .replyMarkup(replyKeyboardDoctor)
-                .build());
+                .text(message + "\n\nВыберите действие:")
+                .parseMode("Markdown")
+                .replyMarkup(InlineKeyboardFactory.createAcceptOrEditKeyboard())
+                .build();
     }
 
     private SendMessage handleQuestionnaire(Update update) throws TelegramApiException, InterruptedException, JsonProcessingException {

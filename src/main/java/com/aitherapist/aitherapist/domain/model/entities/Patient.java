@@ -16,7 +16,7 @@ public abstract class Patient extends User {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DailyHealthData> dailyHealthDataList = new ArrayList<>();
-    @ManyToOne //FIXME
+    @ManyToOne
     private InitialHealthData initialData;
     public void editInitialData(DailyHealthData dailyHealthData, Long healthDataId) {}
 

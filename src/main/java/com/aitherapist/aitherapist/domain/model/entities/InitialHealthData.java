@@ -39,6 +39,10 @@ public class InitialHealthData implements Serializable{
     @Column(name = "bad_habits")
     private String badHabits;
 
+    @OneToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
+
 
     @Override
     public String toString() {

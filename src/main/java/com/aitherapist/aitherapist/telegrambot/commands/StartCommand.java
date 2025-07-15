@@ -49,9 +49,9 @@ public class StartCommand implements ICommand {
 
         if (!userRegistrationService.isSignUp(userId)) {
             Map<String, String> buttons = new HashMap<>();
-            buttons.put("Доктор", "/startDoctor");
-            buttons.put("Пациент не привязанный к клинике", "/clinicPatient");
-            buttons.put("Пациент клиники", "/botPatient");
+            buttons.put("Я Доктор", "/startDoctor");
+            buttons.put("Я Пациент не привязанный к клинике", "/clinicPatient");
+            buttons.put("Я Пациент клиники", "/botPatient");
 
             InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 3);
             registrationContext.startRegistration(chatId);
@@ -74,7 +74,10 @@ public class StartCommand implements ICommand {
                     .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
                     .build();
         }
-        else if()
+        else {
+            return SendMessage.builder().chatId(TelegramIdUtils.getChatId(update)).text(Answers.START_MESSAGE
+                    .getMessage()).replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard()).build();
+        }
 
     }
 

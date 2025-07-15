@@ -4,6 +4,7 @@ import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -20,14 +21,13 @@ public class HistoryPatients implements ICommand {
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        Long doctorId = extractUserId(update);
-        Long chatId = getChatId(update);
+        Long doctorId = TelegramIdUtils.extractUserId(update);
+        Long chatId = TelegramIdUtils.getChatId(update);
 
         if (doctorId == null) {
             return new SendMessage(chatId.toString(), "❌ Ошибка: не удалось определить ваш профиль врача");
         }
 
-        System.out.println("doctorId - " + doctorId);
         List<Patient> patients = doctorService.getPatients(doctorId);
 
         if (patients.isEmpty()) {
@@ -90,23 +90,5 @@ public class HistoryPatients implements ICommand {
         return healthInfo.toString();
     }
 
-    private Long extractUserId(Update update) {
-        if (update.hasMessage()) {
-            return update.getMessage().getFrom().getId();
-        }
-        if (update.hasCallbackQuery()) {
-            return update.getCallbackQuery().getFrom().getId();
-        }
-        return null;
-    }
 
-    private Long getChatId(Update update) {
-        if (update.hasMessage()) {
-            return update.getMessage().getChatId();
-        }
-        if (update.hasCallbackQuery()) {
-            return update.getCallbackQuery().getMessage().getChatId();
-        }
-        return null;
-    }
 }

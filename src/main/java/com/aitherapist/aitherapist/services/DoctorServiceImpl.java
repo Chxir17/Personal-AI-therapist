@@ -25,8 +25,7 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     public Doctor getDoctor(Long doctorId) {
-        return doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new RuntimeException("Доктор с ID " + doctorId + " не найден"));
+        return doctorRepository.getByTelegramId(doctorId);
     }
 
     @Override
@@ -111,8 +110,8 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     @Transactional
-    public Doctor createDoctor(Long userId, Doctor doctorInput) {
-        Optional<Doctor> existingDoctor = doctorRepository.findById(userId);
+    public Doctor createDoctor(Long userTelegramId, Doctor doctorInput) {
+        Optional<Doctor> existingDoctor = doctorRepository.findByTelegramId(userTelegramId);
 
         if (existingDoctor.isPresent()) {
             Doctor existing = existingDoctor.get();
@@ -127,13 +126,14 @@ public class DoctorServiceImpl implements IDoctorService {
             return doctorRepository.save(existing);
         } else {
             doctorInput.setId(null);
+            doctorInput.setTelegramId(userTelegramId);
             return doctorRepository.save(doctorInput);
         }
     }
 
     @Override
     public List<DailyHealthData> getDailyHealthData(Long id, Long userId, Long healthDataId) {
-        Doctor doctor = doctorRepository.getById(id);
+        Doctor doctor = doctorRepository.getByTelegramId(id);
         ClinicPatient clinicPatient = doctor.getPatientById(userId);
         return clinicPatient.getDailyHealthDataList();
     }
