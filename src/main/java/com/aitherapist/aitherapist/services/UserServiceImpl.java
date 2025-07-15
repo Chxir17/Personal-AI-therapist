@@ -123,8 +123,8 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public void editUserHealthData(User user, Long id, HealthData healthData) {
-        editUserHealthData(user, id, healthData);
+    public void editUserHealthData(User user, Long id, dailyHealthData dailyHealthData) {
+        editUserHealthData(user, id, dailyHealthData);
     }
 
     @Override

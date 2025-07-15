@@ -1,7 +1,7 @@
 package com.aitherapist.aitherapist.interactionWithGigaApi;
 
 import chat.giga.model.completion.ChatMessage;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
+import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
 import java.util.*;
@@ -10,56 +10,12 @@ import com.aitherapist.aitherapist.domain.model.entities.User;
 import static com.aitherapist.aitherapist.domain.model.entities.Patient.makeDataList;
 
 public class MakeMedicalRecommendation {
-    //FIXME: переписать
-    public static User user;
 
-    public static Map<String, String> MakeMetaInformation(Patient patient) {
-        var result = new LinkedHashMap<String, String>();
-        result.put("name", makeDataList(List.of(user.getName())));
-        result.put("age", makeDataList(List.of(user.getAge() != null ? String.valueOf(user.getAge()) : "null")));
-        result.put("male", makeDataList(List.of(user.getGender() != null ? String.valueOf(user.getGender()) : "null")));
-        return result;
-    }
 
-    public static Map<String, String> buildMedicalHistory(Patient patient) {
-        var result = new LinkedHashMap<String, String>();
-
-        List<HealthData> history = patient.getHealthDataList();
-
-        result.put("bloodOxygenLevel", makeDataList(
-                history.stream().map(HealthData::getBloodOxygenLevel).toList()
-        ));
-
-        result.put("temperature", makeDataList(
-                history.stream().map(HealthData::getTemperature).toList()
-        ));
-
-        result.put("hoursOfSleepToday", makeDataList(
-                history.stream().map(HealthData::getHoursOfSleepToday).toList()
-        ));
-
-        result.put("pulse", makeDataList(
-                history.stream().map(HealthData::getPulse).toList()
-        ));
-
-        result.put("pressure", makeDataList(
-                history.stream().map(HealthData::getPressure).toList()
-        ));
-
-        result.put("heartPain", makeDataList(
-                history.stream().map(HealthData::getHeartPain).toList()
-        ));
-
-        result.put("arrhythmia", makeDataList(
-                history.stream().map(HealthData::getArrhythmia).toList()
-        ));
-
-        return result;
-    }
 
     public static String giveMedicalRecommendation(Patient patient){
         String token = Llm.getGigaChatToken();
-        Map<String,String> metaInfo = MakeMedicalRecommendation.MakeMetaInformation(patient);
+        Map<String,String> metaInfo = makeMetaInformation(patient);
         Map<String,String> parametersHistory = patient.buildMedicalHistory();
         String systemPrompt = """
                 [Роль для модели]: Ты — опытный терапевт.

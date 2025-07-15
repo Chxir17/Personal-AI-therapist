@@ -2,7 +2,7 @@ package com.aitherapist.aitherapist.services;
 
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
+import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IDoctorRepository;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -57,7 +55,7 @@ public class DoctorServiceImpl implements IDoctorService {
 
         updatedPatient.setId(patientId);
         updatedPatient.getDoctors().addAll(existingPatient.getDoctors());
-        updatedPatient.setHealthDataList(existingPatient.getHealthDataList());
+        updatedPatient.setDailyHealthDataList(existingPatient.getDailyHealthDataList());
         doctor.getPatients().remove(existingPatient);
         doctor.getPatients().add(updatedPatient);
         doctorRepository.save(doctor);
@@ -102,19 +100,19 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     @Transactional
-    public HealthData updateUserHealthData(Long doctorId, Long patientId, HealthData healthData) {
+    public dailyHealthData updateUserHealthData(Long doctorId, Long patientId, dailyHealthData dailyHealthData) {
         ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
-        patient.editHealthData(healthData, healthData.getId());
-        return healthData;
+        patient.editHealthData(dailyHealthData, dailyHealthData.getId());
+        return dailyHealthData;
     }
 
     @Override
     @Transactional
-    public HealthData createUserHealthData(Long doctorId, Long patientId, HealthData healthData) {
+    public dailyHealthData createUserHealthData(Long doctorId, Long patientId, dailyHealthData dailyHealthData) {
         ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
-        healthData.setId(null); //
-        patient.editHealthData(healthData, -1L);
-        return healthData;
+        dailyHealthData.setId(null); //
+        patient.editHealthData(dailyHealthData, -1L);
+        return dailyHealthData;
     }
 
     @Override
@@ -125,8 +123,8 @@ public class DoctorServiceImpl implements IDoctorService {
     }
 
     @Override
-    public List<HealthData> getUserHealthData(Long doctorId, Long userId) {
-        return getPatientById(doctorId, userId).getHealthDataList();
+    public List<dailyHealthData> getUserHealthData(Long doctorId, Long userId) {
+        return getPatientById(doctorId, userId).getDailyHealthDataList();
     }
 
     @Override

@@ -15,73 +15,56 @@ import java.util.*;
 public abstract class Patient extends User {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HealthData> healthDataList = new ArrayList<>();
+    private List<dailyHealthData> dailyHealthDataList = new ArrayList<>();
+    @ManyToOne //FIXME
+    private InitialHealthData initialData;
+    public void editInitialData(dailyHealthData dailyHealthData, Long healthDataId) {}
 
-    public void editHealthData(HealthData healthData, Long healthDataId) {
-        healthDataList.stream()
+    public void editHealthData(dailyHealthData dailyHealthData, Long healthDataId) {
+        dailyHealthDataList.stream()
                 .filter(hd -> Objects.equals(hd.getId(), healthDataId))
                 .findFirst()
                 .ifPresentOrElse(
                         existingHd -> {
-                            BeanUtils.copyProperties(healthData, existingHd, "id", "patient");
+                            BeanUtils.copyProperties(dailyHealthData, existingHd, "id", "patient");
                             existingHd.setPatient(this);
                         },
                         () -> {
-                            healthData.setPatient(this);
-                            healthDataList.add(healthData);
+                            dailyHealthData.setPatient(this);
+                            dailyHealthDataList.add(dailyHealthData);
                         }
                 );
     }
 
     public void removeHealthData(Long healthDataId) {
-        healthDataList.removeIf(hd -> Objects.equals(hd.getId(), healthDataId));
+        dailyHealthDataList.removeIf(hd -> Objects.equals(hd.getId(), healthDataId));
     }
 
-    public static <T> String makeDataList(List<T> values){
-        StringBuilder sb = new StringBuilder();
-        for (T val : values) {
-            sb.append(val).append(", ");
-        }
-        if (!values.isEmpty()) {
-            sb.setLength(sb.length() - 2);
-        }
-        return sb.toString();
-    }
 
     public Map<String, String> buildMedicalHistory() {
         var result = new LinkedHashMap<String, String>();
 
-        List<HealthData> history = this.getHealthDataList();
+        List<dailyHealthData> history = this.getDailyHealthDataList();
 
         result.put("bloodOxygenLevel", makeDataList(
-                history.stream().map(HealthData::getBloodOxygenLevel).toList()
+                history.stream().map(dailyHealthData::getBloodOxygenLevel).toList()
         ));
 
         result.put("temperature", makeDataList(
-                history.stream().map(HealthData::getTemperature).toList()
+                history.stream().map(dailyHealthData::getTemperature).toList()
         ));
 
         result.put("hoursOfSleepToday", makeDataList(
-                history.stream().map(HealthData::getHoursOfSleepToday).toList()
+                history.stream().map(dailyHealthData::getHoursOfSleepToday).toList()
         ));
 
         result.put("pulse", makeDataList(
-                history.stream().map(HealthData::getPulse).toList()
+                history.stream().map(dailyHealthData::getPulse).toList()
         ));
 
         result.put("pressure", makeDataList(
-                history.stream().map(HealthData::getPressure).toList()
+                history.stream().map(dailyHealthData::getPressure).toList()
         ));
-
-
-        result.put("heartPain", makeDataList(
-                history.stream().map(HealthData::getHeartPain).toList()
-        ));
-
-        result.put("arrhythmia", makeDataList(
-                history.stream().map(HealthData::getArrhythmia).toList()
-        ));
-
         return result;
     }
 }

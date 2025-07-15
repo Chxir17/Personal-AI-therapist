@@ -30,34 +30,34 @@ public class GetLastPatientMedicalData implements ICommand {
 
 //    private Map<String, List<String>> getPatientHealthData(Patient patient) {
 //        Map<String, List<String>> result = new LinkedHashMap<>();
-//        List<HealthData> history = patient.getHealthDataList();
+//        List<dailyHealthData> history = patient.getDailyHealthDataList();
 //
 //        result.put("bloodOxygenLevel", (List<String>) makeDataList(
-//                history.stream().map(HealthData::getBloodOxygenLevel).toList()
+//                history.stream().map(dailyHealthData::getBloodOxygenLevel).toList()
 //        ));
 //
 //        result.put("temperature", makeDataList(
-//                history.stream().map(HealthData::getTemperature).toList()
+//                history.stream().map(dailyHealthData::getTemperature).toList()
 //        ));
 //
 //        result.put("hoursOfSleepToday", makeDataList(
-//                history.stream().map(HealthData::getHoursOfSleepToday).toList()
+//                history.stream().map(dailyHealthData::getHoursOfSleepToday).toList()
 //        ));
 //
 //        result.put("pulse", makeDataList(
-//                history.stream().map(HealthData::getPulse).toList()
+//                history.stream().map(dailyHealthData::getPulse).toList()
 //        ));
 //
 //        result.put("pressure", makeDataList(
-//                history.stream().map(HealthData::getPressure).toList()
+//                history.stream().map(dailyHealthData::getPressure).toList()
 //        ));
 //
 //        result.put("heartPain", makeDataList(
-//                history.stream().map(HealthData::getHeartPain).toList()
+//                history.stream().map(dailyHealthData::getHeartPain).toList()
 //        ));
 //
 //        result.put("arrhythmia", makeDataList(
-//                history.stream().map(HealthData::getArrhythmia).toList()
+//                history.stream().map(dailyHealthData::getArrhythmia).toList()
 //        ));
 //
 //        return result;

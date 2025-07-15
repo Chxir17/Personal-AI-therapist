@@ -61,15 +61,15 @@ public class HistoryPatients implements ICommand {
     }
 
     private String getHealthDataInfo(Patient patient) {
-        List<HealthData> healthDataList = patient.getHealthDataList();
-        if (healthDataList.isEmpty()) {
+        List<dailyHealthData> dailyHealthDataList = patient.getDailyHealthDataList();
+        if (dailyHealthDataList.isEmpty()) {
             return "<i>Медицинские данные отсутствуют</i>";
         }
 
         StringBuilder healthInfo = new StringBuilder("<b>📊 Медицинские показатели:</b>\n");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
-        for (HealthData data : healthDataList) {
+        for (dailyHealthData data : dailyHealthDataList) {
             healthInfo.append(String.format(
                             "🫀 <b>Пульс:</b> %d\n" +
                             "💊 <b>Давление:</b> %s\n" +
