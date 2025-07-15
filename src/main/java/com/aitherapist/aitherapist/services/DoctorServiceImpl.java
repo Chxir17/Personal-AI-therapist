@@ -2,7 +2,7 @@ package com.aitherapist.aitherapist.services;
 
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IDoctorRepository;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
@@ -100,7 +100,7 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     @Transactional
-    public dailyHealthData updateUserHealthData(Long doctorId, Long patientId, dailyHealthData dailyHealthData) {
+    public DailyHealthData updateUserHealthData(Long doctorId, Long patientId, DailyHealthData dailyHealthData) {
         ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
         patient.editHealthData(dailyHealthData, dailyHealthData.getId());
         return dailyHealthData;
@@ -108,7 +108,7 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     @Transactional
-    public dailyHealthData createUserHealthData(Long doctorId, Long patientId, dailyHealthData dailyHealthData) {
+    public DailyHealthData createUserHealthData(Long doctorId, Long patientId, DailyHealthData dailyHealthData) {
         ClinicPatient patient = (ClinicPatient) getPatientById(doctorId, patientId);
         dailyHealthData.setId(null); //
         patient.editHealthData(dailyHealthData, -1L);
@@ -123,7 +123,7 @@ public class DoctorServiceImpl implements IDoctorService {
     }
 
     @Override
-    public List<dailyHealthData> getUserHealthData(Long doctorId, Long userId) {
+    public List<DailyHealthData> getUserHealthData(Long doctorId, Long userId) {
         return getPatientById(doctorId, userId).getDailyHealthDataList();
     }
 

@@ -4,7 +4,7 @@ import com.aitherapist.aitherapist.domain.model.FirstPartReg;
 import com.aitherapist.aitherapist.domain.model.SecondPartReg;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
-import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.services.HealthDataServiceImpl;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
@@ -369,22 +369,22 @@ public class MessagesHandler implements IHandler {
 //        }
     }
 
-    private void acceptOrEditMedicalInitData(dailyHealthData dailyHealthData, Update update) throws TelegramApiException {
-        Map<String, String> buttons = new HashMap<>();
-        String message = "Вы ввели:\n Аритмия - " + dailyHealthData.getArrhythmia() + "\n Хронические заболевания - " + dailyHealthData.getChronicDiseases() + "\n Вес - "
-                + dailyHealthData.getHeight() + "\n Вес - " + dailyHealthData.getWeight() + "\n Вредные привычки - " + dailyHealthData.getBadHabits();
-        messageSender.sendMessage(update.getMessage().getChatId(), message);
-        buttons.put("Принять", "/acceptMedicalData");
-        buttons.put("Изменить параметры", "/editMedicalData");
-
-        InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
-
-        messageSender.sendMessage(SendMessage.builder()
-                .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text("Выберите команду")
-                .replyMarkup(replyKeyboardDoctor)
-                .build());
-    }
+//    private void acceptOrEditMedicalInitData(dailyHealthData dailyHealthData, Update update) throws TelegramApiException {
+//        Map<String, String> buttons = new HashMap<>();
+//        String message = "Вы ввели:\n Аритмия - " + dailyHealthData.getArrhythmia() + "\n Хронические заболевания - " + dailyHealthData.getChronicDiseases() + "\n Вес - "
+//                + dailyHealthData.getHeight() + "\n Вес - " + dailyHealthData.getWeight() + "\n Вредные привычки - " + dailyHealthData.getBadHabits();
+//        messageSender.sendMessage(update.getMessage().getChatId(), message);
+//        buttons.put("Принять", "/acceptMedicalData");
+//        buttons.put("Изменить параметры", "/editMedicalData");
+//
+//        InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
+//
+//        messageSender.sendMessage(SendMessage.builder()
+//                .chatId(String.valueOf(update.getMessage().getChatId()))
+//                .text("Выберите команду")
+//                .replyMarkup(replyKeyboardDoctor)
+//                .build());
+//    }
 
     private void acceptOrEditInitInfo(User user, Update update) throws TelegramApiException {
         Map<String, String> buttons = new HashMap<>();
@@ -428,7 +428,7 @@ public class MessagesHandler implements IHandler {
     private void handleHealthData(long chatId, long userId, String messageText, Update update)
             throws TelegramApiException, JsonProcessingException {
         sendInitialResponse(chatId);
-        dailyHealthData dailyHealthData = parseHealthData(messageText);
+        DailyHealthData dailyHealthData = parseHealthData(messageText);
         saveHealthData(userId, dailyHealthData);
         String recommendation = generateMedicalRecommendation(update);
         if (recommendation != null) {
@@ -437,19 +437,19 @@ public class MessagesHandler implements IHandler {
 
     }
 
-    private dailyHealthData parseHealthData(String messageText) throws JsonProcessingException {
+    private DailyHealthData parseHealthData(String messageText) throws JsonProcessingException {
         String rawJsonResponse = ParseUserPrompt.dailyQuestionnaireParser(messageText);
 
         String cleanJson = cleanJsonResponse(rawJsonResponse);
         System.out.println(cleanJson);
-        return mapper.readValue(cleanJson, dailyHealthData.class);
+        return mapper.readValue(cleanJson, DailyHealthData.class);
     }
 
     private String cleanJsonResponse(String jsonResponse) {
         return jsonResponse.replaceAll("```json|```", "").trim();
     }
 
-    private void saveHealthData(long userId, dailyHealthData dailyHealthData) {
+    private void saveHealthData(long userId, DailyHealthData dailyHealthData) {
         patientService.addPatientHealthData(userId, dailyHealthData);
     }
 

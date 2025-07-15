@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.services;
 
-import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IHealthDataRepository;
 import com.aitherapist.aitherapist.repositories.IPatientRepository;
@@ -27,7 +27,7 @@ public class HealthDataServiceImpl implements IHealthDataService {
 
     @Override
     @Transactional
-    public dailyHealthData saveHealthDataInUser(Long userId, dailyHealthData dailyHealthData) {
+    public DailyHealthData saveHealthDataInUser(Long userId, DailyHealthData dailyHealthData) {
         Patient patient = patientRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
         dailyHealthData = healthDataRepository.save(dailyHealthData);
@@ -37,7 +37,7 @@ public class HealthDataServiceImpl implements IHealthDataService {
     }
 
     @Override
-    public List<dailyHealthData> fetchHealthDataList(Long id) {
+    public List<DailyHealthData> fetchHealthDataList(Long id) {
         return patientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient not found"))
                 .getDailyHealthDataList();
@@ -45,8 +45,8 @@ public class HealthDataServiceImpl implements IHealthDataService {
 
     @Override
     @Transactional
-    public dailyHealthData updateHealthData(dailyHealthData dailyHealthData, Long userId) {
-        dailyHealthData currentDailyHealthData = healthDataRepository.findById(dailyHealthData.getId())
+    public DailyHealthData updateHealthData(DailyHealthData dailyHealthData, Long userId) {
+        DailyHealthData currentDailyHealthData = healthDataRepository.findById(dailyHealthData.getId())
                 .orElseThrow(() -> new RuntimeException("Health data not found"));
 
         patientRepository.findById(userId)
@@ -60,7 +60,7 @@ public class HealthDataServiceImpl implements IHealthDataService {
     @Override
     @Transactional
     public void deleteHealthData(Long healthDataId) {
-        dailyHealthData dailyHealthData = healthDataRepository.findById(healthDataId)
+        DailyHealthData dailyHealthData = healthDataRepository.findById(healthDataId)
                 .orElseThrow(() -> new RuntimeException("Health data not found"));
         healthDataRepository.delete(dailyHealthData);
     }

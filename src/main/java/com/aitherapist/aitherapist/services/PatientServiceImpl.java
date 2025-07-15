@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.services;
 
-import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IPatientRepository;
 import com.aitherapist.aitherapist.services.interfaces.IPatientService;
@@ -59,7 +59,7 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional
-    public void editPatientHealthData(Patient patient, dailyHealthData dailyHealthData) {
+    public void editPatientHealthData(Patient patient, DailyHealthData dailyHealthData) {
         Patient existingPatient = patientRepository.findById(patient.getId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
@@ -69,7 +69,7 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional
-    public void addPatientHealthData(Long id, dailyHealthData dailyHealthData) {
+    public void addPatientHealthData(Long id, DailyHealthData dailyHealthData) {
         Patient existingPatient = patientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
@@ -80,7 +80,7 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional
-    public void editPatientHealthData(Long patientId, dailyHealthData dailyHealthData) {
+    public void editPatientHealthData(Long patientId, DailyHealthData dailyHealthData) {
         Patient existingPatient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
@@ -101,7 +101,7 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<dailyHealthData> getPatientHealthData(Long patientId) {
+    public List<DailyHealthData> getPatientHealthData(Long patientId) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 

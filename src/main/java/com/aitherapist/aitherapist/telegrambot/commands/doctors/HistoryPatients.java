@@ -61,7 +61,7 @@ public class HistoryPatients implements ICommand {
     }
 
     private String getHealthDataInfo(Patient patient) {
-        List<dailyHealthData> dailyHealthDataList = patient.getDailyHealthDataList();
+        List<DailyHealthData> dailyHealthDataList = patient.getDailyHealthDataList();
         if (dailyHealthDataList.isEmpty()) {
             return "<i>Медицинские данные отсутствуют</i>";
         }
@@ -69,7 +69,7 @@ public class HistoryPatients implements ICommand {
         StringBuilder healthInfo = new StringBuilder("<b>📊 Медицинские показатели:</b>\n");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
-        for (dailyHealthData data : dailyHealthDataList) {
+        for (DailyHealthData data : dailyHealthDataList) {
             healthInfo.append(String.format(
                             "🫀 <b>Пульс:</b> %d\n" +
                             "💊 <b>Давление:</b> %s\n" +

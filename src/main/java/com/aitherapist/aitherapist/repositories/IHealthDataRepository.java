@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.repositories;
 
-import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
  * (for works with database. aka.dao)
  */
 @Repository
-public interface IHealthDataRepository extends JpaRepository<dailyHealthData, Long>  {
+public interface IHealthDataRepository extends JpaRepository<DailyHealthData, Long>  {
 }

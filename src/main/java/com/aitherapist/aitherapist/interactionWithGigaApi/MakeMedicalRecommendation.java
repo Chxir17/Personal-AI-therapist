@@ -1,13 +1,11 @@
 package com.aitherapist.aitherapist.interactionWithGigaApi;
 
 import chat.giga.model.completion.ChatMessage;
-import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
 import java.util.*;
-import com.aitherapist.aitherapist.domain.model.entities.User;
 
-import static com.aitherapist.aitherapist.domain.model.entities.Patient.makeDataList;
+import static com.aitherapist.aitherapist.domain.model.entities.User.makeMetaInformation;
 
 public class MakeMedicalRecommendation {
 

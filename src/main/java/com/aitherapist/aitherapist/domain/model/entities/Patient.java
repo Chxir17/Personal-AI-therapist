@@ -15,12 +15,12 @@ import java.util.*;
 public abstract class Patient extends User {
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<dailyHealthData> dailyHealthDataList = new ArrayList<>();
+    private List<DailyHealthData> dailyHealthDataList = new ArrayList<>();
     @ManyToOne //FIXME
     private InitialHealthData initialData;
-    public void editInitialData(dailyHealthData dailyHealthData, Long healthDataId) {}
+    public void editInitialData(DailyHealthData dailyHealthData, Long healthDataId) {}
 
-    public void editHealthData(dailyHealthData dailyHealthData, Long healthDataId) {
+    public void editHealthData(DailyHealthData dailyHealthData, Long healthDataId) {
         dailyHealthDataList.stream()
                 .filter(hd -> Objects.equals(hd.getId(), healthDataId))
                 .findFirst()
@@ -44,26 +44,26 @@ public abstract class Patient extends User {
     public Map<String, String> buildMedicalHistory() {
         var result = new LinkedHashMap<String, String>();
 
-        List<dailyHealthData> history = this.getDailyHealthDataList();
+        List<DailyHealthData> history = this.getDailyHealthDataList();
 
         result.put("bloodOxygenLevel", makeDataList(
-                history.stream().map(dailyHealthData::getBloodOxygenLevel).toList()
+                history.stream().map(DailyHealthData::getBloodOxygenLevel).toList()
         ));
 
         result.put("temperature", makeDataList(
-                history.stream().map(dailyHealthData::getTemperature).toList()
+                history.stream().map(DailyHealthData::getTemperature).toList()
         ));
 
         result.put("hoursOfSleepToday", makeDataList(
-                history.stream().map(dailyHealthData::getHoursOfSleepToday).toList()
+                history.stream().map(DailyHealthData::getHoursOfSleepToday).toList()
         ));
 
         result.put("pulse", makeDataList(
-                history.stream().map(dailyHealthData::getPulse).toList()
+                history.stream().map(DailyHealthData::getPulse).toList()
         ));
 
         result.put("pressure", makeDataList(
-                history.stream().map(dailyHealthData::getPressure).toList()
+                history.stream().map(DailyHealthData::getPressure).toList()
         ));
         return result;
     }

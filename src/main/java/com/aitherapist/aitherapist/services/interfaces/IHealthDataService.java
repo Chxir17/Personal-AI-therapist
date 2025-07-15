@@ -1,5 +1,5 @@
 package com.aitherapist.aitherapist.services.interfaces;
-import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import java.util.List;
  * Defines methods for CRUD operations and additional business logic
  */
 public interface IHealthDataService {
-    dailyHealthData saveHealthDataInUser(Long userId, dailyHealthData dailyHealthData);
-    List<dailyHealthData> fetchHealthDataList(Long userId);
-    dailyHealthData updateHealthData(dailyHealthData dailyHealthData, Long userId);
+    DailyHealthData saveHealthDataInUser(Long userId, DailyHealthData dailyHealthData);
+    List<DailyHealthData> fetchHealthDataList(Long userId);
+    DailyHealthData updateHealthData(DailyHealthData dailyHealthData, Long userId);
     void deleteHealthData(Long userId);
 }

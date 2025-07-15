@@ -16,7 +16,7 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "health_data")
-public class dailyHealthData implements Serializable {
+public class DailyHealthData implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,7 +2,7 @@ package com.aitherapist.aitherapist.services.interfaces;
 
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.dailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 
 import java.util.List;
@@ -15,9 +15,9 @@ public interface IDoctorService {
     void deletePatient(Long doctorId, ClinicPatient patient);
     ClinicPatient createPatient(Long doctorId, ClinicPatient patient);
     void deleteAllPatients(Long doctorId);
-    dailyHealthData updateUserHealthData(Long doctorId, Long userId, dailyHealthData dailyHealthData);
-    dailyHealthData createUserHealthData(Long doctorId, Long userId, dailyHealthData dailyHealthData);
+    DailyHealthData updateUserHealthData(Long doctorId, Long userId, DailyHealthData dailyHealthData);
+    DailyHealthData createUserHealthData(Long doctorId, Long userId, DailyHealthData dailyHealthData);
     void deleteUserHealthData(Long doctorId, Long userId, Long healthDataId);
-    List<dailyHealthData> getUserHealthData(Long doctorId, Long userId);
+    List<DailyHealthData> getUserHealthData(Long doctorId, Long userId);
     void createDoctor(Long id, Doctor doctor);
 }
