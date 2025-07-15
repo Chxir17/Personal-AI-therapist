@@ -2,10 +2,11 @@ package com.aitherapist.aitherapist.interactionWithGigaApi;
 
 import chat.giga.model.completion.ChatMessage;
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
-
+@Component
 public class ParseUserPrompt {
 
     public static String patientRegistrationParser(String userMessage) throws InterruptedException {
