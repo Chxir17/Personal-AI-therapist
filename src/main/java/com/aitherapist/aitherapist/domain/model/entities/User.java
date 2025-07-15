@@ -40,6 +40,9 @@ public abstract class User {
     @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
     private Long id;
 
+    @Column(name = "telegram_id", unique = true)
+    private String telegramId;
+
     @Column(nullable = false)
     private String name;
 
