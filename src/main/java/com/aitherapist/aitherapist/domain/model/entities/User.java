@@ -29,7 +29,7 @@ public abstract class User {
     private String name;
 
     @Column(name = "birth_date")
-    private LocalDate birthDate; 
+    private LocalDate birthDate;
 
     private Boolean gender;
     private String phoneNumber;
