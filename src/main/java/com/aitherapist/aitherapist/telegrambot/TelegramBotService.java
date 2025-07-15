@@ -16,7 +16,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
 import com.aitherapist.aitherapist.domain.enums.HypertensionQA;
-import com.aitherapist.aitherapist.telegrambot.scheduled.TelegramNotificationService;
+//import com.aitherapist.aitherapist.telegrambot.scheduled.TelegramNotificationService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -31,7 +31,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final BotProperties botProperties;
     private final CommandsHandler commandsHandler;
     private final @Lazy MessagesHandler messagesHandler;
-    private final TelegramNotificationService notificationService;
+//    private final TelegramNotificationService notificationService;
     private final TelegramMessageSender telegramSender; // Предполагаем, что у вас есть этот интерфейс
     @Autowired
     private RegistrationContext registrationContext;
@@ -46,55 +46,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         return botProperties.getName();
     }
 
-    //FIXME: добавить куда-то:
-    // time - имеет формат час:минуты
-    public void notificationFunction(Update update, String time) throws TelegramApiException {
-        Long chatId = update.getMessage().getChatId();
-        try {
-            String[] parts = time.split(" ");
-            String timeString = parts[parts.length - 1];
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-            var parsedTime = formatter.parse(timeString);
-
-            LocalDateTime triggerTime = LocalDateTime.now()
-                    .withHour(parsedTime.get(ChronoField.HOUR_OF_DAY))
-                    .withMinute(parsedTime.get(ChronoField.MINUTE_OF_HOUR))
-                    .withSecond(0);
-
-            if (triggerTime.isBefore(LocalDateTime.now())) {
-                triggerTime = triggerTime.plusDays(1);
-            }
-
-            HypertensionQA[] articles = HypertensionQA.values();
-            HypertensionQA randomArticle = articles[new Random().nextInt(articles.length)];
-
-            String articleText = String.format("%s\n\n%s",
-                    randomArticle.getQuestion(),
-                    randomArticle.getAnswer());
-
-            Long notificationId = notificationService.scheduleNotification(
-                    chatId,
-                    articleText,
-                    triggerTime,
-                    null
-            );
-
-            String confirmation = String.format(
-                    "✅ Статья о гипертонии будет отправлена в %s:\n\n<b>%s</b>",
-                    formatter.format(triggerTime),
-                    randomArticle.getQuestion()
-            );
-
-            telegramSender.sendMessage(chatId, confirmation);
-
-        } catch (DateTimeParseException e) {
-            telegramSender.sendMessage(chatId, "⏰ Неверный формат времени. Используйте HH:mm, например: 15:30");
-        } catch (Exception e) {
-            telegramSender.sendMessage(chatId, "❌ Ошибка при планировании уведомления");
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public void onUpdateReceived(Update update) {

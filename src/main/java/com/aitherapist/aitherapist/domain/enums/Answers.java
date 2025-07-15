@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.domain.enums;
 
 public enum Answers {
+    GIVE_NAME("Введите ваше имя"),
     START_MESSAGE("Привет! Я ваш телеграм-бот. Вы уже зарегистрированы и вам надо написать свои симптомы чтобы я смог вам помочь."),
     INITIAL_INFO_ABOUT_BOT("Это бот который поможет вам следить за вашем здоровьем..."),
     INFORMATION_MESSAGE("""

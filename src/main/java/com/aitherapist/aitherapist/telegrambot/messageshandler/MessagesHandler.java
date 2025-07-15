@@ -1,5 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
+import com.aitherapist.aitherapist.domain.model.FirstPartReg;
+import com.aitherapist.aitherapist.domain.model.SecondPartReg;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
@@ -47,6 +49,10 @@ public class MessagesHandler implements IHandler {
     @Autowired
     PatientServiceImpl patientService;
     @Autowired
+    private SecondPartReg secondPartReg;
+    @Autowired
+    private FirstPartReg firstPartReg;
+    @Autowired
     private final UserServiceImpl userService;
     @Autowired
     private final HealthDataServiceImpl healthDataServiceImpl;
@@ -59,62 +65,19 @@ public class MessagesHandler implements IHandler {
     private DoctorServiceImpl doctorService;
     private PatientServiceImpl patientServiceImpl;
 
-    public static class FirstPartReg {
-        public String name;
-        public String age;
-        public String gender;
-        public int currentParam = 1;
-
-        @Override
-        public String toString() {
-            return "FirstPartReg {\n" +
-                    "  name = '" + name + "',\n" +
-                    "  age = '" + age + "',\n" +
-                    "  gender = '" + gender + "',\n" +
-                    '}';
-        }
-    }
-
-    public static class SecondPartReg {
-        public String arrhythmia;
-        public String chronicDiseases;
-        public String height;
-        public String weight;
-        public String badHabits;
-        public int currentParam = 1;
-
-        @Override
-        public String toString() {
-            return "SecondPartReg {\n" +
-                    "  arrhythmia = '" + arrhythmia + "',\n" +
-                    "  chronicDiseases = '" + chronicDiseases + "',\n" +
-                    "  height = '" + height + "',\n" +
-                    "  weight = '" + weight + "',\n" +
-                    "  badHabits = '" + badHabits + "'\n" +
-                    '}';
-        }
-    }
-    SecondPartReg secondPartReg;
-    FirstPartReg firstPartReg;
-
-
     @Override
     public void handle(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         this.registrationContext = registrationContext;
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
-
-        if (registrationContext.isRegistrationInProgress(chatId)) {
-            handleRegistration(chatId, userId, messageText);
-        } else if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
+        System.out.println("in handle mesage");
+        if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
             handleEditGender(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_NAME) {
             handleEditName(update);
-        } else if (registrationContext.getStatus(userId) == Status.SECOND_PART_REGISTRATION) {
-            handleSecondPartRegistration(update);
         }else if(registrationContext.getStatus(userId) == Status.EDIT_ARRHYTHMIA){
             handleEditArrhythmia(update);
         }
@@ -129,9 +92,6 @@ public class MessagesHandler implements IHandler {
         }
         else if(registrationContext.getStatus(userId) == Status.EDIT_BAD_HABITS){
             handleEditBadHabits(update);
-        }
-        else if (registrationContext.getStatus(userId) == Status.FIRST_PART_REGISTRATION) {
-            handleFirstPartRegistration(update);
         } else if (registrationContext.getStatus(userId) == Status.GIVING_PATIENT_ID) {
             handleGivePatientIdStatus(update);
         } else {
@@ -247,71 +207,73 @@ public class MessagesHandler implements IHandler {
         return Math.toIntExact(update.getMessage().getFrom().getId());
     }
 
-    private void handleFirstPartRegistration(Update update) throws TelegramApiException, InterruptedException, JsonProcessingException {
-        switch (firstPartReg.currentParam) {
-            case (1):
-                firstPartReg.name = update.getMessage().getText();
-                firstPartReg.currentParam++;
-                messageSender.sendMessage(update.getMessage().getChatId(), Answers.AGE.getMessage());
-                break;
-            case (2):
-                firstPartReg.age = update.getMessage().getText();
-                firstPartReg.currentParam++;
-                messageSender.sendMessage(update.getMessage().getChatId(), Answers.GENDER.getMessage());
-                break;
-            case (3):
-                firstPartReg.gender = update.getMessage().getText();
-                String response = ParseUserPrompt.initPromptParser(firstPartReg.toString());
-                String cleanJson = cleanJsonResponse(response);
-                User user = mapper.readValue(cleanJson, User.class);
-                userService.saveUser(user);
-                acceptOrEditInitInfo(user, update);
-
-        }
-    }
-
-    private void handleSecondPartRegistration(Update update)
-            throws TelegramApiException, JsonProcessingException {
-
-        String text = update.getMessage().getText();
-        Long chatId = update.getMessage().getChatId();
-
-        switch (secondPartReg.currentParam) {
-            case 1 -> {
-                secondPartReg.arrhythmia = text;
-                secondPartReg.currentParam++;
-                messageSender.sendMessage(chatId, "Есть ли у вас хронические заболевания?");
-            }
-            case 2 -> {
-                secondPartReg.chronicDiseases = text;
-                secondPartReg.currentParam++;
-                messageSender.sendMessage(chatId, "Введите ваш рост (в сантиметрах):");
-            }
-            case 3 -> {
-                secondPartReg.height = text;
-                secondPartReg.currentParam++;
-                messageSender.sendMessage(chatId, "Введите ваш вес (в килограммах):");
-            }
-            case 4 -> {
-                secondPartReg.weight = text;
-                secondPartReg.currentParam++;
-                messageSender.sendMessage(chatId, "Есть ли у вас вредные привычки?");
-            }
-            case 5 -> {
-                secondPartReg.badHabits = text;
-
-                // Сбор данных завершён — парсим
-                //String response = ParseUserPrompt.initPromptParser(secondPartReg.toString()); //FIXME подставить подходящий парсер
-                //String cleanJson = cleanJsonResponse(response);
-                String cleanJson = "";
-                HealthData healthData = mapper.readValue(cleanJson, HealthData.class);
-
-                Long userId = update.getMessage().getFrom().getId();
-                healthDataServiceImpl.saveHealthDataInUser(userId, healthData);
-                acceptOrEditMedicalInitData(healthData, update);
-            }
-        }
-    }
+//    private void handleFirstPartRegistration(Update update) throws TelegramApiException, InterruptedException, JsonProcessingException {
+//        switch (firstPartReg.currentParam) {
+//            case (1):
+//                firstPartReg.name = update.getMessage().getText();
+//                firstPartReg.currentParam++;
+//                messageSender.sendMessage(update.getMessage().getChatId(), Answers.AGE.getMessage());
+//                break;
+//            case (2):
+//                firstPartReg.age = update.getMessage().getText();
+//                firstPartReg.currentParam++;
+//                messageSender.sendMessage(update.getMessage().getChatId(), Answers.GENDER.getMessage());
+//                break;
+//            case (3):
+//                firstPartReg.gender = update.getMessage().getText();
+//                System.out.println(firstPartReg.toString());
+//                String response = ParseUserPrompt.initPromptParser(firstPartReg.toString());
+//                System.out.println(response);
+//                String cleanJson = cleanJsonResponse(response);
+//                FirstPartReg user = mapper.readValue(cleanJson, FirstPartReg.class);
+//                userService.saveUser(user);
+//                acceptOrEditInitInfo(user, update);
+//
+//        }
+//    }
+//
+//    private void handleSecondPartRegistration(Update update)
+//            throws TelegramApiException, JsonProcessingException {
+//
+//        String text = update.getMessage().getText();
+//        Long chatId = update.getMessage().getChatId();
+//
+//        switch (secondPartReg.currentParam) {
+//            case 1 -> {
+//                secondPartReg.arrhythmia = text;
+//                secondPartReg.currentParam++;
+//                messageSender.sendMessage(chatId, "Есть ли у вас хронические заболевания?");
+//            }
+//            case 2 -> {
+//                secondPartReg.chronicDiseases = text;
+//                secondPartReg.currentParam++;
+//                messageSender.sendMessage(chatId, "Введите ваш рост (в сантиметрах):");
+//            }
+//            case 3 -> {
+//                secondPartReg.height = text;
+//                secondPartReg.currentParam++;
+//                messageSender.sendMessage(chatId, "Введите ваш вес (в килограммах):");
+//            }
+//            case 4 -> {
+//                secondPartReg.weight = text;
+//                secondPartReg.currentParam++;
+//                messageSender.sendMessage(chatId, "Есть ли у вас вредные привычки?");
+//            }
+//            case 5 -> {
+//                secondPartReg.badHabits = text;
+//
+//                // Сбор данных завершён — парсим
+//                //String response = ParseUserPrompt.initPromptParser(secondPartReg.toString()); //FIXME подставить подходящий парсер
+//                //String cleanJson = cleanJsonResponse(response);
+//                String cleanJson = "";
+//                HealthData healthData = mapper.readValue(cleanJson, HealthData.class);
+//
+//                Long userId = update.getMessage().getFrom().getId();
+//                healthDataServiceImpl.saveHealthDataInUser(userId, healthData);
+//                acceptOrEditMedicalInitData(healthData, update);
+//            }
+//        }
+//    }
 
     public void handleEditArrhythmia(Update update) {
 //        try {
@@ -434,17 +396,6 @@ public class MessagesHandler implements IHandler {
                 .build());
     }
 
-    private void handleRegistration(long chatId, long userId, String messageText) throws TelegramApiException {
-        try {
-            User user = parseUserRegistrationData(messageText);
-            registerUser(userId, user);
-            sendSuccessMessage(chatId, Answers.REGISTRATION_SUCCESSFUL.getMessage());
-            registrationContext.deleteRegistration(chatId);
-        } catch (Exception e) {
-            logRegistrationError(chatId, e);
-        }
-    }
-
     private void handleRewritePatientParameters(Update update) throws InterruptedException {
         String response = ParseUserPrompt.initPromptParser(update.getMessage().getText());
 
@@ -467,12 +418,6 @@ public class MessagesHandler implements IHandler {
         Doctor doctor = doctorService.getDoctor(doctorId);
         messageSender.sendMessage(doctor.showDoctorMenu(chatId));
         registrationContext.setStatus(doctorId, Status.NONE);
-    }
-
-    private User parseUserRegistrationData(String messageText) throws JsonProcessingException, InterruptedException {
-        String rawJsonResponse = parseUserPrompt.initPromptParser(messageText);
-        String cleanJson = cleanJsonResponse(rawJsonResponse);
-        return mapper.readValue(cleanJson, User.class);
     }
 
     private void registerUser(long userId, User user) {

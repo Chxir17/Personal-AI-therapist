@@ -1,16 +1,26 @@
 package com.aitherapist.aitherapist.domain.model.entities;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "user_type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Doctor.class, name = "DOCTOR"),
+        @JsonSubTypes.Type(value = ClinicPatient.class, name = "CLINIC_PATIENT"),
+        @JsonSubTypes.Type(value = NonClinicPatient.class, name = "NON_CLINIC_PATIENT")
+})
 @Getter
 @Setter
 @NoArgsConstructor
