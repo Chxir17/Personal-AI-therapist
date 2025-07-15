@@ -93,13 +93,9 @@ public class StartDoctors implements ICommand {
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
                 try {
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
-                    System.out.println("Пытаемся создать/обновить доктора с ID: " + userId);
                     Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
-                    System.out.println("Доктор успешно сохранен: " + savedDoctor);
                     return acceptOrEditDoctorInfo(savedDoctor, update);
                 } catch (Exception e) {
-                    System.err.println("Ошибка создания доктора: " + e.getMessage());
-                    e.printStackTrace(); // Добавьте это для детального лога ошибки
                     return SendMessage.builder()
                             .chatId(chatId.toString())
                             .text("Произошла ошибка при сохранении данных: " + e.getMessage() + ". Попробуйте еще раз.")
