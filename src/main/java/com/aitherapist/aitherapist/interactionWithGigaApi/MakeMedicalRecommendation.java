@@ -5,15 +5,10 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
 import java.util.*;
 
-import static com.aitherapist.aitherapist.domain.model.entities.User.makeMetaInformation;
-
 public class MakeMedicalRecommendation {
-
-
-
     public static String giveMedicalRecommendation(Patient patient){
         String token = Llm.getGigaChatToken();
-        Map<String,String> metaInfo = makeMetaInformation(patient);
+        Map<String,String> metaInfo = patient.makeMetaInformation(patient);
         Map<String,String> parametersHistory = patient.buildMedicalHistory();
         String systemPrompt = """
                 [Роль для модели]: Ты — опытный терапевт.
@@ -42,5 +37,4 @@ public class MakeMedicalRecommendation {
         );
         return Llm.talkToChat(token, requestMessage);
     }
-
 }

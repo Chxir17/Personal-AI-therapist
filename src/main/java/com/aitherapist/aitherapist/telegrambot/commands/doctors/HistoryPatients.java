@@ -62,6 +62,7 @@ public class HistoryPatients implements ICommand {
 
     private String getHealthDataInfo(Patient patient) {
         List<DailyHealthData> dailyHealthDataList = patient.getDailyHealthDataList();
+        InitialHealthData initHealthData = patient.getInitialData();
         if (dailyHealthDataList.isEmpty()) {
             return "<i>Медицинские данные отсутствуют</i>";
         }
@@ -73,7 +74,6 @@ public class HistoryPatients implements ICommand {
             healthInfo.append(String.format(
                             "🫀 <b>Пульс:</b> %d\n" +
                             "💊 <b>Давление:</b> %s\n" +
-                            "🩸 <b>Сахар:</b> %.1f\n" +
                             "🌡 <b>Температура:</b> %.1f\n" +
                             "💤 <b>Сон:</b> %.1f часов",
                     data.getPulse() != null ? data.getPulse() : 0,
@@ -82,8 +82,8 @@ public class HistoryPatients implements ICommand {
                     data.getHoursOfSleepToday() != null ? data.getHoursOfSleepToday() : 0
             ));
 
-            if (data.getChronicDiseases() != null && !data.getChronicDiseases().isEmpty()) {
-                healthInfo.append("\n<b>Хронические заболевания:</b> ").append(data.getChronicDiseases());
+            if (initHealthData.getChronicDiseases() != null && !initHealthData.getChronicDiseases().isEmpty()) {
+                healthInfo.append("\n<b>Хронические заболевания:</b> ").append(initHealthData.getChronicDiseases());
             }
         }
 
