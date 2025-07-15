@@ -1,29 +1,32 @@
 package com.aitherapist.aitherapist.services;
 
-import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
-import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.domain.model.entities.HealthData;
-import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.repositories.IDoctorRepository;
+import com.aitherapist.aitherapist.repositories.IUserRepository;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional()
 public class DoctorServiceImpl implements IDoctorService {
     private final IDoctorRepository doctorRepository;
+    private final IUserRepository userRepository; // Добавьте этот репозиторий
 
     @Autowired
-    public DoctorServiceImpl(IDoctorRepository doctorRepository) {
+    public DoctorServiceImpl(IDoctorRepository doctorRepository, IUserRepository userRepository) {
         this.doctorRepository = doctorRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -130,8 +133,28 @@ public class DoctorServiceImpl implements IDoctorService {
     }
 
     @Override
-    public void createDoctor(Long id, Doctor doctor) {
-        doctor.setId(id);
-        doctorRepository.save(doctor);
+    @Transactional
+    public Doctor createDoctor(Long userId, Doctor doctorInput) {
+        Optional<Doctor> existingDoctor = doctorRepository.findById(userId);
+
+        if (existingDoctor.isPresent()) {
+            Doctor existing = existingDoctor.get();
+            existing.setName(doctorInput.getName());
+            existing.setGender(doctorInput.getGender());
+            existing.setBirthDate(doctorInput.getBirthDate());
+            existing.setPhoneNumber(doctorInput.getPhoneNumber());
+            existing.setLicenseNumber(doctorInput.getLicenseNumber());
+            existing.setRole(doctorInput.getRole());
+            existing.setUpdatedAt(LocalDateTime.now());
+
+            return doctorRepository.save(existing);
+        } else {
+            doctorInput.setId(null);
+            return doctorRepository.save(doctorInput);
+        }
     }
+
+
+
+
 }
