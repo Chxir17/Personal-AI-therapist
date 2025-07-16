@@ -1,23 +1,19 @@
 package com.aitherapist.aitherapist.telegrambot;
 
-import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
-import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
-import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
-import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.StartClinicPatient;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.GetLastPatientMedicalData;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.HistoryPatients;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.EditPatientAccountData;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.GetLastMessageFromDoctor;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.SendMessageDoctor;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.StartClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
-import com.aitherapist.aitherapist.telegrambot.commands.initDataEditor.*;
-import com.aitherapist.aitherapist.telegrambot.commands.medicalEditor.*;
-import com.aitherapist.aitherapist.telegrambot.commands.nonClinicPatient.StartNonClinicPatient;
+import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.nonClinicPatient.StartNonClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.ChangePatientAccountData;
 import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +42,8 @@ public class CommandsHandler {
             SettingsPatientCommand settingsPatientCommand,
             SettingsDoctorCommand settingsDoctorCommand,
             GetLastMessageFromDoctor getLastMessageFromDoctor,
-            SendMessageUser sendMessagePatient,
-            HistoryPatients getLastParientMedicalData,
+            DoctorSendMessageToPatient sendMessagePatient,
+            HistoryPatients getHistoryPatients,
             SendMessageDoctor sendMessageDoctor,
             ChangePatientAccountData changeDoctorAccountData,
             ChangePatientAccountData changePatientAccountData,
@@ -63,11 +59,11 @@ public class CommandsHandler {
             EditWeight editWeightCommand,
             EditBadHabits editBadHabitsCommand,
 
-            EditParameters editParametersCommand,
-            EditMedicalData editMedicalDataCommand,
+            EditDoctorAccountData editDoctorAccountDataCommand,
+            EditPatientAccountData editMedicalDataCommand,
 
-            AcceptInitData acceptInitDataCommand,
-            AcceptMedicalData acceptMedicalDataCommand
+            AcceptDoctorData acceptDoctorDataCommand,
+            AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
     ) {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
@@ -80,7 +76,7 @@ public class CommandsHandler {
                 Map.entry("/getLastMessageDoctor", getLastMessageFromDoctor),
                 Map.entry("/sendMessageDoctor", sendMessageDoctor),
                 Map.entry("/sendMessageToPatient", sendMessagePatient),
-                Map.entry("/getLastRecords", getLastParientMedicalData),
+                Map.entry("/patientHistory", getHistoryPatients),
                 Map.entry("/changeDoctorAccountData", changeDoctorAccountData),
                 Map.entry("/changePatientAccountData", changePatientAccountData),
                 Map.entry("/changeRole", changeRoleCommand),
@@ -95,11 +91,11 @@ public class CommandsHandler {
                 Map.entry("/editWeight", editWeightCommand),
                 Map.entry("/editBadHabits", editBadHabitsCommand),
 
-                Map.entry("/editParameters", editParametersCommand),
-                Map.entry("/editMedicalData", editMedicalDataCommand),
+                Map.entry("/editParameters", editDoctorAccountDataCommand),
+                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
 
-                Map.entry("/acceptInitData", acceptInitDataCommand),
-                Map.entry("/acceptMedicalData", acceptMedicalDataCommand)
+                Map.entry("/acceptInitData", acceptDoctorDataCommand),
+                Map.entry("/acceptClinicPatientInitData", acceptClinicPatientInitDataCommand)
         );
     }
 
@@ -137,6 +133,11 @@ public class CommandsHandler {
 
     public void inProgressQuestionnaireDoctor(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         ICommand commandHandler = commands.get("/startDoctor");
+
+        messageSender.sendMessage(commandHandler.apply(update, registrationContext));
+    }
+    public void inProgressQuestionnairePatient(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/clinicPatient");
 
         messageSender.sendMessage(commandHandler.apply(update, registrationContext));
     }

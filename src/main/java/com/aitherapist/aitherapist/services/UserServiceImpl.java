@@ -34,8 +34,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public Boolean isSignUp(Long userId){
-        User user = fetchUser(userId);
-        return user != null;
+        return fetchUserByTelegramId(userId) != null;
     }
 
     @Override
@@ -53,8 +52,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public User fetchUser(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public User fetchUserByTelegramId(Long id) {
+        return userRepository.findByTelegramId(id);
     }
 
     /**
@@ -100,19 +99,19 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public Roles getUserRoles(Long userId) {
-        User user = fetchUser(userId);
+        User user = fetchUserByTelegramId(userId);
         return user.getRole();
     }
 
     @Override
     public Boolean isUserInClinic(Long userId) {
-        User user = fetchUser(userId);
+        User user = fetchUserByTelegramId(userId);
        return user.getRole() == Roles.DOCTOR ||  user.getRole() == Roles.CLINIC_PATIENT;
     }
 
     @Override
     public void changeUserRoles(Long userId, Roles role) {
-        User user = fetchUser(userId);
+        User user = fetchUserByTelegramId(userId);
         user.setRole(role);
         userRepository.save(user);
     }

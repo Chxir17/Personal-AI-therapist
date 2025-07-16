@@ -1,8 +1,9 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.domain.enums.Answers;
-import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +48,9 @@ public class StartCommand implements ICommand {
 
         if (!userRegistrationService.isSignUp(userId)) {
             Map<String, String> buttons = new HashMap<>();
-            buttons.put("Доктор", "/startDoctor");
-            buttons.put("Пациент не привязанный к клинике", "/clinicPatient");
-            buttons.put("Пациент клиники", "/botPatient");
+            buttons.put("Я Доктор", "/startDoctor");
+            buttons.put("Я Пациент не привязанный к клинике", "/botPatient");
+            buttons.put("Я Пациент клиники", "/clinicPatient");
 
             InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 3);
             registrationContext.startRegistration(chatId);
@@ -63,7 +64,20 @@ public class StartCommand implements ICommand {
                     .replyMarkup(replyKeyboardDoctor)
                     .build();
         }
-        return new SendMessage(String.valueOf(chatId), Answers.START_MESSAGE.getMessage());
+        registrationContext.start(chatId);
+        Roles roles = userRegistrationService.getUserRoles(userId);
+        if (roles == Roles.DOCTOR) {
+            return SendMessage.builder()
+                    .chatId(TelegramIdUtils.getChatId(update))
+                    .text(Answers.START_MESSAGE.getMessage())
+                    .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
+                    .build();
+        }
+        else {
+            return SendMessage.builder().chatId(TelegramIdUtils.getChatId(update)).text(Answers.START_MESSAGE
+                    .getMessage()).replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard()).build();
+        }
+
     }
 
     private Long extractUserId(Update update) {

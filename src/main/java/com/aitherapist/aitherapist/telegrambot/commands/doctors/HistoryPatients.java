@@ -4,8 +4,10 @@ import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -18,16 +20,17 @@ public class HistoryPatients implements ICommand {
     @Autowired
     DoctorServiceImpl doctorService;
 
+
     @Override
+    @Transactional
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        Long doctorId = extractUserId(update);
-        Long chatId = getChatId(update);
+        Long doctorId = TelegramIdUtils.extractUserId(update);
+        Long chatId = TelegramIdUtils.getChatId(update);
 
         if (doctorId == null) {
             return new SendMessage(chatId.toString(), "❌ Ошибка: не удалось определить ваш профиль врача");
         }
 
-        System.out.println("doctorId - " + doctorId);
         List<Patient> patients = doctorService.getPatients(doctorId);
 
         if (patients.isEmpty()) {
@@ -63,50 +66,48 @@ public class HistoryPatients implements ICommand {
     private String getHealthDataInfo(Patient patient) {
         List<DailyHealthData> dailyHealthDataList = patient.getDailyHealthDataList();
         InitialHealthData initHealthData = patient.getInitialData();
-        if (dailyHealthDataList.isEmpty()) {
-            return "<i>Медицинские данные отсутствуют</i>";
+
+        StringBuilder healthInfo = new StringBuilder("<b>📊 Медицинские данные:</b>\n");
+
+        if (initHealthData != null) {
+            if (initHealthData.getChronicDiseases() != null && !initHealthData.getChronicDiseases().isEmpty()) {
+                healthInfo.append("🩺 <b>Хронические заболевания:</b> ")
+                        .append(initHealthData.getChronicDiseases()).append("\n");
+            }
+            if (initHealthData.getHeight() != null) {
+                healthInfo.append("📏 <b>Рост:</b> ").append(initHealthData.getHeight()).append(" см\n");
+            }
+            if (initHealthData.getWeight() != null) {
+                healthInfo.append("⚖️ <b>Вес:</b> ").append(initHealthData.getWeight()).append(" кг\n");
+            }
+            if (initHealthData.getBadHabits() != null && !initHealthData.getBadHabits().isEmpty()) {
+                healthInfo.append("🚬 <b>Вредные привычки:</b> ").append(initHealthData.getBadHabits()).append("\n");
+            }
         }
 
-        StringBuilder healthInfo = new StringBuilder("<b>📊 Медицинские показатели:</b>\n");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-
-        for (DailyHealthData data : dailyHealthDataList) {
-            healthInfo.append(String.format(
-                            "🫀 <b>Пульс:</b> %d\n" +
-                            "💊 <b>Давление:</b> %s\n" +
-                            "🌡 <b>Температура:</b> %.1f\n" +
-                            "💤 <b>Сон:</b> %.1f часов",
-                    data.getPulse() != null ? data.getPulse() : 0,
-                    data.getPressure() != null ? data.getPressure() : "не измерялось",
-                    data.getTemperature() != null ? data.getTemperature() : 0,
-                    data.getHoursOfSleepToday() != null ? data.getHoursOfSleepToday() : 0
-            ));
-
-            if (initHealthData.getChronicDiseases() != null && !initHealthData.getChronicDiseases().isEmpty()) {
-                healthInfo.append("\n<b>Хронические заболевания:</b> ").append(initHealthData.getChronicDiseases());
+        if (dailyHealthDataList != null && !dailyHealthDataList.isEmpty()) {
+            for (DailyHealthData data : dailyHealthDataList) {
+                healthInfo.append("\n<b>🗓️ Измерения:</b>\n")
+                        .append(String.format(
+                                "🫀 <b>Пульс:</b> %d\n" +
+                                        "💊 <b>Давление:</b> %s\n" +
+                                        "🌡 <b>Температура:</b> %.1f\n" +
+                                        "💤 <b>Сон:</b> %.1f часов\n",
+                                data.getPulse() != null ? data.getPulse() : 0,
+                                data.getPressure() != null ? data.getPressure() : "не измерялось",
+                                data.getTemperature() != null ? data.getTemperature() : 0,
+                                data.getHoursOfSleepToday() != null ? data.getHoursOfSleepToday() : 0
+                        ));
             }
+        }
+
+        if (healthInfo.toString().equals("<b>📊 Медицинские данные:</b>\n")) {
+            return "<i>Медицинские данные отсутствуют</i>";
         }
 
         return healthInfo.toString();
     }
 
-    private Long extractUserId(Update update) {
-        if (update.hasMessage()) {
-            return update.getMessage().getFrom().getId();
-        }
-        if (update.hasCallbackQuery()) {
-            return update.getCallbackQuery().getFrom().getId();
-        }
-        return null;
-    }
 
-    private Long getChatId(Update update) {
-        if (update.hasMessage()) {
-            return update.getMessage().getChatId();
-        }
-        if (update.hasCallbackQuery()) {
-            return update.getCallbackQuery().getMessage().getChatId();
-        }
-        return null;
-    }
+
 }

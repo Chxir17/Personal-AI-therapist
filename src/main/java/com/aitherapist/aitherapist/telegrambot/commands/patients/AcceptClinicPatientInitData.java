@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.commands.medicalEditor;
+package com.aitherapist.aitherapist.telegrambot.commands.patients;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class AcceptMedicalData implements ICommand {
+public class AcceptClinicPatientInitData implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         long chatId = update.getMessage().getChatId();

@@ -15,7 +15,7 @@ import java.io.Serializable;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "health_data")
+@Table(name = "initial_health_data")
 public class InitialHealthData implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +38,10 @@ public class InitialHealthData implements Serializable{
 
     @Column(name = "bad_habits")
     private String badHabits;
+
+    @OneToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 
 
     @Override

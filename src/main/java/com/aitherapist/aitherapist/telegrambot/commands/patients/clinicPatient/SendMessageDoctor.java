@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.commands.clinicPatient;
+package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;

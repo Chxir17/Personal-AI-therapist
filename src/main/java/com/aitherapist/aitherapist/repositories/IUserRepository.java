@@ -10,4 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * (for works with database. aka.dao)
  */
 public interface IUserRepository extends JpaRepository<User, Long> {
+    User findByTelegramId(Long telegramId);
 }
