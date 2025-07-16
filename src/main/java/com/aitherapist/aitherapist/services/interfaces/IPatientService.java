@@ -18,7 +18,7 @@ public interface IPatientService {
     void editPatientDailyHealthData(Long patientId, DailyHealthData dailyHealthData);
     void addPatientDailyHealthData(Long id, DailyHealthData dailyHealthData);
 
-    void setInitialDailyHealthDataToUser(Long userId, InitialHealthData initialHealthData);
+    void setInitialHealthDataToUser(Long userId, InitialHealthData initialHealthData);
     InitialHealthData getInitialDailyHealthData(Long userId);
     void deleteInitialDailyHealthData(Long userId);
 }

@@ -95,7 +95,6 @@ public class RegistrationContext {
 
     public List<Long> findUserIdsWithSendToUserStatus(Long doctorId) {
         List<Long> userIds = new ArrayList<>();
-
         for (Map.Entry<Long, DynamicStatus> entry : mapOfUserStatus.entrySet()) {
             DynamicStatus status = entry.getValue();
             if (status.is(Status.SEND_TO_THIS_USER) &&

@@ -43,11 +43,13 @@ public class MessagesHandler implements IHandler {
     @Autowired
     private final Verification verification;
     @Autowired
-    PatientServiceImpl patientService;
+    InitialHealthDataServiceImpl initialHealthDataServiceImpl;
     @Autowired
     private final UserServiceImpl userService;
     @Autowired
     private final HealthDataServiceImpl healthDataServiceImpl;
+    @Autowired
+    private PatientServiceImpl patientService;
     private final ObjectMapper mapper = new ObjectMapper();
     @Autowired
     @Lazy
@@ -59,7 +61,6 @@ public class MessagesHandler implements IHandler {
     @Autowired
     private CommandsHandler commandsHandler;
 
-    InitialHealthDataServiceImpl initialHealthDataService;
 
 
     @Override
@@ -80,6 +81,9 @@ public class MessagesHandler implements IHandler {
         }
         else if(registrationContext.getStatus(userId) == Status.EDIT_CHRONIC_DISEASES){
             handleEditChronicDiseases(update);
+        }
+        else if (registrationContext.getStatus(userId) == Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER) {
+            handleMessageFromDoctorToUser(update);
         }
         else if(registrationContext.getStatus(userId) == Status.REGISTRATION_DOCTOR){
             commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
@@ -125,8 +129,16 @@ public class MessagesHandler implements IHandler {
         List<Long> userIds = registrationContext.findUserIdsWithSendToUserStatus(currentDoctorId);
 
         for (Long userId : userIds) {
-            System.out.println("__________" + userId);
-            messageSender.sendMessage(1085500451, message.toString());
+            String doctorMessage = String.format(
+                    "✉️ *Вам пришло сообщение от вашего доктора:*\n\n" +
+                            "━━━━━━━━━━━━━━━━━━━━\n" +
+                            "%s\n" +
+                            "━━━━━━━━━━━━━━━━━━━━\n\n" +
+                            "Вы можете ответить доктору, просто написав сообщение в этот чат.",
+                    message.toString()
+            );
+
+            messageSender.sendMessage(1085500451, doctorMessage);
         }
     }
 
@@ -247,11 +259,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
 
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setArrhythmia(parsedData.getArrhythmia());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace(); // лучше логировать
@@ -264,11 +276,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
 
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setChronicDiseases(parsedData.getChronicDiseases());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace();
@@ -281,11 +293,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
 
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setHeight(parsedData.getHeight());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace();
@@ -298,11 +310,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
 
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setWeight(parsedData.getWeight());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер
@@ -314,11 +326,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
 
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setBadHabits(parsedData.getBadHabits());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер

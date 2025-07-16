@@ -22,6 +22,7 @@ public class PatientServiceImpl implements IPatientService {
         this.patientRepository = patientRepository;
     }
 
+
     @Override
     @Transactional
     public void editPatient(Patient patient) {
@@ -39,8 +40,7 @@ public class PatientServiceImpl implements IPatientService {
     @Override
     @Transactional(readOnly = true)
     public Patient findById(Long userId) {
-        return patientRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        return patientRepository.findByTelegramId(userId);
     }
 
     @Override
@@ -79,23 +79,20 @@ public class PatientServiceImpl implements IPatientService {
     }
 
     @Override
-    public void setInitialDailyHealthDataToUser(Long userId, InitialHealthData initialHealthData) {
-        Patient existingPatient = patientRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+    public void setInitialHealthDataToUser(Long userId, InitialHealthData initialHealthData) {
+        Patient existingPatient = patientRepository.findByTelegramId(userId);
         existingPatient.setInitialData(initialHealthData);
     }
 
     @Override
     public InitialHealthData getInitialDailyHealthData(Long userId) {
-        Patient existingPatient = patientRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        Patient existingPatient = patientRepository.findByTelegramId(userId);
         return existingPatient.getInitialData();
     }
 
     @Override
     public void deleteInitialDailyHealthData(Long userId) {
-        Patient patient =  patientRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        Patient patient =  patientRepository.findByTelegramId(userId);
         patient.setInitialData(null);
     }
 

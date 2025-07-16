@@ -3,7 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.clinicPatient;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
-import com.aitherapist.aitherapist.services.InitialHealthDataServiceImpl;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
@@ -34,22 +34,25 @@ public class StartClinicPatient implements ICommand {
     private ClinicPatient patient;
     private int currentRegistrationStep = 1;
     private UserServiceImpl userService;
-    private StringBuilder userInput = new StringBuilder(); // Используем StringBuilder для эффективности
-    private PatientServiceImpl patientService;
+    private StringBuilder userInput = new StringBuilder();
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    @Autowired
-    InitialHealthDataServiceImpl initialHealthDataService;
-
-    @Autowired
     public Verification verification;
+    public PatientServiceImpl patientService;
 
     @Autowired
-    public StartClinicPatient(TelegramMessageSender messageSender, DoctorSendMessageToPatient sendMessageUser) {
+    public StartClinicPatient(
+            TelegramMessageSender messageSender,
+            DoctorSendMessageToPatient sendMessageUser,
+            PatientServiceImpl patientService,
+            UserServiceImpl userService
+    ) {
         this.messageSender = messageSender;
         this.sendMessageUser = sendMessageUser;
+        this.patientService = patientService;
+        this.userService = userService;
     }
 
     private SendMessage acceptOrEditMedicalInitData(InitialHealthData dailyHealthData, Update update) {
@@ -161,17 +164,20 @@ public class StartClinicPatient implements ICommand {
                 userInput.append("badHabits: ").append(text).append("\n");
                 String response = ParseUserPrompt.patientRegistrationParser(userInput.toString());
                 String jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
-
                 InitialHealthData initialHealthData = mapper.readValue(jsonWithType, InitialHealthData.class);
-                initialHealthDataService.putInitialHealthDataByUserId(initialHealthData, userId);
-                patient = mapper.readValue(jsonWithType, ClinicPatient.class);
-                patient.setInitialData(initialHealthData);
-                userService.saveUser(patient);
-                initialHealthDataService.putInitialHealthDataByUserId(initialHealthData, userId);
-
-
-                currentRegistrationStep = 0;
-                userInput.setLength(0);
+//                System.out.println(jsonWithType);
+//                ClinicPatient patient = mapper.readValue(jsonWithType, ClinicPatient.class);
+//                System.out.println(initialHealthData);
+//                System.out.println(patient.toString());
+//                System.out.println(1);
+//                patient.setInitialData(initialHealthData);
+//                System.out.println(2);
+//                userService.saveUser(patient);
+//                System.out.println(3);
+//                patientService.setInitialHealthDataToUser(userId, initialHealthData);
+//                System.out.println(4);
+//                currentRegistrationStep = 0;
+//                userInput.setLength(0);
 
                 return acceptOrEditMedicalInitData(initialHealthData, update);
             }
