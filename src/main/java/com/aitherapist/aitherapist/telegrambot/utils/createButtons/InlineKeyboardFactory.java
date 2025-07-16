@@ -47,7 +47,15 @@ public class InlineKeyboardFactory {
 
     public static InlineKeyboardMarkup createDoctorSettingsKeyboard() {
         Map<String, String> buttonMap = new LinkedHashMap<>();
-        buttonMap.put("✏️ Редактировать профиль", "/changeDoctorAccountData");
+        buttonMap.put("✏️ Редактировать профиль", "/editDoctorAccountData");
+        buttonMap.put("🔄 Сменить роль пользователя", "/changeRole");
+        buttonMap.put("🔙 Вернуться в главное меню", "/doctorMenu");
+        return createInlineKeyboard(buttonMap, 2);
+    }
+
+    public static InlineKeyboardMarkup createPatientSettingsKeyboard() {
+        Map<String, String> buttonMap = new LinkedHashMap<>();
+        buttonMap.put("✏️ Редактировать профиль", "/editPatientAccountData");
         buttonMap.put("🔄 Сменить роль пользователя", "/changeRole");
         buttonMap.put("🔙 Вернуться в главное меню", "/doctorMenu");
         return createInlineKeyboard(buttonMap, 2);

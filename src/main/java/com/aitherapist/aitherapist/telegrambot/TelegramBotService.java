@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot;
 
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.WriteDailyData;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -31,7 +32,13 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final BotProperties botProperties;
     private final CommandsHandler commandsHandler;
     private final @Lazy MessagesHandler messagesHandler;
-//    private final TelegramNotificationService notificationService;
+
+
+    private int flag = 0;
+    @Autowired
+    WriteDailyData writeDailyData;
+
+
     private final TelegramMessageSender telegramSender; // Предполагаем, что у вас есть этот интерфейс
     @Autowired
     private RegistrationContext registrationContext;
@@ -50,6 +57,10 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     @Override
     public void onUpdateReceived(Update update) {
         try {
+            if (flag == 1) {
+                telegramSender.sendMessage(writeDailyData.apply(update, registrationContext));
+                return;
+            }
             if (update.hasMessage()) {
                 if (update.getMessage().hasText()) {
                     handleMessageUpdate(update, registrationContext);
@@ -57,6 +68,11 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                     handleContactUpdate(update, registrationContext);
                 }
             } else if (update.hasCallbackQuery()) {
+                if (Objects.equals(update.getCallbackQuery().getMessage().getText(), "Выберите команду:")) {
+                    System.out.println("111111");
+                    flag = 1;
+                    writeDailyData.apply(update, registrationContext);
+                }
                 handleCallbackQueryUpdate(update, registrationContext);
             }
         } catch (Exception e) {

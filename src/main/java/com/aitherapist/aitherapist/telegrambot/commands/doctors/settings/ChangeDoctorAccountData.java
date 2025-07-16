@@ -20,9 +20,9 @@ public class ChangeDoctorAccountData implements ICommand {
         long chatId = update.getMessage().getChatId();
 
         Map<String, String> buttons = Map.of(
-                "Сменить возраст", "/changeAge",
-                "Сменить пол", "/changeGender",
-                "Сменить имя", "/changeName"
+                "Сменить возраст", "/editAge",
+                "Сменить пол", "/editGender",
+                "Сменить имя", "/editName"
         );
 
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createInlineKeyboard(buttons, 1);

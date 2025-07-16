@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.commands.medicalEditor;
+package com.aitherapist.aitherapist.telegrambot.commands.patients;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -12,16 +12,13 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 @Component
-public class EditPatientMedicalData implements ICommand {
+public class EditPatientAccountData implements ICommand {
 
     private final IMessageSender messageSender;
 
     @Autowired
-    public EditPatientMedicalData(IMessageSender messageSender) {
+    public EditPatientAccountData(IMessageSender messageSender) {
         this.messageSender = messageSender;
     }
 

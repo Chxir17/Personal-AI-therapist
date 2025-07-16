@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.commands.initDataEditor;
+package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -10,22 +10,20 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Component
-public class AcceptInitData implements ICommand {
+public class EditDoctorAccountData implements ICommand {
+
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        long chatId = TelegramIdUtils.getChatId(update);
+        Long chatId = TelegramIdUtils.getChatId(update);
 
-        InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createDoctorDefaultKeyboard();
-        registrationContext.startRegistration(chatId);
+
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditDoctorData();
 
         return SendMessage.builder()
-              .chatId(String.valueOf(chatId))
-              .text("Выберите роль")
-              .replyMarkup(replyKeyboardDoctor)
-              .build();
+                .chatId(chatId.toString())
+                .text("Что вы хотите изменить?")
+                .replyMarkup(keyboard)
+                .build();
     }
 }

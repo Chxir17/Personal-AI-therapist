@@ -1,19 +1,16 @@
 package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.telegrambot.commands.*;
-import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.ClinicMenu;
-import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
-import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
-import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.StartClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.DoctorSendMessageToPatient;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.HistoryPatients;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
-import com.aitherapist.aitherapist.telegrambot.commands.initDataEditor.*;
-import com.aitherapist.aitherapist.telegrambot.commands.medicalEditor.*;
-import com.aitherapist.aitherapist.telegrambot.commands.nonClinicPatient.StartNonClinicPatient;
+import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.ChangePatientAccountData;
 import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.nonClinicPatient.StartNonClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import lombok.Getter;
@@ -60,15 +57,16 @@ public class CommandsHandler {
             EditHeight editHeightCommand,
             EditWeight editWeightCommand,
             EditBadHabits editBadHabitsCommand,
-
-            EditParameters editParametersCommand,
-            EditPatientMedicalData editMedicalDataCommand,
+            WriteDailyData writeDailyData,
+//            EditParameters editParametersCommand,
+//            EditPatientMedicalData editMedicalDataCommand,
             ClinicMenu clinicMenu,
-            AcceptInitData acceptInitDataCommand,
+//            AcceptInitData acceptInitDataCommand,
             AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
     ) {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
+                Map.entry("/inputDailyData", writeDailyData),
                 Map.entry("/information", informationCommand),
                 Map.entry("/startDoctor", doctorCommand),
                 Map.entry("/botPatient", botPatientCommand),
@@ -93,10 +91,10 @@ public class CommandsHandler {
                 Map.entry("/editWeight", editWeightCommand),
                 Map.entry("/editBadHabits", editBadHabitsCommand),
 
-                Map.entry("/editParameters", editParametersCommand),
-                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
-
-                Map.entry("/acceptInitData", acceptInitDataCommand),
+//                Map.entry("/editParameters", editParametersCommand),
+//                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
+//
+//                Map.entry("/acceptInitData", acceptInitDataCommand),
                 Map.entry("/acceptClinicPatientInitData", acceptClinicPatientInitDataCommand)
         );
     }

@@ -28,40 +28,6 @@ public class GetLastPatientMedicalData implements ICommand {
         return result;
     }
 
-//    private Map<String, List<String>> getPatientHealthData(Patient patient) {
-//        Map<String, List<String>> result = new LinkedHashMap<>();
-//        List<dailyHealthData> history = patient.getDailyHealthDataList();
-//
-//        result.put("bloodOxygenLevel", (List<String>) makeDataList(
-//                history.stream().map(dailyHealthData::getBloodOxygenLevel).toList()
-//        ));
-//
-//        result.put("temperature", makeDataList(
-//                history.stream().map(dailyHealthData::getTemperature).toList()
-//        ));
-//
-//        result.put("hoursOfSleepToday", makeDataList(
-//                history.stream().map(dailyHealthData::getHoursOfSleepToday).toList()
-//        ));
-//
-//        result.put("pulse", makeDataList(
-//                history.stream().map(dailyHealthData::getPulse).toList()
-//        ));
-//
-//        result.put("pressure", makeDataList(
-//                history.stream().map(dailyHealthData::getPressure).toList()
-//        ));
-//
-//        result.put("heartPain", makeDataList(
-//                history.stream().map(dailyHealthData::getHeartPain).toList()
-//        ));
-//
-//        result.put("arrhythmia", makeDataList(
-//                history.stream().map(dailyHealthData::getArrhythmia).toList()
-//        ));
-//
-//        return result;
-//    }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
