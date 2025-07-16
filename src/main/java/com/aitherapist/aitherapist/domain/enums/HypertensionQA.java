@@ -1,5 +1,9 @@
 package com.aitherapist.aitherapist.domain.enums;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum HypertensionQA {
     WHAT_IS_HYPERTENSION(
             "Что такое гипертония? Простым языком о высоком давлении",
@@ -194,5 +198,20 @@ public enum HypertensionQA {
 
     public String getAnswer() {
         return answer;
+    }
+
+    public static List<String> getAllQuestions() {
+        return Stream.of(HypertensionQA.values())
+                .map(HypertensionQA::getQuestion)
+                .collect(Collectors.toList());
+    }
+
+    public static HypertensionQA findByQuestion(String question) {
+        for (HypertensionQA item : HypertensionQA.values()) {
+            if (item.getQuestion().equalsIgnoreCase(question)) {
+                return item;
+            }
+        }
+        return null;
     }
 }

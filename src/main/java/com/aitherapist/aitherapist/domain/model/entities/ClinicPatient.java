@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -21,4 +23,12 @@ public class ClinicPatient extends Patient {
 
     @ManyToMany(mappedBy = "patients")
     private List<Doctor> doctors = new ArrayList<>();
+
+    //FIXME получать комментарий из внешней DB
+    public Map<String, String> buildGoalsInformation(){
+        Map<String, String> goals = new HashMap<>();
+        goals.put("pressure", "120");
+        goals.put("pulse", "70");
+        return goals;
+    }
 }

@@ -1,50 +1,30 @@
 package com.aitherapist.aitherapist.interactionWithGigaApi;
 
 import chat.giga.model.completion.ChatMessage;
+import com.aitherapist.aitherapist.domain.enums.Prompts;
+import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
+import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.llm.Llm;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation.giveMedicalRecommendationBeta;
+import static com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta;
+
 @Component
 public class ParseUserPrompt {
 
     public static String patientRegistrationParser(String userMessage) throws InterruptedException {
         String token = Llm.getGigaChatToken();
-        String systemPrompt =
-        """
-        [Роль для модели]: Ты — помощник, способный извлекать личную и медицинскую информацию из текстовых сообщений пользователей и представлять её в виде корректного JSON-объекта.
-        [Задача]: Проанализируй сообщение пользователя и заполни следующие поля информацией, представленной в сообщении:
-        -"name" — имя пользователя
-        -"birthDate" — дата рождения пользователя(год-месяц-день)
-        -"gender" — пол пользователя (true если мужчина; false если женщина)
-        -"arrhythmia" — наличие аритмии (true, если есть; false — если отсутствует)
-        -"chronicDiseases" — хронические заболевания
-        -"height" — рост пользователя в сантиметрах
-        -"weight" — вес пользователя в килограммах
-        -"badHabits" — вредные привычки.
-        [Инструкция]:
-        1.Если в сообщении указано имя в падеже или уменьшительной форме (например, "зовут Сашей", "Катей"), приведи его к нормальной форме (например, "Саша", "Катя"). Используй нормативную словарную форму имени.
-        2.Преобразуй описания вредных привычек пользователя в словосочетания с глаголом в форме третьего лица единственного числа.
-        3.Обязательно учитывай указанные типы данных. Например, если возраст указан строкой ("20 лет"), преобразуй его в целое число (20), а если указана единица измерения, которая не соответствует указанной (например, "вес 150 фунтов"), преобразуй значение в требуемые единицы измерения.
-        4.Если дата рождения человека указана словом завтра, сегодня и т.п. то преобразуй это сам в нужный формат исходя из даты которую я тебе отправил, если человек пишет свой возраст в годах то возвращай null.
-        4.Игнорируй любые дополнительные сведения, которые не подходят под один из указанных параметров.
-        [Дополнительные уточнения]:
-        -Не считай обычные или полезные привычки вредными. «пью много воды», «занимаюсь спортом», «люблю гулять» — это не вредные привычки и не должны заполняться в поле "badHabits". Вредные привычки — это только те, которые могут нанести вред здоровью (например, курение, злоупотребление алкоголем, наркотиками, переедание, злоупотребление сладким и т.п.).
-        -Заносить в форму значения на том языке на котором они написаны пользователем.
-        [Формат ответа]:
-        {"name": <string>, "birthDate": <string(год-месяц-день)> | null, "gender": <bool> | null, "arrhythmia": <bool> | null, "chronicDiseases": <string> | null, "height": <double> | null, "weight": <double> | null, "badHabits": <string> | null}
-        [Примечания]:
-        -Используй строгую обработку данных согласно указанным типам и единицам измерений.
-        -Вывод должен быть только в виде валидного JSON без комментариев или пояснений.
-        [Критерии качества]:
-        -Корректное заполнение всех полей JSON согласно правилам преобразования данных.
-        -Использование null для незаполненных или неправильно представленных данных.
-        -Строгое соблюдение типов данных, систем измерения и формата вывода.
-        -Игнорирование любой информации, не относящейся к заданным полям.
-        """;
-
+        Prompts prompt = Prompts.valueOf("PATIENT_REGISTRATION_PROMPT");
+        String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessage = Arrays.asList(
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
@@ -67,31 +47,8 @@ public class ParseUserPrompt {
 
     public static String doctorRegistrationParser(String userMessage) throws InterruptedException {
         String token = Llm.getGigaChatToken();
-        String systemPrompt =
-        """
-        [Роль для модели]: Ты — помощник, способный извлекать личную информацию из сообщений пользователей и представлять её в виде корректного JSON-объекта.
-        [Задача]: Проанализируй сообщение пользователя и заполни следующие поля информацией, представленной в сообщении:
-        -"name" — строка(имя пользователя)
-        -"birthDate" — год-месяц-день(дата рождения пользователя)
-        -"gender" — true - мужчина; false - женщина; null иначе
-        [Инструкция]:
-        1.Обязательно учитывай указанные типы данных.
-        2.Если в сообщении указано имя в падеже или уменьшительной форме (например, "зовут Сашей", "Катей"), приведи его к нормальной форме (например, "Саша", "Катя"). Используй нормативную словарную форму имени.
-        3.Если дата рождения человека указана словом завтра, сегодня и т.п. то преобразуй это сам в нужный формат исходя из даты которую я тебе отправил, если человек пишет свой возраст в годах то возвращай null.
-        4.Игнорируй любые дополнительные сведения, которые не подходят под один из указанных параметров.
-        [Дополнительные уточнения]:
-        -Заносить в форму значения на том языке на котором они написаны пользователем.
-        [Формат ответа]:
-        {"name": <string>, "birthDate": <string(год-месяц-день)> | null, "gender": <bool> | null}
-        [Примечания]:
-        -Используй строгую обработку данных согласно указанным типам и единицам измерений.
-        -Вывод должен быть только в виде валидного JSON без комментариев или пояснений.
-        [Критерии качества]:
-        -Корректное заполнение всех полей JSON согласно правилам преобразования данных.
-        -Использование null для незаполненных или неправильно представленных данных.
-        -Строгое соблюдение типов данных, систем измерения и формата вывода.
-        -Игнорирование любой информации, не относящейся к заданным полям.
-        """;
+        Prompts prompt = Prompts.valueOf("DOCTOR_REGISTRATION_PROMPT");
+        String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessage = Arrays.asList(
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
@@ -113,97 +70,24 @@ public class ParseUserPrompt {
 
     public static String dailyQuestionnaireParser(String userMessage){
         String token = Llm.getGigaChatToken();
-        String systemPrompt =
-        """
-        [Роль для модели]: Ты — помощник, способный извлекать личную и медицинскую информацию из сообщений пользователей и представлять её в виде корректного JSON-объекта с указанными типами данных и форматом этих данных.
-        [Задача]: Проанализируй сообщение пользователя и заполни следующие поля информацией, представленной в сообщении:
-        "isMedicalData" — ответ на вопрос:"запрос содержит медицинские параметры"(true, если содержит; false — если не содержит)
-        "bloodOxygenLevel" — уровень кислорода в крови в процентах
-        "temperature" — температура тела в градусах Цельсия
-        "hoursOfSleepToday" — количество часов сна за сегодняшний день
-        "pulse" — пульс в ударах в минуту
-        "pressure" — артериальное давление(только в виде "int/int")
-        "heartPain" — наличие боли в области сердца или груди (true, если есть; false — если отсутствует)
-        
-        [Инструкция]:
-        1. Если пользователь сообщает, что какие-либо параметры в норме или использует синонимичные фразы, заполни соответствующее поля значениями из следующего перечня
-        {"bloodOxygenLevel": 98.0, "temperature": 36.6, "hoursOfSleepToday": 8.0, "pulse": 70, "pressure": "120/80", "heartPain": false}
-        2. Если пользователь называет единицы измерения, отличные от требуемых, выполни конвертацию.
-        3. Если параметр в сообщении не упоминается, запиши null в соответствующее поле. Все поля обязательно должны присутствовать в ответе.
-        5. Обязательно учитывай указанные типы данных и формат данных.
-        6. Игнорируй любые дополнительные сведения, которые не подходят под один из указанных параметров.
-        
-        [Формат ответа]:
-        {"isMedical": <bool>, "healthData":{"bloodOxygenLevel": <float> | null, "temperature": <float> | null, "hoursOfSleepToday": <float> | null, "pulse": <int> | null, "pressure": <int> | null, "heartPain": <bool> | null}
-        [Примечания]:
-        - Используй строгую обработку данных согласно указанным типам и единицам измерений.
-        - Вывод должен быть только в виде валидного JSON без комментариев или пояснений.
-        [Критерии качества]:
-        - Корректное заполнение всех полей JSON согласно правилам преобразования данных.
-        - Использование null для незаполненных или неправильно представленных данных.
-        - Строгое соблюдение типов данных, систем измерения и формата вывода.
-        - Игнорирование любой информации, не относящейся к заданным полям.
-        [Пример]:
-        - ввод пользователя: "давление и пульс нормальные. температура 38 и болит голова чуть-чуть чо мне делать???" твой ответ: "{"isMedical": true, "healthData":{"bloodOxygenLevel": null, "temperature": 38.0, "hoursOfSleepToday": null, "pulse": 70, "pressure": "120/80", "heartPain": null}}"
-        """;
+        Prompts prompt = Prompts.valueOf("DAILY_QUESTIONNAIRE_PROMPT");
+        String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessage = Arrays.asList(
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
         );
-        String response = Llm.talkToChat(token, requestMessage);
-        return response;
+        return Llm.talkToChat(token, requestMessage);
     }
 
     public static String parameterEditorParser(String userMessage){
         String token = Llm.getGigaChatToken();
-        String systemPrompt =
-            """
-            [Роль для модели]: Ты — помощник, способный извлекать личную и медицинскую информацию из текстовых сообщений пользователей и представлять её в виде корректного JSON-объекта.
-            [Задача]: Проанализируй сообщение пользователя и извлеки только один параметр, который указан пользователем в запросе. Параметр будет приходить в формате:
-            [Инструкция]:
-            1.Обязательно учитывай указанные типы данных:
-            -name — строка
-            -birthDate — строка в формате год-месяц-день
-            -gender — true (мужчина) или false (женщина)
-            -arrhythmia — true (если есть) или false (если отсутствует)
-            -height — число в сантиметрах
-            -weight — число в килограммах
-            -badHabits — строка
-            -chronicDiseases — строка
-            -bloodOxygenLevel" — вещественное число
-            -temperature" — вещественное число
-            -hoursOfSleepToday" — вещественное число
-            -pulse" — целое число
-            -pressure" — строка в виде "целое/целое"
-            -heartPain" — true, если есть; false — если отсутствует
-            2.Если в сообщении указано имя в падеже или уменьшительной форме (например, "зовут Сашей", "Катей"), приведи его к нормальной форме (например, "Саша", "Катя"). Используй нормативную словарную форму имени.
-            3.Преобразуй описания вредных привычек пользователя в словосочетания с глаголом в форме третьего лица единственного числа.
-            4.Если дата рождения человека указана словом завтра, сегодня и т.п. то преобразуй это сам в нужный формат исходя из даты которую я тебе отправил, если человек пишет свой возраст в годах то возвращай null.
-            5.Если указана единица измерения, которая не соответствует требуемой (например, вес в фунтах), преобразуй значение в требуемые единицы измерения.
-            6.Игнорируй любую дополнительную информацию, которая не относится к запрашиваемому параметру.
-            [Дополнительные уточнения]:
-            -Не считай обычные или полезные привычки вредными. «пью много воды», «занимаюсь спортом», «люблю гулять» — это не вредные привычки и не должны заполняться в поле "badHabits". Вредные привычки — это только те, которые могут нанести вред здоровью (например, курение, злоупотребление алкоголем, наркотиками, переедание, злоупотребление сладким и т.п.).
-            -Заносить в JSON-объект значения на том языке, на котором они написаны пользователем.
-            [Формат ответа]:
-            Верни валидный JSON-объект в следующем формате:{"parameterName": <value>}
-            [Примечания]:
-            -Если в сообщении пользователя параметр отсутствует или указан некорректно или ты его не можешь преобразовать к нужному формату, верни null в значении.
-            -Вывод должен быть только в виде валидного JSON без комментариев или пояснений.
-            -Используй строгую обработку данных согласно указанным типам и единицам измерений.
-            -Игнорируй любую информацию, не относящуюся к заданному параметру.
-            [Критерии качества]:
-            -Корректное заполнение одного поля JSON согласно правилам преобразования данных.
-            -Использование null для незаполненных или неправильно представленных данных.
-            -Строгое соблюдение типов данных, систем измерений и формата вывода.
-            -Игнорирование любой информации, не относящейся к запрашиваемому полю.
-            Текущая дата:
-            """ + LocalDateTime.now();
+        Prompts prompt = Prompts.valueOf("PARAMETERS_EDITOR_PROMPT");
+        String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessage = Arrays.asList(
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
         );
-        String response = Llm.talkToChat(token, requestMessage);
-        return response;
+        return Llm.talkToChat(token, requestMessage);
     }
 
 
@@ -211,15 +95,53 @@ public class ParseUserPrompt {
 
 
     public static void main(String[] args) throws InterruptedException {
-        String userPrompt1 = "Я Саша мне 19 я родился в России много подтягиваюсь на турнике и еще я много пью колу. мой рост 197 вес 70000 г";
-        String userPrompt2 = "I'am Sasha and I'm 19. I was born in Russia. I love do push ups and also i drink a lot cola. My parameters is 197 and 70";
-        String userPrompt3 = "давление и температура как у всех. пульс 80 и сильно болит голова чо мне делать???";
-        String editParams = "birthDay - завтра";
-        String response = parameterEditorParser(editParams);
+//        String userPrompt1 = "Я Саша мне 19 я родился в России много подтягиваюсь на турнике и еще я много пью колу. мой рост 197 вес 70000 г";
+//        String userPrompt2 = "I'am Sasha and I'm 19. I was born in Russia. I love do push ups and also i drink a lot cola. My parameters is 197 and 70";
+//        String userPrompt3 = "давление и температура как у всех. пульс 80 и сильно болит голова чо мне делать???";
+//        String editParams = "birthDay - завтра";
+//        String response = parameterEditorParser(editParams);
 //        String response1 = doctorRegistrationParser(userPrompt1);
 //        String response2 = dailyQuestionnaireParser(userPrompt3);
-        System.out.println(response);
+//        System.out.println(response);
 //        System.out.println(response1);
 //        System.out.println(response2);
+
+
+        InitialHealthData initialData = new InitialHealthData();
+        initialData.setHeartPain(true);
+        initialData.setArrhythmia(true);
+        initialData.setChronicDiseases(null);
+        initialData.setHeight(175.5);
+        initialData.setWeight(80.0);
+        initialData.setBadHabits("Smoking");
+
+
+        // Создаем ClinicPatient
+        ClinicPatient patient = new ClinicPatient();
+        patient.setClinicId(1L);
+        patient.setMedicalCardNumber("192.168.20.2");
+        patient.setInitialData(initialData);
+
+        patient.setName("Джон Смит");
+        patient.setBirthDate(LocalDate.of(1990, 5, 20));
+        patient.setGender(true);
+        patient.setPhoneNumber("+123456789");
+        // Создаем DailyHealthData
+        DailyHealthData dailyData = new DailyHealthData();
+        dailyData.setBloodOxygenLevel(98.5);
+        dailyData.setTemperature(36.7);
+        dailyData.setHoursOfSleepToday(7.5);
+        dailyData.setPulse(90L);
+        dailyData.setPressure("190/150");
+        dailyData.setPatient(patient);
+
+        List<DailyHealthData> dailyList = new ArrayList<>();
+        dailyList.add(dailyData);
+
+        patient.setDailyHealthDataList(dailyList);
+//        String response4 = giveMedicalRecommendationBeta(patient);
+//        System.out.println(response4);
+        String response5 = giveMedicalRecommendationWithScoreBeta(patient);
+        System.out.println(response5);
     }
 }
