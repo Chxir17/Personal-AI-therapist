@@ -5,6 +5,7 @@ import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.DoctorRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -28,7 +29,6 @@ public class StartDoctors implements ICommand {
     public Doctor doctor;
     @Autowired
     private final DoctorServiceImpl doctorService;
-    private int currentRegistrationStep = 1;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -57,11 +57,12 @@ public class StartDoctors implements ICommand {
                 .build();
     }
 
-    private SendMessage handleQuestionnaire(Update update, Long userId) throws JsonProcessingException, InterruptedException {
+    private SendMessage handleQuestionnaire(Update update, Long userId, RegistrationContext registrationContext) throws JsonProcessingException, InterruptedException {
         Long chatId = TelegramIdUtils.getChatId(update);
+        DoctorRegistrationState state = registrationContext.getDoctorRegistrationState(userId);
 
         if (!update.hasMessage()) {
-            if (currentRegistrationStep == 1) {
+            if (state.getCurrentStep() == 1) {
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.GIVE_NAME.getMessage())
@@ -71,33 +72,31 @@ public class StartDoctors implements ICommand {
         }
 
         String text = update.getMessage().getText();
-        System.out.println(text);
-        System.out.println(currentRegistrationStep);
-        switch (currentRegistrationStep) {
+        switch (state.getCurrentStep()) {
             case 1:
-                System.out.println("--");
-                userInput.append("name: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getUserInput().append("name: ").append(text).append("\n");
+                state.setCurrentStep(2);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.AGE.getMessage())
                         .build();
 
             case 2:
-                userInput.append("age: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getUserInput().append("age: ").append(text).append("\n");
+                state.setCurrentStep(3);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.GENDER.getMessage())
                         .build();
 
             case 3:
-                userInput.append("gender: ").append(text).append("\n");
-                String response = ParseUserPrompt.doctorRegistrationParser(userInput.toString());
+                state.getUserInput().append("gender: ").append(text).append("\n");
+                String response = ParseUserPrompt.doctorRegistrationParser(state.getUserInput().toString());
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
                 try {
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
                     Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
+                    registrationContext.clearDoctorRegistrationState(userId);
                     return acceptOrEditDoctorInfo(savedDoctor, update);
                 } catch (Exception e) {
                     return SendMessage.builder()
@@ -107,8 +106,7 @@ public class StartDoctors implements ICommand {
                 }
 
             default:
-                currentRegistrationStep = 0;
-                userInput.setLength(0);
+                registrationContext.clearDoctorRegistrationState(userId);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text("Неизвестный шаг регистрации")
@@ -128,7 +126,7 @@ public class StartDoctors implements ICommand {
 
         if (registrationContext.getStatus(userId) == Status.FIRST_PART_REGISTRATION_DOCTOR) {
             try {
-                return handleQuestionnaire(update, userId);
+                return handleQuestionnaire(update, userId, registrationContext);
             } catch (Exception e) {
                 return SendMessage.builder()
                         .chatId(TelegramIdUtils.getChatId(update).toString())

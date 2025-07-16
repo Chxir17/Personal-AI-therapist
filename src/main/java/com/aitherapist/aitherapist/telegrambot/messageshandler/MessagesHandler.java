@@ -66,6 +66,7 @@ public class MessagesHandler implements IHandler {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
+        System.out.println(registrationContext.getStatus(userId));
         if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
@@ -120,8 +121,10 @@ public class MessagesHandler implements IHandler {
         Message message = update.getMessage();
         Long currentDoctorId = message.getFrom().getId();
         List<Long> userIds = registrationContext.findUserIdsWithSendToUserStatus(currentDoctorId);
+
         for (Long userId : userIds) {
-            messageSender.sendMessage(userId, message.toString());
+            System.out.println("__________" + userId);
+            messageSender.sendMessage(1085500451, message.toString());
         }
     }
 

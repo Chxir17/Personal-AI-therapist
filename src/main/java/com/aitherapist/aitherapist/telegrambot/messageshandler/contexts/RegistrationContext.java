@@ -13,6 +13,20 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
+    private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
+
+    public DoctorRegistrationState getDoctorRegistrationState(Long userId) {
+        return doctorRegistrationStates.computeIfAbsent(userId, k -> new DoctorRegistrationState());
+    }
+
+    public void clearDoctorRegistrationState(Long userId) {
+        doctorRegistrationStates.remove(userId);
+    }
+
+    public boolean hasDoctorRegistrationState(Long userId) {
+        return doctorRegistrationStates.containsKey(userId);
+    }
+
 
     public void startRegistration(long chatId) {
         mapOfUserStatus.put(chatId, Status.FIRST_PART_REGISTRATION_DOCTOR.withId(null));
