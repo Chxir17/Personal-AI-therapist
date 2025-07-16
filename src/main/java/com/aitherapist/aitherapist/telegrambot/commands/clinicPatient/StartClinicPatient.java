@@ -11,7 +11,8 @@ import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.DoctorSendMessageToPatient;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
@@ -85,12 +86,18 @@ public class StartClinicPatient implements ICommand {
     }
 
     private SendMessage handleQuestionnaire(Update update) throws TelegramApiException, InterruptedException, JsonProcessingException {
+        Long chatId = TelegramIdUtils.getChatId(update);
+
         if (!update.hasMessage()) {
+            if (currentRegistrationStep == 1) {
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text(Answers.GIVE_NAME.getMessage())
+                        .build();
+            }
             return null;
         }
-
         String text = update.getMessage().getText();
-        Long chatId = update.getMessage().getChatId();
         Long userId = update.getMessage().getFrom().getId();
 
         switch (currentRegistrationStep) {
@@ -161,12 +168,12 @@ public class StartClinicPatient implements ICommand {
                 patient.setInitialData(initialHealthData);
                 userService.saveUser(patient);
                 initialHealthDataService.putInitialHealthDataByUserId(initialHealthData, userId);
-                acceptOrEditMedicalInitData(initialHealthData, update);
+
 
                 currentRegistrationStep = 0;
                 userInput.setLength(0);
 
-                return null; // сообщение уже отправлено внутри acceptOrEditMedicalInitData
+                return acceptOrEditMedicalInitData(initialHealthData, update);
             }
             default -> {
                 currentRegistrationStep = 0;
@@ -179,28 +186,42 @@ public class StartClinicPatient implements ICommand {
         }
     }
 
-    /**
-     * verify user. If user hide telephone number-> create buttom and request.
-     * @param update
-     * @return
-     * @throws TelegramApiException
-     */
-    /**
-     * g
-     * Get telephone number and set to field
-     *
-     * @param update
-     * @return
-     */
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        registrationContext.setStatus(update.getMessage().getFrom().getId(), Status.SECOND_PART_REGISTRATION);
+        Long userId = TelegramIdUtils.extractUserId(update);
+        registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+        if (userId == null) {
+            return SendMessage.builder()
+                    .chatId(TelegramIdUtils.getChatId(update).toString())
+                    .text("Не удалось определить пользователя")
+                    .build();
+        }
 
-//        boolean verStatus = verify(update);
-//        while(!verStatus){                //FIXME что с этим делать как это исправить? какой метод тут должен быть теперь?
-//            verStatus = verify(update);
-//        }
-        long chatId = update.getMessage().getChatId();
-        return new SendMessage(String.valueOf(chatId), Answers.WRITE_MEDICAL_INFO.getMessage());
+        if (registrationContext.getStatus(userId) == Status.REGISTRATION_CLINIC_PATIENT) {
+            try {
+                return handleQuestionnaire(update);
+            } catch (Exception e) {
+                return SendMessage.builder()
+                        .chatId(TelegramIdUtils.getChatId(update).toString())
+                        .text("Ошибка обработки данных")
+                        .build();
+            }
+        }
+
+        if (!registrationContext.isVerify(userId)) {
+            return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        }
+        return SendMessage.builder()
+                .chatId(TelegramIdUtils.getChatId(update).toString())
+                .text("Вы уже верифицированы. Выберите действие:")
+                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
+                .build();
+    }
+    private SendMessage requestPhoneNumber(Long chatId) {
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .replyMarkup(verification.createContactRequestKeyboard())
+                .build();
     }
 }

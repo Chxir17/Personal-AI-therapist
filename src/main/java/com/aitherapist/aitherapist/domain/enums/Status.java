@@ -2,7 +2,8 @@ package com.aitherapist.aitherapist.domain.enums;
 
 public enum Status  {
     NONE,
-    FIRST_PART_REGISTRATION_DOCTOR,
+    REGISTRATION_DOCTOR,
+    REGISTRATION_CLINIC_PATIENT,
     SECOND_PART_REGISTRATION,
     WAITING_VERIFICATION,
     VERIFIED,
