@@ -126,7 +126,7 @@ public class StartDoctors implements ICommand {
                     .build();
         }
 
-        if (registrationContext.getStatus(userId) == Status.FIRST_PART_REGISTRATION_DOCTOR) {
+        if (registrationContext.getStatus(userId) == Status.REGISTRATION_DOCTOR) {
             try {
                 return handleQuestionnaire(update, userId);
             } catch (Exception e) {
