@@ -29,16 +29,13 @@ public class RegistrationContext {
 
 
     public void startRegistration(long chatId) {
-        mapOfUserStatus.put(chatId, Status.FIRST_PART_REGISTRATION_DOCTOR.withId(null));
+        mapOfUserStatus.put(chatId, Status.REGISTRATION_DOCTOR.withId(null));
     }
 
     public void start(long chatId) {
         mapOfUserStatus.put(chatId, Status.ALREADY_REGISTER.withId(null));
     }
 
-    public boolean isRegistrationInProgress(long chatId) {
-        return getDynamicStatus(chatId).is(Status.FIRST_PART_REGISTRATION_DOCTOR);
-    }
 
     public Status getStatus(long userId) {
         return getDynamicStatus(userId).getBaseStatus();
