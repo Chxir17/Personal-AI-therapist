@@ -15,7 +15,7 @@ import java.io.Serializable;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "health_data")
+@Table(name = "daily_health_data")
 public class DailyHealthData implements Serializable {
 
     @Id
