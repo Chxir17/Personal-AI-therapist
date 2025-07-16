@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.telegrambot.commands.*;
+import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.ClinicMenu;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.StartClinicPatient;
@@ -62,7 +63,7 @@ public class CommandsHandler {
 
             EditParameters editParametersCommand,
             EditPatientMedicalData editMedicalDataCommand,
-
+            ClinicMenu clinicMenu,
             AcceptInitData acceptInitDataCommand,
             AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
     ) {
@@ -71,7 +72,7 @@ public class CommandsHandler {
                 Map.entry("/information", informationCommand),
                 Map.entry("/startDoctor", doctorCommand),
                 Map.entry("/botPatient", botPatientCommand),
-                Map.entry("/clinicPatient", clinicPatientCommand),
+                Map.entry("/clinicPatient", clinicMenu),
                 Map.entry("/settingsPatient", settingsPatientCommand),
                 Map.entry("/settingsDoctor", settingsDoctorCommand),
                 Map.entry("/getLastMessageDoctor", getLastMessageFromDoctor),
