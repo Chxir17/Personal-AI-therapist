@@ -50,12 +50,14 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            if (update.hasMessage() && update.getMessage().hasText()) {
-                handleMessageUpdate(update, registrationContext);
+            if (update.hasMessage()) {
+                if (update.getMessage().hasText()) {
+                    handleMessageUpdate(update, registrationContext);
+                } else if (update.getMessage().hasContact()) {
+                    handleContactUpdate(update, registrationContext);
+                }
             } else if (update.hasCallbackQuery()) {
                 handleCallbackQueryUpdate(update, registrationContext);
-            } else if (update.getMessage().hasContact()) {
-                handleContactUpdate(update, registrationContext);
             }
         } catch (Exception e) {
             log.error("Error processing update", e);

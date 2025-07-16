@@ -8,7 +8,7 @@ import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
-import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
+import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,12 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -77,6 +78,9 @@ public class MessagesHandler implements IHandler {
 //        else if(registrationContext.getStatus(userId) == Status.EDIT_CHRONIC_DISEASES){
 //            handleEditChronicDiseases(update);
         }
+        else if (registrationContext.getStatus(userId) == Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER) {
+            handleMessageFromDoctorToUser(update);
+        }
         else if(registrationContext.getStatus(userId) == Status.FIRST_PART_REGISTRATION_DOCTOR){
             commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
         }
@@ -109,6 +113,15 @@ public class MessagesHandler implements IHandler {
             acceptOrEditInitInfo(existingUser, update);
         } catch (Exception e) {
             e.printStackTrace(); // лучше логировать
+        }
+    }
+
+    private void handleMessageFromDoctorToUser(Update update) throws TelegramApiException {
+        Message message = update.getMessage();
+        Long currentDoctorId = message.getFrom().getId();
+        List<Long> userIds = registrationContext.findUserIdsWithSendToUserStatus(currentDoctorId);
+        for (Long userId : userIds) {
+            messageSender.sendMessage(userId, message.toString());
         }
     }
 

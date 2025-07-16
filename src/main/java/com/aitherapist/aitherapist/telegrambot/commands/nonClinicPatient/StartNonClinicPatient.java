@@ -3,7 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.nonClinicPatient;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
+import com.aitherapist.aitherapist.domain.enums.Status;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;

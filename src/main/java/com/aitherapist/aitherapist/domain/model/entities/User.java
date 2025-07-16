@@ -36,10 +36,8 @@ import java.util.Map;
 public abstract class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Используйте IDENTITY вместо SEQUENCE
     private Long id;
-
     @Column(name = "telegram_id", unique = true)
     private Long telegramId;
 

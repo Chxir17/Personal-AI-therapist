@@ -4,8 +4,8 @@ import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.GetLastMessageFromDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.SendMessageDoctor;
 import com.aitherapist.aitherapist.telegrambot.commands.clinicPatient.StartClinicPatient;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.DoctorSendMessageToPatient;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.HistoryPatients;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.initDataEditor.*;
@@ -43,7 +43,7 @@ public class CommandsHandler {
             SettingsPatientCommand settingsPatientCommand,
             SettingsDoctorCommand settingsDoctorCommand,
             GetLastMessageFromDoctor getLastMessageFromDoctor,
-            SendMessageUser sendMessagePatient,
+            DoctorSendMessageToPatient sendMessagePatient,
             HistoryPatients getHistoryPatients,
             SendMessageDoctor sendMessageDoctor,
             ChangePatientAccountData changeDoctorAccountData,

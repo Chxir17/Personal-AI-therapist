@@ -1,6 +1,6 @@
-package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
+package com.aitherapist.aitherapist.domain.enums;
 
-public enum Status {
+public enum Status  {
     NONE,
     FIRST_PART_REGISTRATION_DOCTOR,
     SECOND_PART_REGISTRATION,
@@ -17,5 +17,11 @@ public enum Status {
     EDIT_HEIGHT,
     EDIT_WEIGHT,
     EDIT_BAD_HABITS,
-    ALREADY_REGISTER
+    ALREADY_REGISTER,
+    WAIT_DOCTOR_WRITE_MESSAGE_TO_USER,
+    SEND_TO_THIS_USER;
+
+    public DynamicStatus withId(Long id) {
+        return new DynamicStatus(this, id);
+    }
 }

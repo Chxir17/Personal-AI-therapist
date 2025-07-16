@@ -3,17 +3,15 @@ package com.aitherapist.aitherapist.telegrambot.commands.clinicPatient;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
-import com.aitherapist.aitherapist.domain.model.entities.Patient;
-import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.services.InitialHealthDataServiceImpl;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.SendMessageUser;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.DoctorSendMessageToPatient;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
+import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
@@ -25,17 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class StartClinicPatient implements ICommand {
     private String telephoneNumber;
     private IMessageSender messageSender;
-    private SendMessageUser sendMessageUser;
+    private DoctorSendMessageToPatient sendMessageUser;
     private ClinicPatient patient;
     private int currentRegistrationStep = 1;
     private UserServiceImpl userService;
@@ -52,7 +46,7 @@ public class StartClinicPatient implements ICommand {
     public Verification verification;
 
     @Autowired
-    public StartClinicPatient(TelegramMessageSender messageSender, SendMessageUser sendMessageUser) {
+    public StartClinicPatient(TelegramMessageSender messageSender, DoctorSendMessageToPatient sendMessageUser) {
         this.messageSender = messageSender;
         this.sendMessageUser = sendMessageUser;
     }

@@ -3,7 +3,6 @@ package com.aitherapist.aitherapist.telegrambot.commands;
 import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.domain.enums.Answers;
-import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;

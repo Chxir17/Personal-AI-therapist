@@ -1,12 +1,10 @@
 package com.aitherapist.aitherapist.telegrambot.utils.createButtons;
 
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InlineKeyboardFactory {
 
@@ -103,4 +101,23 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttons, 2);
     }
 
+    public static InlineKeyboardMarkup createPatientsKeyboard(List<Patient> patients) {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        for (Patient patient : patients) {
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText("💬 " + patient.getName());
+            button.setCallbackData("/sendMessageToPatient " + patient.getId());
+            keyboard.add(Collections.singletonList(button));
+        }
+
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton();
+        cancelButton.setText("❌ Отмена");
+        cancelButton.setCallbackData("cancel_message");
+        keyboard.add(Collections.singletonList(cancelButton));
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        return markup;
+    }
 }
