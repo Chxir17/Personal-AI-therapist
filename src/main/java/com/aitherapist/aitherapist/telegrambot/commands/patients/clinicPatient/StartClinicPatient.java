@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.commands.clinicPatient;
+package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
