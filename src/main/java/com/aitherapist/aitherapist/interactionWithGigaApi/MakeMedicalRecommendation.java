@@ -59,6 +59,23 @@ public class MakeMedicalRecommendation {
             Map<String, String> metaInfo = patient.makeMetaInformation(patient);
             Map<String, String> parametersHistory = patient.buildMedicalHistory();
             Map<String, String> goals = patient.buildGoalsInformation();
+            // Печать metaInfo
+            System.out.println("Meta Information:");
+            for (Map.Entry<String, String> entry : metaInfo.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue());
+            }
+
+            // Печать parametersHistory
+            System.out.println("\nParameters History:");
+            for (Map.Entry<String, String> entry : parametersHistory.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue());
+            }
+
+            // Печать goals
+            System.out.println("\nGoals Information:");
+            for (Map.Entry<String, String> entry : goals.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue());
+            }
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> userPrompt = new HashMap<>();
             userPrompt.put("metaInfo", metaInfo);
@@ -71,7 +88,7 @@ public class MakeMedicalRecommendation {
                     ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                     ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
             );
-            return getFullRecommendation(Llm.talkToChat(token, requestMessage, 3));
+            return getFullRecommendation(Llm.talkToChat(token, requestMessage, 2));
         }
         catch (Exception e) {
             return null;

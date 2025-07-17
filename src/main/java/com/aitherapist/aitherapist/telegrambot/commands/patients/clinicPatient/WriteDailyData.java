@@ -1,111 +1,109 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
-import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.services.PatientServiceImpl;
+import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
+import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation.giveMedicalRecommendationBeta;
 import static com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta;
 
 @Component
 public class WriteDailyData implements ICommand {
-    private int currentRegistrationStep = 1;
-    private StringBuilder userInput = new StringBuilder();
+    private UserServiceImpl userService;
+    private PatientServiceImpl patientService;
+    @Autowired
+    public WriteDailyData(UserServiceImpl userService, PatientServiceImpl patientService) {
+        this.userService = userService;
+        this.patientService = patientService;
+    }
 
-    private SendMessage handleQuestionnaire(Update update) throws TelegramApiException {
+    private final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+
+    private SendMessage handleQuestionnaire(Update update, Long userId, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
-
-
-        switch (currentRegistrationStep) {
+        ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
+        String text = "";
+        if (update.hasMessage()) {
+            text = update.getMessage().getText();
+        }
+        switch (state.getCurrentStep()) {
             case 1 -> {
-                currentRegistrationStep++;
+                state.setCurrentStep(2);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Введите температуру тела (°C):")
+                        .text(Answers.TEMPERATURE_QUESTION.getMessage())
                         .build();
             }
             case 2 -> {
-
-                currentRegistrationStep++;
+                state.getBase().append("temperature: ").append(text).append("\n");
+                state.setCurrentStep(3);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Сколько часов вы спали сегодня?")
+                        .text(Answers.SLEEP_HOURS_QUESTION.getMessage())
                         .build();
             }
             case 3 -> {
-                currentRegistrationStep++;
+                state.getBase().append("sleepHours: ").append(text).append("\n");
+                state.setCurrentStep(4);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Введите ваш пульс (уд/мин):")
+                        .text(Answers.PULSE_QUESTION.getMessage())
                         .build();
             }
             case 4 -> {
-                currentRegistrationStep++;
+                state.getBase().append("pulse: ").append(text).append("\n");
+                state.setCurrentStep(5);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Введите ваше давление (формат: 120/80):")
+                        .text(Answers.BLOOD_PRESSURE_QUESTION.getMessage())
                         .build();
             }
+
             case 5 -> {
-                InitialHealthData initialData = new InitialHealthData();
-                initialData.setHeartPain(true);
-                initialData.setArrhythmia(true);
-                initialData.setChronicDiseases(null);
-                initialData.setHeight(175.5);
-                initialData.setWeight(80.0);
-                initialData.setBadHabits("Smoking");
+                state.getBase().append("bloodPressure: ").append(text).append("\n");
+                String response = ParseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
+                DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
+                System.out.println(d.toString());
 
+                Patient currentPatient = patientService.getPatientWithData(userId);
+                patientService.addDailyHealthDataToPatient(userId, d);
 
-                // Создаем ClinicPatient
-                ClinicPatient patient = new ClinicPatient();
-                patient.setClinicId(1L);
-                patient.setMedicalCardNumber("192.168.20.2");
-                patient.setInitialData(initialData);
-
-                patient.setName("Джон Смит");
-                patient.setBirthDate(LocalDate.of(1990, 5, 20));
-                patient.setGender(true);
-                patient.setPhoneNumber("+123456789");
-                // Создаем DailyHealthData
-                DailyHealthData dailyData = new DailyHealthData();
-                dailyData.setBloodOxygenLevel(98.5);
-                dailyData.setTemperature(36.7);
-                dailyData.setHoursOfSleepToday(7.5);
-                dailyData.setPulse(90L);
-                dailyData.setPressure("190/150");
-                dailyData.setPatient(patient);
-
-                List<DailyHealthData> dailyList = new ArrayList<>();
-                dailyList.add(dailyData);
-
-                patient.setDailyHealthDataList(dailyList);
-                String response4 = giveMedicalRecommendationWithScoreBeta(patient);
-                System.out.println("---------" + response4 + "-----------");
-                currentRegistrationStep = 0;
-                userInput.setLength(0);
+                currentPatient = patientService.getPatientWithData(userId);
+                System.out.println(1);
+                String response4 = MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
+                registrationContext.setStatus(userId, Status.NONE);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text(response4)
+                        .text(response4 != null ? response4 : "Рекомендации не сгенерированы")
+                        .parseMode("HTML")
+                        .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
                         .build();
             }
             default -> {
-                currentRegistrationStep = 0;
-                userInput.setLength(0);
+                registrationContext.clearClientRegistrationState(userId);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text("Неизвестный шаг регистрации")
@@ -116,6 +114,12 @@ public class WriteDailyData implements ICommand {
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        return handleQuestionnaire(update);
+        Long userId = TelegramIdUtils.extractUserId(update);
+        registrationContext.setStatus(userId, Status.WRITE_DAILY_DATA);
+        try {
+            return handleQuestionnaire(update, userId, registrationContext);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

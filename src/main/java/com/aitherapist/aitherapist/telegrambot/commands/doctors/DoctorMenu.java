@@ -16,7 +16,7 @@ public class DoctorMenu implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update))
-                .text("Выберите команду:")
+                .text("\uD83C\uDF1F Добро пожаловать! \uD83C\uDF1F \n Выберите команду:")
                 .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
                 .build();
 

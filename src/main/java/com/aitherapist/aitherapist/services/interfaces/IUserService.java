@@ -1,9 +1,6 @@
 package com.aitherapist.aitherapist.services.interfaces;
 import com.aitherapist.aitherapist.domain.enums.Roles;
-import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
-import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
-import com.aitherapist.aitherapist.domain.model.entities.User;
-import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
+import com.aitherapist.aitherapist.domain.model.entities.*;
 
 /**
  * IUserService - Service interface for health data entity.
@@ -28,4 +25,5 @@ public interface IUserService {
     Boolean isSignUp(Long userId);
     User getUserByUserId(Long userId);
     void registerUser(Long userId, User user);
+    ClinicPatient getClinicPatientById(Long clinicPatientId);
 }

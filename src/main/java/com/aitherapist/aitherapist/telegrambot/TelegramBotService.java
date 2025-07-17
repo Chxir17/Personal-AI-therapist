@@ -33,13 +33,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final CommandsHandler commandsHandler;
     private final @Lazy MessagesHandler messagesHandler;
 
-
-    private int flag = 0;
-    @Autowired
-    WriteDailyData writeDailyData;
-
-
-    private final TelegramMessageSender telegramSender; // Предполагаем, что у вас есть этот интерфейс
     @Autowired
     private RegistrationContext registrationContext;
 
@@ -53,14 +46,18 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         return botProperties.getName();
     }
 
+    public String generateSessionId(Update update) {
+        Long chatId = update.hasMessage() ? update.getMessage().getChatId() :
+                update.hasCallbackQuery() ? update.getCallbackQuery().getMessage().getChatId() :
+                        null;
+
+        return "chat_" + chatId + "_" + System.currentTimeMillis();
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
+        System.out.printf(generateSessionId(update));
         try {
-            if (flag == 1) {
-                telegramSender.sendMessage(writeDailyData.apply(update, registrationContext));
-                return;
-            }
             if (update.hasMessage()) {
                 if (update.getMessage().hasText()) {
                     handleMessageUpdate(update, registrationContext);
@@ -68,11 +65,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                     handleContactUpdate(update, registrationContext);
                 }
             } else if (update.hasCallbackQuery()) {
-                if (Objects.equals(update.getCallbackQuery().getMessage().getText(), "Выберите команду:")) {
-                    System.out.println("111111");
-                    flag = 1;
-                    writeDailyData.apply(update, registrationContext);
-                }
                 handleCallbackQueryUpdate(update, registrationContext);
             }
         } catch (Exception e) {
