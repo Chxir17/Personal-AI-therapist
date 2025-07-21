@@ -2,16 +2,14 @@ package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
-import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
-import com.aitherapist.aitherapist.telegrambot.commands.patients.EditPatientAccountData;
-import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.GetLastMessageFromDoctor;
-import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.SendMessageDoctor;
-import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.StartClinicPatient;
-import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationMessage;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationTime;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.Settings;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.ToggleNotifications;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.nonClinicPatient.StartNonClinicPatient;
-import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.ChangePatientAccountData;
-import com.aitherapist.aitherapist.telegrambot.commands.patientSettings.SettingsPatientCommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import lombok.Getter;
@@ -39,16 +37,12 @@ public class CommandsHandler {
             StartDoctors doctorCommand,
             StartNonClinicPatient botPatientCommand,
             StartClinicPatient clinicPatientCommand,
-            SettingsPatientCommand settingsPatientCommand,
-            SettingsDoctorCommand settingsDoctorCommand,
             GetLastMessageFromDoctor getLastMessageFromDoctor,
             DoctorSendMessageToPatient sendMessagePatient,
             HistoryPatients getHistoryPatients,
             SendMessageDoctor sendMessageDoctor,
-            ChangePatientAccountData changeDoctorAccountData,
-            ChangePatientAccountData changePatientAccountData,
             ChangeRoleCommand changeRoleCommand,
-
+            Settings patientSettings,
             EditName editNameCommand,
             EditBirthDate editBirthDateCommand,
             EditGender editGenderCommand,
@@ -58,43 +52,54 @@ public class CommandsHandler {
             EditHeight editHeightCommand,
             EditWeight editWeightCommand,
             EditBadHabits editBadHabitsCommand,
-
-            EditDoctorAccountData editDoctorAccountDataCommand,
-            EditPatientAccountData editMedicalDataCommand,
-
-            AcceptDoctorData acceptDoctorDataCommand,
+            WriteDailyData writeDailyData,
+            HealthHistory healthHistory,
+            Profile profile,
+            SetNotificationMessage setNotificationMessage,
+            SetNotificationTime setNotificationTime,
+            ToggleNotifications toggleNotifications,
+//            EditParameters editParametersCommand,
+//            EditPatientMedicalData editMedicalDataCommand,
+            ClinicMenu clinicMenu,
+            GetLastPatientMedicalData lastRecords,
+//            AcceptInitData acceptInitDataCommand,
+            DoctorMenu doctorMenu,
             AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
     ) {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
+                Map.entry("/getLastRecords",  lastRecords),
+                Map.entry("/toggleNotification", toggleNotifications),
+                Map.entry("/setNotificationTime", setNotificationTime),
+                Map.entry("/setNotificationMessage", setNotificationMessage),
+                Map.entry("/acceptInitData", doctorMenu),
+                Map.entry("/acceptInitDataClinic", clinicMenu),
+                Map.entry("/inputDailyData", writeDailyData),
                 Map.entry("/information", informationCommand),
                 Map.entry("/startDoctor", doctorCommand),
                 Map.entry("/botPatient", botPatientCommand),
                 Map.entry("/clinicPatient", clinicPatientCommand),
-                Map.entry("/settingsPatient", settingsPatientCommand),
-                Map.entry("/settingsDoctor", settingsDoctorCommand),
+                Map.entry("/patientSettings", patientSettings),
                 Map.entry("/getLastMessageDoctor", getLastMessageFromDoctor),
                 Map.entry("/sendMessageDoctor", sendMessageDoctor),
                 Map.entry("/sendMessageToPatient", sendMessagePatient),
                 Map.entry("/patientHistory", getHistoryPatients),
-                Map.entry("/changeDoctorAccountData", changeDoctorAccountData),
-                Map.entry("/changePatientAccountData", changePatientAccountData),
                 Map.entry("/changeRole", changeRoleCommand),
-
+                Map.entry("/myHealthHistory", healthHistory),
                 Map.entry("/editName", editNameCommand),
                 Map.entry("/editBirthDate", editBirthDateCommand),
                 Map.entry("/editGender", editGenderCommand),
-
+                Map.entry("/myProfile", profile),
                 Map.entry("/editArrhythmia", editArrhythmiaCommand),
                 Map.entry("/editChronicDiseases", editChronicDiseasesCommand),
                 Map.entry("/editHeight", editHeightCommand),
                 Map.entry("/editWeight", editWeightCommand),
                 Map.entry("/editBadHabits", editBadHabitsCommand),
 
-                Map.entry("/editParameters", editDoctorAccountDataCommand),
-                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
-
-                Map.entry("/acceptInitData", acceptDoctorDataCommand),
+//                Map.entry("/editParameters", editParametersCommand),
+//                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
+//
+//                Map.entry("/acceptInitData", acceptInitDataCommand),
                 Map.entry("/acceptClinicPatientInitData", acceptClinicPatientInitDataCommand)
         );
     }
@@ -131,14 +136,30 @@ public class CommandsHandler {
         }
     }
 
+    public SendMessage handleCustomCommand(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/inputDailyData");
+        return commandHandler.apply(update, registrationContext);
+    }
+
     public void inProgressQuestionnaireDoctor(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         ICommand commandHandler = commands.get("/startDoctor");
-
         messageSender.sendMessage(commandHandler.apply(update, registrationContext));
     }
     public void inProgressQuestionnairePatient(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         ICommand commandHandler = commands.get("/clinicPatient");
+        messageSender.sendMessage(commandHandler.apply(update, registrationContext));
+    }
+
+    public void inProgressQuestionnaireNonPatient(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/botPatient");
 
         messageSender.sendMessage(commandHandler.apply(update, registrationContext));
     }
+
+    public void lastDailyHealthDataUser(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/getLastRecords");
+
+        messageSender.sendMessage(commandHandler.apply(update, registrationContext));
+    }
+
 }

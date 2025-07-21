@@ -48,15 +48,18 @@ public class StartCommand implements ICommand {
 
         if (!userRegistrationService.isSignUp(userId)) {
             Map<String, String> buttons = new HashMap<>();
-            buttons.put("Я Доктор", "/startDoctor");
-            buttons.put("Я Пациент не привязанный к клинике", "/botPatient");
-            buttons.put("Я Пациент клиники", "/clinicPatient");
+            buttons.put("🩺 Доктор", "/startDoctor");
+            buttons.put("💊 Обычный пациент", "/botPatient");
+            buttons.put("🏥 Пациент клиники", "/clinicPatient");
 
             InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 3);
             registrationContext.startRegistration(chatId);
 
-            messageSender.sendMessage(new SendMessage(String.valueOf(chatId),
-                    Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage()));
+            SendMessage message = new SendMessage(String.valueOf(chatId),
+                    Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage());
+            message.setParseMode("HTML");
+
+            messageSender.sendMessage(message);
 
             return SendMessage.builder()
                     .chatId(String.valueOf(chatId))

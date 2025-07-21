@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.domain.model.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -36,6 +37,18 @@ public abstract class Patient extends User {
                 );
     }
 
+    public void printValueOfDailyData() {
+        List<DailyHealthData> lst = getDailyHealthDataList();
+        for (DailyHealthData dailyHealthData : lst) {
+            System.out.println(dailyHealthData.toString());
+        }
+    }
+
+    public void addDailyHealthData(DailyHealthData dailyHealthData) {
+        dailyHealthData.setPatient(this);
+        dailyHealthDataList.add(dailyHealthData);
+    }
+
     public void removeHealthData(Long healthDataId) {
         dailyHealthDataList.removeIf(hd -> Objects.equals(hd.getId(), healthDataId));
     }
@@ -66,5 +79,14 @@ public abstract class Patient extends User {
                 history.stream().map(DailyHealthData::getPressure).toList()
         ));
         return result;
+    }
+    @Override
+    public String toString() {
+        String parentToString = super.toString().replaceFirst("User\\{", "Patient{");
+
+        return parentToString +
+                ", dailyHealthDataCount=" + (dailyHealthDataList != null ? dailyHealthDataList.size() : 0) +
+                ", initialDataId=" + (initialData != null ? initialData.getId() : "null") +
+                '}';
     }
 }
