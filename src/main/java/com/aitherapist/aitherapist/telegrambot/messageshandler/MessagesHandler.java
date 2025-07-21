@@ -78,7 +78,7 @@ public class MessagesHandler implements IHandler {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
-        System.out.println(registrationContext.getStatus(userId));
+        System.out.println("DEB: " + registrationContext.getStatus(userId).toString());
         if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
@@ -102,8 +102,8 @@ public class MessagesHandler implements IHandler {
         } else if (registrationContext.getStatus(userId) == Status.SET_NOTIFICATION_MESSAGE) {
             handleSetNotificationMessage(update);
         }
-        else if(registrationContext.getStatus(userId) == Status.REGISTERED){
-            commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
+        else if(registrationContext.getStatus(userId).isRegistered()){
+            commandsHandler.handleUserMessageAfterVerificationToFilter(update, registrationContext);
         }
         else if(registrationContext.getStatus(userId) == Status.REGISTRATION_CLINIC_PATIENT){
             commandsHandler.inProgressQuestionnairePatient(update, registrationContext);
@@ -281,7 +281,6 @@ public class MessagesHandler implements IHandler {
     /**
      * TODO: add check is verify in db or no
      * @param update
-     * @param registrationContext
      * @return
      * @throws TelegramApiException
      */
@@ -346,7 +345,7 @@ public class MessagesHandler implements IHandler {
 
         messageSender.sendMessage(SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text("Выберите команду")
+                .text("✨ Доступные действия ✨")
                 .replyMarkup(replyKeyboardDoctor)
                 .build());
     }

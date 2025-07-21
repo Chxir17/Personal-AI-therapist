@@ -111,7 +111,6 @@ public class StartClinicPatient implements ICommand {
         }
         String text = update.getMessage().getText();
         Long userId = update.getMessage().getFrom().getId();
-
         switch (state.getCurrentStep()) {
             case 1 -> {
                 state.getBase().append("name: ").append(text).append("\n");
@@ -171,7 +170,7 @@ public class StartClinicPatient implements ICommand {
             }
             case 8 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
-                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString());
+                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString() );
                 String jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
                 ClinicPatient patient = new ClinicPatient();
@@ -214,15 +213,13 @@ public class StartClinicPatient implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
-
         if (userId == null) {
             return SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
                     .text("Не удалось определить пользователя")
                     .build();
         }
-
-        if (registrationContext.getStatus(userId) == Status.REGISTERED) {
+        if (registrationContext.getStatus(userId) == Status.REGISTERED_CLINIC_PATIENT) {
             try {
                 return handleQuestionnaire(update, registrationContext);
             } catch (Exception e) {
@@ -232,9 +229,7 @@ public class StartClinicPatient implements ICommand {
                         .build();
             }
         } else {
-            System.out.println(1);
             if (registrationContext.isVerify(userId)) {
-                System.out.println(2);
                 registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
                 return requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }

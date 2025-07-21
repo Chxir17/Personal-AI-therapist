@@ -1,15 +1,12 @@
 package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
-import com.aitherapist.aitherapist.domain.enums.DynamicStatus;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
-import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.WriteDailyData;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
-import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,25 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
-import com.aitherapist.aitherapist.domain.enums.HypertensionQA;
-//import com.aitherapist.aitherapist.telegrambot.scheduled.TelegramNotificationService;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoField;
-import java.util.Objects;
-import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
@@ -114,28 +98,19 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     }
 
     private void handleContactUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
-//        execute(messagesHandler.handleVerify(update, registrationContext));
-        System.out.println(3);
         Long userId = update.getMessage().getFrom().getId();
         Long chatId = update.getMessage().getChatId();
+        registrationContext.setTelephone(userId, update.getMessage().getContact().getPhoneNumber());
+
         SendMessage sm = SendMessage.builder()
                 .chatId(chatId.toString())
-                .text("✅ Верификация успешна.")
+                .text("✅ Верификация успешна.\n" +
+                        "Пожалуйста заполните анкету:")
                 .build();
         execute(sm);
-        Status s = registrationContext.getStatus(userId);
-        if (s == Status.REGISTRATION_DOCTOR) {
-            registrationContext.setStatus(userId, Status.REGISTERED);
-            commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
-        }
-        else if (s == Status.REGISTRATION_CLINIC_PATIENT) {
-            registrationContext.setStatus(userId, Status.REGISTERED);
-            commandsHandler.inProgressQuestionnairePatient(update, registrationContext);
-        } else if (s == Status.REGISTRATION_NO_CLINIC_PATIENT) {
-            registrationContext.setStatus(userId, Status.REGISTERED);
-            commandsHandler.inProgressQuestionnaireNonPatient(update, registrationContext);
-        }
+        commandsHandler.mapStatusToHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
     }
+
 
     private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String messageText = update.getMessage().getText();
