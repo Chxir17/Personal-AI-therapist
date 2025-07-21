@@ -90,10 +90,11 @@ public class StartDoctors implements ICommand {
 
             case 3:
                 state.getUserInput().append("gender: ").append(text).append("\n");
-                String response = ParseUserPrompt.doctorRegistrationParser(state.getUserInput().toString() + "phoneNumber: " + registrationContext.getTelephone(userId));
+                String response = ParseUserPrompt.doctorRegistrationParser(state.getUserInput().toString());
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
                 try {
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
+                    doctorInput.setPhoneNumber(registrationContext.getTelephone(userId));
                     Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
                     registrationContext.clearDoctorRegistrationState(userId);
                     return acceptOrEditDoctorInfo(savedDoctor, update);
