@@ -23,6 +23,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -65,35 +66,9 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
             if (update.hasMessage()) {
                 if (update.getMessage().hasText()) {
                     handleMessageUpdate(update, registrationContext);
-                }else if(update.getMessage().hasVoice()){
-                    Voice voice = update.getMessage().getVoice();
-                    String fileId = voice.getFileId();
-                    GetFile getFile = new GetFile();
-                    getFile.setFileId(fileId);
-                    File file = execute(getFile); // метод из TelegramLongPollingBot
-                    String filePath = file.getFilePath();
-                    String downloadUrl = "https://api.telegram.org/file/bot"+ getBotToken() +"/" + filePath;
-
-                    HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create("http://your-python-server/transcribe"))
-                            .header("Content-Type", "application/json")
-                            .POST(HttpRequest.BodyPublishers.ofString("{\"url\":\"" + downloadUrl + "\"}"))
-                            .build();
-
-                    HttpClient client = HttpClient.newHttpClient();
-                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                    if (response.statusCode() == 200) {
-                        String jsonResponse = response.body();
-                        update.getMessage().setText(jsonResponse);
-                        handleMessageUpdate(update, registrationContext);
-                    } else {
-                        System.out.println("Ошибка: " + response.statusCode());
-                        System.out.println(response.body());
-                    }
-
-                }
-
-                else if (update.getMessage().hasContact()) {
+                } else if(update.getMessage().hasVoice()) {
+                    handleVoiceMessage(update);
+                } else if (update.getMessage().hasContact()) {
                     handleContactUpdate(update, registrationContext);
                 }
             } else if (update.hasCallbackQuery()) {
@@ -102,6 +77,48 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         } catch (Exception e) {
             log.error("Error processing update", e);
             sendErrorMessage(update);
+        }
+    }
+
+    private void handleVoiceMessage(Update update) throws InterruptedException, TelegramApiException, IOException {
+        Voice voice = update.getMessage().getVoice();
+        String fileId = voice.getFileId();
+        GetFile getFile = new GetFile();
+        getFile.setFileId(fileId);
+        File file = execute(getFile);
+        String filePath = file.getFilePath();
+        String downloadUrl = "https://api.telegram.org/file/bot" + getBotToken() + "/" + filePath;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://your-python-server/transcribe"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("{\"url\":\"" + downloadUrl + "\"}"))
+                .build();
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            String jsonResponse = response.body();
+            update.getMessage().setText(jsonResponse);
+            handleMessageUpdate(update, registrationContext);
+        } else {
+            log.error("Voice processing error. Status code: {}, Response: {}",
+                    response.statusCode(), response.body());
+            // Можно добавить отправку сообщения об ошибке пользователю
+            sendErrorMessage(update, "Не удалось обработать голосовое сообщение");
+        }
+    }
+
+    private void sendErrorMessage(Update update, String errorMessage) {
+        try {
+            SendMessage message = SendMessage.builder()
+                    .chatId(update.getMessage().getChatId().toString())
+                    .text(errorMessage)
+                    .build();
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send error message", e);
         }
     }
 
