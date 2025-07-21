@@ -40,7 +40,7 @@ public class RegistrationContext {
 
 
     public void startRegistration(long chatId) {
-        mapOfUserStatus.put(chatId, Status.REGISTRATION_DOCTOR.withId(null));
+        mapOfUserStatus.put(chatId, Status.REGISTRATION.withId(null));
     }
 
     public void start(long chatId) {
@@ -57,7 +57,7 @@ public class RegistrationContext {
     }
 
     public boolean isVerify(Long id) {
-        return getDynamicStatus(id).is(Status.VERIFIED);
+        return getDynamicStatus(id).is(Status.REGISTRATION);
     }
 
     public void setVerify(Long userId, Status status) {

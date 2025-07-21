@@ -143,11 +143,15 @@ public class CommandsHandler {
 
     public void inProgressQuestionnaireDoctor(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         ICommand commandHandler = commands.get("/startDoctor");
-
         messageSender.sendMessage(commandHandler.apply(update, registrationContext));
     }
     public void inProgressQuestionnairePatient(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         ICommand commandHandler = commands.get("/clinicPatient");
+        messageSender.sendMessage(commandHandler.apply(update, registrationContext));
+    }
+
+    public void inProgressQuestionnaireNonPatient(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/botPatient");
 
         messageSender.sendMessage(commandHandler.apply(update, registrationContext));
     }

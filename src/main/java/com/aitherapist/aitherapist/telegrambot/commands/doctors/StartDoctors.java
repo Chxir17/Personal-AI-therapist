@@ -60,15 +60,11 @@ public class StartDoctors implements ICommand {
     private SendMessage handleQuestionnaire(Update update, Long userId, RegistrationContext registrationContext) throws JsonProcessingException, InterruptedException {
         Long chatId = TelegramIdUtils.getChatId(update);
         DoctorRegistrationState state = registrationContext.getDoctorRegistrationState(userId);
-
-        if (!update.hasMessage()) {
-            if (state.getCurrentStep() == 1) {
-                return SendMessage.builder()
+        if (update.getMessage().hasContact()) {
+            return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.GIVE_NAME.getMessage())
                         .build();
-            }
-            return null;
         }
 
         String text = update.getMessage().getText();
@@ -124,7 +120,8 @@ public class StartDoctors implements ICommand {
                     .build();
         }
 
-        if (registrationContext.getStatus(userId) == Status.REGISTRATION_DOCTOR) {
+
+        if (registrationContext.getStatus(userId) == Status.REGISTERED) {
             try {
                 return handleQuestionnaire(update, userId, registrationContext);
             } catch (Exception e) {
@@ -133,11 +130,13 @@ public class StartDoctors implements ICommand {
                         .text("Ошибка обработки данных")
                         .build();
             }
+        } else {
+            if (registrationContext.isVerify(userId)) {
+                registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
+                return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+            }
         }
 
-        if (!registrationContext.isVerify(userId)) {
-            return requestPhoneNumber(TelegramIdUtils.getChatId(update));
-        }
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
                 .text("Вы уже верифицированы. Выберите действие:")
