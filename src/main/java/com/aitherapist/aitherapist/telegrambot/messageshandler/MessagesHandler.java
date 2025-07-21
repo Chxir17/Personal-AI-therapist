@@ -27,6 +27,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
@@ -130,10 +133,16 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             String response = ParseUserPrompt.parameterEditorParser(message); //FIXME другой метод взять который илья пишет щас
-            messageSender.sendMessage(SendMessage.builder()
+            KeyboardButton menuButton = new KeyboardButton("/menu");
+            KeyboardRow row = new KeyboardRow();
+            row.add(menuButton);
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+            keyboard.setKeyboard(List.of(row));
+            keyboard.setResizeKeyboard(true); // Опционально: компактный размер
+
+            messageSender.sendMessage( SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
-                    .text(response)
-                    .replyMarkup(InlineKeyboardFactory.createBackToMenuButton())
+                    .replyMarkup(keyboard)
                     .build());
         } catch (Exception e) {
             e.printStackTrace();
