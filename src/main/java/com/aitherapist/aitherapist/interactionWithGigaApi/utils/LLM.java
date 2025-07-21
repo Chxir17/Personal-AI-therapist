@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.interactionWithGigaApi.llm;
+package com.aitherapist.aitherapist.interactionWithGigaApi.utils;
 
 import chat.giga.client.auth.AuthClient;
 import chat.giga.client.auth.AuthClientBuilder;
@@ -11,12 +11,11 @@ import chat.giga.model.completion.CompletionResponse;
 
 import java.util.List;
 
-
-public final class Llm {
-    public static String talkToChat(String accessToken, List<ChatMessage> messages) {
+public final class LLM {
+    public static String talkToChat(List<ChatMessage> messages) {
         GigaChatClient client = GigaChatClient.builder()
                 .authClient(AuthClient.builder()
-                        .withProvidedTokenAuth(accessToken).build())
+                        .withProvidedTokenAuth(AccessToken.getInstance().getToken()).build())
                 .build();
         try {
             CompletionResponse response = client.completions(CompletionRequest.builder()
@@ -30,7 +29,7 @@ public final class Llm {
     }
 
 
-    public static String talkToChat(String accessToken, List<ChatMessage> messages, int model) {
+    public static String talkToChat(List<ChatMessage> messages, int model) {
         String modelName;
         switch (model) {
             case 1:
@@ -43,11 +42,11 @@ public final class Llm {
                 modelName = ModelName.GIGA_CHAT_MAX;
                 break;
             default:
-                return "Ошибка: неизвестный номер модели. Допустимые значения: 1, 2 или 3.";
+                return ModelName.GIGA_CHAT;
         }
         GigaChatClient client = GigaChatClient.builder()
                 .authClient(AuthClient.builder()
-                        .withProvidedTokenAuth(accessToken).build())
+                        .withProvidedTokenAuth(AccessToken.getInstance().getToken()).build())
                 .build();
         try {
             CompletionResponse response = client.completions(CompletionRequest.builder()
@@ -59,35 +58,6 @@ public final class Llm {
             return ex.statusCode() + " " + ex.bodyAsString();
         }
     }
-
-    public static String getGigaChatToken() {
-        try {
-            String authKey = System.getenv("GIGA_CHAT_API_KEY");
-            AuthClient client = AuthClient.builder().withOAuth(AuthClientBuilder.OAuthBuilder.builder()
-                    .scope(Scope.GIGACHAT_API_PERS)
-                    .authKey(authKey)
-                    .build()).build();
-            return client.getToken().token();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static String getGigaChatToken(Scope scope) {
-        try {
-            String authKey = System.getenv("GIGA_CHAT_API_KEY");
-            AuthClient client = AuthClient.builder().withOAuth(AuthClientBuilder.OAuthBuilder.builder()
-                                    .scope(scope)
-                                    .authKey(authKey)
-                                    .build()).build();
-            return client.getToken().token();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
 }
 
 

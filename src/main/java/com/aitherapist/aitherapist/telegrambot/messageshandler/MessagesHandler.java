@@ -2,8 +2,8 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.*;
-import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
