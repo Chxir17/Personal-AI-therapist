@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
@@ -57,7 +58,34 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
             if (update.hasMessage()) {
                 if (update.getMessage().hasText()) {
                     handleMessageUpdate(update, registrationContext);
-                } else if (update.getMessage().hasContact()) {
+                }else if(update.getMessage().hasVoice()){
+                    Voice voice = update.getMessage().getVoice();
+                    String fileId = voice.getFileId();
+                    GetFile getFile = new GetFile();
+                    getFile.setFileId(fileId);
+                    File file = execute(getFile); // метод из TelegramLongPollingBot
+                    String filePath = file.getFilePath();
+                    String downloadUrl = "https://api.telegram.org/file/bot"+ getBotToken() +"/" + filePath;
+
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .uri(URI.create("http://your-python-server/transcribe"))
+                            .header("Content-Type", "application/json")
+                            .POST(HttpRequest.BodyPublishers.ofString("{\"url\":\"" + downloadUrl + "\"}"))
+                            .build();
+
+                    HttpClient client = HttpClient.newHttpClient();
+                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    if (response.statusCode() == 200) {
+                        String jsonResponse = response.body();
+                        update.getMessage().setText(jsonResponse);
+                        handleMessageUpdate(update, registrationContext);
+                    } else {
+                        System.out.println("Ошибка: " + response.statusCode());
+                        System.out.println(response.body());
+                    }
+
+                }
+                else if (update.getMessage().hasContact()) {
                     handleContactUpdate(update, registrationContext);
                 }
             } else if (update.hasCallbackQuery()) {

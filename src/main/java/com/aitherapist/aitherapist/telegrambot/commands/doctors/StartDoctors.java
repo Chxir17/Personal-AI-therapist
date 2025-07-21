@@ -1,7 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;

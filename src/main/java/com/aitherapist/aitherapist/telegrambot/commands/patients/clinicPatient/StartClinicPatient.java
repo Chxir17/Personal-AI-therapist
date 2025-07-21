@@ -6,7 +6,7 @@ import com.aitherapist.aitherapist.domain.model.PatientRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
