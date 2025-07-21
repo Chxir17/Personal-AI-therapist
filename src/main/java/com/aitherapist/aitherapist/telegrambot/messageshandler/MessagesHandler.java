@@ -226,6 +226,7 @@ public class MessagesHandler implements IHandler {
     private void handleMessageFromDoctorToUser(Update update) throws TelegramApiException {
         Message message = update.getMessage();
         Long currentDoctorId = message.getFrom().getId();
+
         List<Long> userIds = registrationContext.findUserIdsWithSendToUserStatus(currentDoctorId);
 
         for (Long userId : userIds) {

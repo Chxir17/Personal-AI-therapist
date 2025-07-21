@@ -22,6 +22,7 @@ public final class LLM {
                     .model(ModelName.GIGA_CHAT)
                     .messages(messages)
                     .build());
+            System.out.println("DEB: " + AccessToken.getInstance().getToken());
             return response.choices().get(0).message().content();
         } catch (HttpClientException ex) {
             return ex.statusCode() + "  " + ex.bodyAsString();
