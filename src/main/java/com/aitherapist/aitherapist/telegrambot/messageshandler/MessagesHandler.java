@@ -345,7 +345,7 @@ public class MessagesHandler implements IHandler {
 
         messageSender.sendMessage(SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text("Выберите команду")
+                .text("✨ Доступные действия ✨")
                 .replyMarkup(replyKeyboardDoctor)
                 .build());
     }

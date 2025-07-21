@@ -61,10 +61,13 @@ public class StartDoctors implements ICommand {
         Long chatId = TelegramIdUtils.getChatId(update);
         DoctorRegistrationState state = registrationContext.getDoctorRegistrationState(userId);
         if (update.getMessage().hasContact()) {
+            String phoneNumber = update.getMessage().getContact().getPhoneNumber();
+            registrationContext.setTelephone(userId, phoneNumber);
+
             return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.GIVE_NAME.getMessage())
-                        .build();
+                    .chatId(chatId.toString())
+                    .text(Answers.GIVE_NAME.getMessage())
+                    .build();
         }
 
         String text = update.getMessage().getText();
@@ -87,7 +90,7 @@ public class StartDoctors implements ICommand {
 
             case 3:
                 state.getUserInput().append("gender: ").append(text).append("\n");
-                String response = ParseUserPrompt.doctorRegistrationParser(state.getUserInput().toString());
+                String response = ParseUserPrompt.doctorRegistrationParser(state.getUserInput().toString() + "phoneNumber: " + registrationContext.getTelephone(userId));
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
                 try {
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);

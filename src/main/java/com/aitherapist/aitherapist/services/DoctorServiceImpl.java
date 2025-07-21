@@ -24,8 +24,13 @@ public class DoctorServiceImpl implements IDoctorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Doctor getDoctor(Long doctorId) {
-        return doctorRepository.getByTelegramId(doctorId);
+        Doctor doctor = doctorRepository.getByTelegramId(doctorId);
+        if (doctor != null) {
+            doctor.getPatients().size();
+        }
+        return doctor;
     }
 
     @Override

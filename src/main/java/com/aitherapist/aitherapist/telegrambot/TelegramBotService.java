@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -71,6 +72,8 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private void handleContactUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
         Long userId = update.getMessage().getFrom().getId();
         Long chatId = update.getMessage().getChatId();
+        registrationContext.setTelephone(userId, update.getMessage().getContact().getPhoneNumber());
+
         SendMessage sm = SendMessage.builder()
                 .chatId(chatId.toString())
                 .text("✅ Верификация успешна.\n" +

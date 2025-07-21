@@ -170,7 +170,7 @@ public class StartClinicPatient implements ICommand {
             }
             case 8 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
-                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString());
+                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString() );
                 String jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
                 ClinicPatient patient = new ClinicPatient();
