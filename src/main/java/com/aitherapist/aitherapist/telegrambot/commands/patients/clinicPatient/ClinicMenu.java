@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.commands.doctors;
+package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -10,14 +10,13 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
-public class DoctorMenu implements ICommand {
-
+public class ClinicMenu implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update))
-                .text("\uD83C\uDF1F Добро пожаловать! \uD83C\uDF1F \n Выберите команду:")
-                .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
+                .text("Выберите команду:")
+                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
                 .build();
 
     }

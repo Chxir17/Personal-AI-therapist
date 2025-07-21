@@ -14,6 +14,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
+    private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
+
+
+    public ClientRegistrationState getClientRegistrationState(Long userId) {
+        return clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
+    }
+
+
+    public void clearClientRegistrationState(Long userId) {
+        clientRegistrationStates.remove(userId);
+    }
 
     public DoctorRegistrationState getDoctorRegistrationState(Long userId) {
         return doctorRegistrationStates.computeIfAbsent(userId, k -> new DoctorRegistrationState());
@@ -95,7 +106,6 @@ public class RegistrationContext {
 
     public List<Long> findUserIdsWithSendToUserStatus(Long doctorId) {
         List<Long> userIds = new ArrayList<>();
-
         for (Map.Entry<Long, DynamicStatus> entry : mapOfUserStatus.entrySet()) {
             DynamicStatus status = entry.getValue();
             if (status.is(Status.SEND_TO_THIS_USER) &&

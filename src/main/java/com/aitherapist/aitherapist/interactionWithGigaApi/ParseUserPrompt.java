@@ -122,7 +122,7 @@ public class ParseUserPrompt {
         patient.setMedicalCardNumber("192.168.20.2");
         patient.setInitialData(initialData);
 
-        patient.setName("Джон Смит");
+        patient.setName("Илья");
         patient.setBirthDate(LocalDate.of(1990, 5, 20));
         patient.setGender(true);
         patient.setPhoneNumber("+123456789");
@@ -139,7 +139,7 @@ public class ParseUserPrompt {
         dailyList.add(dailyData);
 
         patient.setDailyHealthDataList(dailyList);
-//        String response4 = giveMedicalRecommendationBeta(patient);
+        String response4 = giveMedicalRecommendationBeta(patient);
 //        System.out.println(response4);
         String response5 = giveMedicalRecommendationWithScoreBeta(patient);
         System.out.println(response5);

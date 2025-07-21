@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot;
 
+import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.WriteDailyData;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -38,8 +39,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final BotProperties botProperties;
     private final CommandsHandler commandsHandler;
     private final @Lazy MessagesHandler messagesHandler;
-//    private final TelegramNotificationService notificationService;
-    private final TelegramMessageSender telegramSender; // Предполагаем, что у вас есть этот интерфейс
+
     @Autowired
     private RegistrationContext registrationContext;
 
@@ -53,9 +53,17 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         return botProperties.getName();
     }
 
+    public String generateSessionId(Update update) {
+        Long chatId = update.hasMessage() ? update.getMessage().getChatId() :
+                update.hasCallbackQuery() ? update.getCallbackQuery().getMessage().getChatId() :
+                        null;
+
+        return "chat_" + chatId + "_" + System.currentTimeMillis();
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
+        System.out.printf(generateSessionId(update));
         try {
             if (update.hasMessage()) {
                 if (update.getMessage().hasText()) {

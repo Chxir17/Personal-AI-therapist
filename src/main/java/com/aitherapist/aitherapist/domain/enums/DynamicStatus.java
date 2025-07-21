@@ -1,5 +1,8 @@
 package com.aitherapist.aitherapist.domain.enums;
 
+import lombok.Getter;
+
+@Getter
 public class DynamicStatus {
     private Status baseStatus;  
     private Long associatedId;
@@ -8,14 +11,6 @@ public class DynamicStatus {
         this.associatedId = associatedId;
     }
 
-
-    public Status getBaseStatus() {
-        return baseStatus;
-    }
-
-    public Long getAssociatedId() {
-        return associatedId;
-    }
 
     public boolean is(Status status) {
         return this.baseStatus == status;

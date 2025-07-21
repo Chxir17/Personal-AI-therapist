@@ -94,12 +94,19 @@ public class InlineKeyboardFactory {
 
     public static InlineKeyboardMarkup createPatientDefaultKeyboard() {
         Map<String, String> buttonMap = new LinkedHashMap<>();
-        buttonMap.put("📊 Ввести daily данные", "/inputDailyData");
+        buttonMap.put("📊 Ввести ежедневные данные", "/inputDailyData");
         buttonMap.put("💬 Написать доктору", "/writeToDoctor");
         buttonMap.put("👤 Мой профиль", "/myProfile");
         buttonMap.put("⚙️ Настройки", "/patientSettings");
         buttonMap.put("📈 История показателей", "/myHealthHistory");
         return createInlineKeyboard(buttonMap, 2);
+    }
+
+    public static InlineKeyboardMarkup createAcceptOrEditKeyboardClinic() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("✅ Принять", "/acceptInitDataClinic");
+        buttons.put("✏️ Изменить", "/editParameters");
+        return createInlineKeyboard(buttons, 2);
     }
 
     public static InlineKeyboardMarkup createAcceptOrEditKeyboard() {
@@ -126,6 +133,25 @@ public class InlineKeyboardFactory {
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
+        return markup;
+    }
+
+    public static InlineKeyboardMarkup createProfileKeyboard() {
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+
+        List<InlineKeyboardButton> row1 = List.of(
+                InlineKeyboardButton.builder()
+                        .text("✏️ Редактировать профиль")
+                        .callbackData("/editParameters")
+                        .build(),
+                InlineKeyboardButton.builder()
+                        .text("📊 История здоровья")
+                        .callbackData("/myHealthHistory")
+                        .build()
+        );
+
+
+        markup.setKeyboard(List.of(row1));
         return markup;
     }
 }
