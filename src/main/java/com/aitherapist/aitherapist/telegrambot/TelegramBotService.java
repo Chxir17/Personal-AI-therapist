@@ -84,7 +84,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                     String downloadUrl = "https://api.telegram.org/file/bot"+ getBotToken() +"/" + filePath;
 
                     HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create("http://your-python-server/transcribe"))
+                            .uri(URI.create("http://0.0.0.0/transcribe"))
                             .header("Content-Type", "application/json")
                             .POST(HttpRequest.BodyPublishers.ofString("{\"url\":\"" + downloadUrl + "\"}"))
                             .build();

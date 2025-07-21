@@ -4,6 +4,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationMessage;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationTime;
@@ -62,6 +63,7 @@ public class CommandsHandler {
 //            EditPatientMedicalData editMedicalDataCommand,
             ClinicMenu clinicMenu,
             GetLastPatientMedicalData lastRecords,
+            QAMode qaMode,
 //            AcceptInitData acceptInitDataCommand,
             DoctorMenu doctorMenu,
             AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
@@ -73,7 +75,8 @@ public class CommandsHandler {
                 Map.entry("/setNotificationTime", setNotificationTime),
                 Map.entry("/setNotificationMessage", setNotificationMessage),
                 Map.entry("/acceptInitData", doctorMenu),
-                Map.entry("/acceptInitDataClinic", clinicMenu),
+                Map.entry("/clinicPatientMenu", clinicMenu),
+                Map.entry("/QAMode", qaMode),
                 Map.entry("/inputDailyData", writeDailyData),
                 Map.entry("/information", informationCommand),
                 Map.entry("/startDoctor", doctorCommand),

@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendat
 import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -111,6 +112,9 @@ public class MessagesHandler implements IHandler {
         else if(registrationContext.getStatus(userId) == Status.EDIT_HEIGHT){
             handleEditHeight(update);
         }
+        else if(registrationContext.getStatus(userId) == Status.QAMode){
+            QAModeHandler(update);
+        }
         else if(registrationContext.getStatus(userId) == Status.EDIT_WEIGHT){
             handleEditWeight(update);
         }
@@ -119,6 +123,20 @@ public class MessagesHandler implements IHandler {
         }
         else if (registrationContext.getStatus(userId) == Status.GIVING_PATIENT_ID) {
             handleGivePatientIdStatus(update);
+        }
+    }
+
+    private void QAModeHandler(Update update) {
+        try {
+            String message = update.getMessage().getText();
+            String response = ParseUserPrompt.parameterEditorParser(message); //FIXME другой метод взять который илья пишет щас
+            messageSender.sendMessage(SendMessage.builder()
+                    .chatId(TelegramIdUtils.getChatId(update).toString())
+                    .text(response)
+                    .replyMarkup(InlineKeyboardFactory.createBackToMenuButton())
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -281,7 +299,6 @@ public class MessagesHandler implements IHandler {
     /**
      * TODO: add check is verify in db or no
      * @param update
-     * @param registrationContext
      * @return
      * @throws TelegramApiException
      */

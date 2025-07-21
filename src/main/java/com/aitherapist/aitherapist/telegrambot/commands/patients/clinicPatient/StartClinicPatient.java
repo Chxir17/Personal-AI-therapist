@@ -232,9 +232,7 @@ public class StartClinicPatient implements ICommand {
                         .build();
             }
         } else {
-            System.out.println(1);
             if (registrationContext.isVerify(userId)) {
-                System.out.println(2);
                 registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
                 return requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
