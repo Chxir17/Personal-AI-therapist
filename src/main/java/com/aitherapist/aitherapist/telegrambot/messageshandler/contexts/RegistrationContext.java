@@ -17,13 +17,29 @@ public class RegistrationContext {
     private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
 
 
-    public ClientRegistrationState getClientRegistrationState(Long userId) {
-        return clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
+    public void setTelephone(Long userId, String telephone) {
+        DynamicStatus status = mapOfUserStatus.computeIfAbsent(
+                userId,
+                k -> new DynamicStatus(null, null)
+        );
+
+        status.setTelephone(telephone);
+        System.out.println(status.toString());
+
+        clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
     }
 
+    public String getTelephone(Long userId) {
+        DynamicStatus status = mapOfUserStatus.get(userId);
+        return status == null ? null : status.getTelephone();
+    }
 
     public void clearClientRegistrationState(Long userId) {
         clientRegistrationStates.remove(userId);
+    }
+
+    public ClientRegistrationState getClientRegistrationState(Long userId) {
+        return clientRegistrationStates.get(userId);
     }
 
     public DoctorRegistrationState getDoctorRegistrationState(Long userId) {
@@ -40,7 +56,7 @@ public class RegistrationContext {
 
 
     public void startRegistration(long chatId) {
-        mapOfUserStatus.put(chatId, Status.REGISTRATION_DOCTOR.withId(null));
+        mapOfUserStatus.put(chatId, Status.REGISTRATION.withId(null));
     }
 
     public void start(long chatId) {
@@ -57,7 +73,7 @@ public class RegistrationContext {
     }
 
     public boolean isVerify(Long id) {
-        return getDynamicStatus(id).is(Status.VERIFIED);
+        return getDynamicStatus(id).is(Status.REGISTRATION);
     }
 
     public void setVerify(Long userId, Status status) {

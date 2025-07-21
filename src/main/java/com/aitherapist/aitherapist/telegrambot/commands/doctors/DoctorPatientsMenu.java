@@ -14,7 +14,7 @@ public class DoctorPatientsMenu implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         return SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update))
-                    .text("Выберите команду:")
+                    .text("✨ Доступные действия ✨")
                     .replyMarkup(InlineKeyboardFactory.createPatientManagementKeyboard())
                     .build();
         }

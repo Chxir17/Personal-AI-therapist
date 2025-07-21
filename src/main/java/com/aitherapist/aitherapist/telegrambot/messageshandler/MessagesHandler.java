@@ -2,8 +2,8 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.*;
-import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -78,7 +78,7 @@ public class MessagesHandler implements IHandler {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
-        System.out.println(registrationContext.getStatus(userId));
+        System.out.println("DEB: " + registrationContext.getStatus(userId).toString());
         if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
@@ -102,8 +102,8 @@ public class MessagesHandler implements IHandler {
         } else if (registrationContext.getStatus(userId) == Status.SET_NOTIFICATION_MESSAGE) {
             handleSetNotificationMessage(update);
         }
-        else if(registrationContext.getStatus(userId) == Status.REGISTRATION_DOCTOR){
-            commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
+        else if(registrationContext.getStatus(userId).isRegistered()){
+            commandsHandler.handleUserMessageAfterVerificationToFilter(update, registrationContext);
         }
         else if(registrationContext.getStatus(userId) == Status.REGISTRATION_CLINIC_PATIENT){
             commandsHandler.inProgressQuestionnairePatient(update, registrationContext);
@@ -278,27 +278,13 @@ public class MessagesHandler implements IHandler {
         }
     }
 
-    public SendMessage handleVerify(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        Long userId = update.getMessage().getFrom().getId();
-        Long chatId = update.getMessage().getChatId();
+    /**
+     * TODO: add check is verify in db or no
+     * @param update
+     * @return
+     * @throws TelegramApiException
+     */
 
-        if (registrationContext.isVerify(userId)) {
-            return new SendMessage(chatId.toString(), "Ты уже зарегистрирован");
-        } else {
-            if (Verification.verify(update, update.getMessage().getContact().getPhoneNumber())) {
-                registrationContext.setStatus(userId, Status.VERIFIED);
-                InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorDefaultKeyboard();
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text("✅ Верификация успешна. Выберите действие:")
-                        .replyMarkup(keyboard)
-                        .build();
-            } else {
-                return new SendMessage(chatId.toString(),
-                        Answers.VERIFICAATION_ERROR.getMessage());
-            }
-        }
-    }
 
 
     public boolean verify(Update update) throws TelegramApiException {
@@ -359,7 +345,7 @@ public class MessagesHandler implements IHandler {
 
         messageSender.sendMessage(SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text("Выберите команду")
+                .text("✨ Доступные действия ✨")
                 .replyMarkup(replyKeyboardDoctor)
                 .build());
     }

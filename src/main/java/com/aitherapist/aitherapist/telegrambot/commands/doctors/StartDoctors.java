@@ -1,7 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
@@ -60,15 +60,14 @@ public class StartDoctors implements ICommand {
     private SendMessage handleQuestionnaire(Update update, Long userId, RegistrationContext registrationContext) throws JsonProcessingException, InterruptedException {
         Long chatId = TelegramIdUtils.getChatId(update);
         DoctorRegistrationState state = registrationContext.getDoctorRegistrationState(userId);
+        if (update.getMessage().hasContact()) {
+            String phoneNumber = update.getMessage().getContact().getPhoneNumber();
+            registrationContext.setTelephone(userId, phoneNumber);
 
-        if (!update.hasMessage()) {
-            if (state.getCurrentStep() == 1) {
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.GIVE_NAME.getMessage())
-                        .build();
-            }
-            return null;
+            return SendMessage.builder()
+                    .chatId(chatId.toString())
+                    .text(Answers.GIVE_NAME.getMessage())
+                    .build();
         }
 
         String text = update.getMessage().getText();
@@ -95,6 +94,7 @@ public class StartDoctors implements ICommand {
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
                 try {
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
+                    doctorInput.setPhoneNumber(registrationContext.getTelephone(userId));
                     Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
                     registrationContext.clearDoctorRegistrationState(userId);
                     return acceptOrEditDoctorInfo(savedDoctor, update);
@@ -124,7 +124,8 @@ public class StartDoctors implements ICommand {
                     .build();
         }
 
-        if (registrationContext.getStatus(userId) == Status.REGISTRATION_DOCTOR) {
+
+        if (registrationContext.getStatus(userId) == Status.REGISTERED_DOCTOR) {
             try {
                 return handleQuestionnaire(update, userId, registrationContext);
             } catch (Exception e) {
@@ -133,11 +134,13 @@ public class StartDoctors implements ICommand {
                         .text("Ошибка обработки данных")
                         .build();
             }
+        } else {
+            if (registrationContext.isVerify(userId)) {
+                registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
+                return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+            }
         }
 
-        if (!registrationContext.isVerify(userId)) {
-            return requestPhoneNumber(TelegramIdUtils.getChatId(update));
-        }
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
                 .text("Вы уже верифицированы. Выберите действие:")

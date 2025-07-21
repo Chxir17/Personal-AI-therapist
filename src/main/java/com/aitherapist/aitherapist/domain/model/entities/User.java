@@ -118,7 +118,7 @@ public abstract class User {
         var result = new LinkedHashMap<String, String>();
         result.put("name", makeDataList(List.of(user.getName())));
         result.put("age", makeDataList(List.of(user.getAge() != null ? String.valueOf(user.getAge()) : "null")));
-        result.put("male", makeDataList(List.of(user.getGender() != null ? String.valueOf(user.getGender()) : "null")));
+        result.put("male", makeDataList(List.of(user.getGender() != null ? (user.getGender() ? "муж" : "жен") : "null")));
         if (user instanceof Patient patient){
             var data = patient.getInitialData();
             result.put("weight", makeDataList(List.of(data.getWeight() != null ? String.valueOf(data.getWeight()) : "null")));
