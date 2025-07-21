@@ -2,7 +2,9 @@ package com.aitherapist.aitherapist.domain.enums;
 
 public enum Status  {
     NONE,
-    REGISTERED,
+    REGISTERED_DOCTOR,
+    REGISTERED_CLINIC_PATIENT,
+    REGISTERED_NO_CLINIC_PATIENT,
     REGISTRATION,
     REGISTRATION_DOCTOR,
     REGISTRATION_CLINIC_PATIENT,
@@ -27,6 +29,11 @@ public enum Status  {
     SET_NOTIFICATION_TIME,
     SET_NOTIFICATION_MESSAGE,
     SEND_TO_THIS_USER;
+
+
+    public boolean isRegistered() {
+        return this.name().startsWith("REGISTERED_");
+    }
 
     public DynamicStatus withId(Long id) {
         return new DynamicStatus(this, id);

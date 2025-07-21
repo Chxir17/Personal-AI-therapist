@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot;
 
+import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
@@ -139,6 +140,37 @@ public class CommandsHandler {
     public SendMessage handleCustomCommand(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         ICommand commandHandler = commands.get("/inputDailyData");
         return commandHandler.apply(update, registrationContext);
+    }
+
+    public void mapStatusToHandler(Update update, Status s, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
+        if (s == Status.REGISTRATION_DOCTOR) {
+            registrationContext.setStatus(userId, Status.REGISTERED_DOCTOR);
+            inProgressQuestionnaireDoctor(update, registrationContext);
+        }
+        else if (s == Status.REGISTRATION_CLINIC_PATIENT) {
+            registrationContext.setStatus(userId, Status.REGISTERED_CLINIC_PATIENT);
+            inProgressQuestionnairePatient(update, registrationContext);
+        } else if (s == Status.REGISTRATION_NO_CLINIC_PATIENT) {
+            registrationContext.setStatus(userId, Status.REGISTERED_NO_CLINIC_PATIENT);
+            inProgressQuestionnaireNonPatient(update, registrationContext);
+        }
+    }
+
+
+
+    public void mapStatusHandler(Update update, Status s, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
+        if (s == Status.REGISTERED_DOCTOR) {
+            inProgressQuestionnaireDoctor(update, registrationContext);
+        } else if (s == Status.REGISTERED_CLINIC_PATIENT) {
+            inProgressQuestionnairePatient(update, registrationContext);
+        } else if (s == Status.REGISTERED_NO_CLINIC_PATIENT) {
+            inProgressQuestionnaireNonPatient(update, registrationContext);
+        }
+    }
+
+    public void handleUserMessageAfterVerificationToFilter(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        Long userId = update.getMessage().getFrom().getId();
+        mapStatusHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
     }
 
     public void inProgressQuestionnaireDoctor(Update update, RegistrationContext registrationContext) throws TelegramApiException {
