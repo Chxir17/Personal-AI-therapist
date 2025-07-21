@@ -1,9 +1,14 @@
 package com.aitherapist.aitherapist.telegrambot;
 
+import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.domain.enums.DynamicStatus;
+import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.WriteDailyData;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +37,8 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final BotProperties botProperties;
     private final CommandsHandler commandsHandler;
     private final @Lazy MessagesHandler messagesHandler;
+    @Autowired
+    public Verification verification;
 
     @Autowired
     private RegistrationContext registrationContext;
@@ -56,7 +63,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
 
     @Override
     public void onUpdateReceived(Update update) {
-        System.out.printf(generateSessionId(update));
         try {
             if (update.hasMessage()) {
                 if (update.getMessage().hasText()) {
@@ -74,7 +80,27 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     }
 
     private void handleContactUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
-        execute(messagesHandler.handleVerify(update, registrationContext));
+//        execute(messagesHandler.handleVerify(update, registrationContext));
+        System.out.println(3);
+        Long userId = update.getMessage().getFrom().getId();
+        Long chatId = update.getMessage().getChatId();
+        SendMessage sm = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text("✅ Верификация успешна.")
+                .build();
+        execute(sm);
+        Status s = registrationContext.getStatus(userId);
+        if (s == Status.REGISTRATION_DOCTOR) {
+            registrationContext.setStatus(userId, Status.REGISTERED);
+            commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
+        }
+        else if (s == Status.REGISTRATION_CLINIC_PATIENT) {
+            registrationContext.setStatus(userId, Status.REGISTERED);
+            commandsHandler.inProgressQuestionnairePatient(update, registrationContext);
+        } else if (s == Status.REGISTRATION_NO_CLINIC_PATIENT) {
+            registrationContext.setStatus(userId, Status.REGISTERED);
+            commandsHandler.inProgressQuestionnaireNonPatient(update, registrationContext);
+        }
     }
 
     private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
@@ -84,6 +110,18 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         } else {
             messagesHandler.handle(update, registrationContext);
         }
+    }
+
+    private void handleVerification(Update update, Long userId) throws TelegramApiException {
+        Long chatId = TelegramIdUtils.getChatId(update);
+
+        SendMessage sm = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .replyMarkup(verification.createContactRequestKeyboard())
+                .build();
+
+        sendMessage(sm);
     }
 
     private void handleCallbackQueryUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
@@ -121,5 +159,13 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
             log.error("Send message error", e);
             throw e;
         }
+    }
+
+    private SendMessage requestPhoneNumber(Long chatId) {
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .replyMarkup(verification.createContactRequestKeyboard())
+                .build();
     }
 }

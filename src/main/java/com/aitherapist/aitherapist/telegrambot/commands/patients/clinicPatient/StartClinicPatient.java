@@ -103,14 +103,11 @@ public class StartClinicPatient implements ICommand {
     private SendMessage handleQuestionnaire(Update update, RegistrationContext registrationContext) throws TelegramApiException, InterruptedException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
         ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
-        if (!update.hasMessage()) {
-            if (state.getCurrentStep() == 1) {
-                return SendMessage.builder()
+        if (update.getMessage().hasContact()) {
+            return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.GIVE_NAME.getMessage())
                         .build();
-            }
-            return null;
         }
         String text = update.getMessage().getText();
         Long userId = update.getMessage().getFrom().getId();
@@ -217,7 +214,7 @@ public class StartClinicPatient implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
-        registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+
         if (userId == null) {
             return SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
@@ -225,7 +222,7 @@ public class StartClinicPatient implements ICommand {
                     .build();
         }
 
-        if (registrationContext.getStatus(userId) == Status.REGISTRATION_CLINIC_PATIENT) {
+        if (registrationContext.getStatus(userId) == Status.REGISTERED) {
             try {
                 return handleQuestionnaire(update, registrationContext);
             } catch (Exception e) {
@@ -234,10 +231,13 @@ public class StartClinicPatient implements ICommand {
                         .text("Ошибка обработки данных")
                         .build();
             }
-        }
-
-        if (!registrationContext.isVerify(userId)) {
-            return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        } else {
+            System.out.println(1);
+            if (registrationContext.isVerify(userId)) {
+                System.out.println(2);
+                registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+                return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+            }
         }
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
