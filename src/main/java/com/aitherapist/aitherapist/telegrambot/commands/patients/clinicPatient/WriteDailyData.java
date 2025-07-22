@@ -5,7 +5,6 @@ import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
-import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
@@ -90,8 +89,8 @@ public class WriteDailyData implements ICommand {
                 patientService.addDailyHealthDataToPatient(userId, d);
 
                 currentPatient = patientService.getPatientWithData(userId);
-                System.out.println(1);
-                String response4 = MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
+                String response4 =
+                        MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
                 registrationContext.setStatus(userId, Status.NONE);
                 return SendMessage.builder()
                         .chatId(chatId.toString())

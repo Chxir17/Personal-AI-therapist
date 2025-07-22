@@ -26,7 +26,6 @@ public class RegistrationContext {
         status.setTelephone(telephone);
         System.out.println(status.toString());
 
-        clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
     }
 
     public String getTelephone(Long userId) {
@@ -39,7 +38,7 @@ public class RegistrationContext {
     }
 
     public ClientRegistrationState getClientRegistrationState(Long userId) {
-        return clientRegistrationStates.get(userId);
+        return clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
     }
 
     public DoctorRegistrationState getDoctorRegistrationState(Long userId) {

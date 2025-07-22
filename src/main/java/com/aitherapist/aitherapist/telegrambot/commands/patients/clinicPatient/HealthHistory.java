@@ -11,11 +11,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Comparator;
 import java.util.DoubleSummaryStatistics;
 import java.util.IntSummaryStatistics;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class HealthHistory implements ICommand {
@@ -29,33 +30,24 @@ public class HealthHistory implements ICommand {
 
     @Override
     @Transactional(readOnly = true)
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext) {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
         List<DailyHealthData> healthData = patientService.getPatientDailyHealthData(userId);
+        healthData.sort(Comparator.comparingLong(DailyHealthData::getId).reversed());
 
         StringBuilder message = new StringBuilder();
         message.append("📆 *История ваших показателей:*\n\n");
 
-        for (DailyHealthData data : healthData) {
-            message.append(String.format(
-                    "🌡 Температура: *%.1f°C*\n" +
-                            "❤️ Пульс: *%d уд/мин*\n" +
-                            "🩸 Давление: *%s*\n" +
-                            "😴 Сон: *%.1f часов*\n" +
-                            "🧪 Кислород: *%.1f%%*\n\n",
-                    data.getTemperature(),
-                    data.getPulse(),
-                    data.getPressure() != null ? data.getPressure() : "нет данных",
-                    data.getHoursOfSleepToday(),
-                    data.getBloodOxygenLevel()
-            ));
-        }
-
-        if (!healthData.isEmpty()) {
-            message.append("\n🔍 *Статистика:*\n");
-            message.append(getMinMaxStats(healthData));
+        if (healthData.isEmpty()) {
+            message.append("У вас пока нет сохранённых данных о здоровье.");
+        } else {
+            for (DailyHealthData data : healthData) {
+                message.append(formatHealthData(data));
+            }
+            message.append("\n🔍 *Статистика за весь период:*\n");
+            message.append(calculateStatistics(healthData));
         }
 
         return SendMessage.builder()
@@ -66,26 +58,77 @@ public class HealthHistory implements ICommand {
                 .build();
     }
 
-    private String getMinMaxStats(List<DailyHealthData> data) {
+    private String formatHealthData(DailyHealthData data) {
+        return String.format(
+                "🆔 ID записи: *%d*\n" +
+                        "🌡 Температура: *%s*\n" +
+                        "❤️ Пульс: *%s*\n" +
+                        "🩸 Давление: *%s*\n" +
+                        "😴 Сон: *%s*\n" +
+                        "🧪 Кислород: *%s*\n\n",
+                data.getId(),
+                data.getTemperature() != null ? String.format("%.1f°C", data.getTemperature()) : "нет данных",
+                data.getPulse() != null ? data.getPulse() + " уд/мин" : "нет данных",
+                data.getPressure() != null ? data.getPressure() : "нет данных",
+                data.getHoursOfSleepToday() != null ? String.format("%.1f часов", data.getHoursOfSleepToday()) : "нет данных",
+                data.getBloodOxygenLevel() != null ? String.format("%.1f%%", data.getBloodOxygenLevel()) : "нет данных"
+        );
+    }
+
+    private String calculateStatistics(List<DailyHealthData> data) {
+
         DoubleSummaryStatistics tempStats = data.stream()
-                .mapToDouble(DailyHealthData::getTemperature)
+                .map(DailyHealthData::getTemperature)
+                .filter(Objects::nonNull)
+                .mapToDouble(Double::doubleValue)
                 .summaryStatistics();
 
         IntSummaryStatistics pulseStats = data.stream()
-                .mapToInt(d -> d.getPulse().intValue())
+                .map(DailyHealthData::getPulse)
+                .filter(Objects::nonNull)
+                .mapToInt(Long::intValue)
+                .summaryStatistics();
+        DoubleSummaryStatistics sleepStats = data.stream()
+                .map(DailyHealthData::getHoursOfSleepToday)
+                .filter(Objects::nonNull)
+                .mapToDouble(Double::doubleValue)
                 .summaryStatistics();
 
-        DoubleSummaryStatistics sleepStats = data.stream()
-                .mapToDouble(DailyHealthData::getHoursOfSleepToday)
+        DoubleSummaryStatistics oxygenStats = data.stream()
+                .map(DailyHealthData::getBloodOxygenLevel)
+                .filter(Objects::nonNull)
+                .mapToDouble(Double::doubleValue)
                 .summaryStatistics();
 
         return String.format(
-                "🌡 Температура: макс %.1f°C / мин %.1f°C\n" +
-                        "❤️ Пульс: макс %d / мин %d\n" +
-                        "😴 Сон: макс %.1fч / мин %.1fч",
-                tempStats.getMax(), tempStats.getMin(),
-                pulseStats.getMax(), pulseStats.getMin(),
-                sleepStats.getMax(), sleepStats.getMin()
+                "🌡 Температура: %s\n" +
+                        "❤️ Пульс: %s\n" +
+                        "😴 Сон: %s\n" +
+                        "🧪 Кислород: %s",
+                formatStats(tempStats, "°C"),
+                formatStats(pulseStats, "уд/мин"),
+                formatStats(sleepStats, "ч"),
+                formatStats(oxygenStats, "%%")
         );
+    }
+
+    private String formatStats(DoubleSummaryStatistics stats, String unit) {
+        if (stats.getCount() == 0) {
+            return "нет данных";
+        }
+        return String.format("макс %.1f%s / мин %.1f%s / сред %.1f%s",
+                stats.getMax(), unit,
+                stats.getMin(), unit,
+                stats.getAverage(), unit);
+    }
+
+    private String formatStats(IntSummaryStatistics stats, String unit) {
+        if (stats.getCount() == 0) {
+            return "нет данных";
+        }
+        return String.format("макс %d%s / мин %d%s / сред %.1f%s",
+                stats.getMax(), unit,
+                stats.getMin(), unit,
+                stats.getAverage(), unit);
     }
 }

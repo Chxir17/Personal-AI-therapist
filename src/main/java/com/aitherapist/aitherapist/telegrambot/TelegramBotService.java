@@ -14,12 +14,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.Contact;
+import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @Component
 @RequiredArgsConstructor
@@ -58,34 +66,9 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
             if (update.hasMessage()) {
                 if (update.getMessage().hasText()) {
                     handleMessageUpdate(update, registrationContext);
-                }else if(update.getMessage().hasVoice()){
-                    Voice voice = update.getMessage().getVoice();
-                    String fileId = voice.getFileId();
-                    GetFile getFile = new GetFile();
-                    getFile.setFileId(fileId);
-                    File file = execute(getFile); // метод из TelegramLongPollingBot
-                    String filePath = file.getFilePath();
-                    String downloadUrl = "https://api.telegram.org/file/bot"+ getBotToken() +"/" + filePath;
-
-                    HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create("http://your-python-server/transcribe"))
-                            .header("Content-Type", "application/json")
-                            .POST(HttpRequest.BodyPublishers.ofString("{\"url\":\"" + downloadUrl + "\"}"))
-                            .build();
-
-                    HttpClient client = HttpClient.newHttpClient();
-                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                    if (response.statusCode() == 200) {
-                        String jsonResponse = response.body();
-                        update.getMessage().setText(jsonResponse);
-                        handleMessageUpdate(update, registrationContext);
-                    } else {
-                        System.out.println("Ошибка: " + response.statusCode());
-                        System.out.println(response.body());
-                    }
-
-                }
-                else if (update.getMessage().hasContact()) {
+                } else if(update.getMessage().hasVoice()) {
+                    handleVoiceMessage(update);
+                } else if (update.getMessage().hasContact()) {
                     handleContactUpdate(update, registrationContext);
                 }
             } else if (update.hasCallbackQuery()) {
@@ -94,6 +77,49 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         } catch (Exception e) {
             log.error("Error processing update", e);
             sendErrorMessage(update);
+        }
+    }
+
+    private void handleVoiceMessage(Update update) throws TelegramApiException, IOException, InterruptedException {
+        // Для теста просто эмулируем получение голосового сообщения
+        String testMessage = "Это тестовый текст из голосового сообщения";
+
+        // Формируем запрос к тестовому FastAPI серверу
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8000/echo"))  // URL нашего тестового endpoint
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "{\"text\":\"" + testMessage + "\"}"  // Используем структуру из тестового API
+                ))
+                .build();
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            // Парсим ответ (простая строка в JSON)
+            String responseText = response.body();
+
+            // Отправляем текст пользователю
+            SendMessage message = new SendMessage();
+            message.setChatId(update.getMessage().getChatId().toString());
+            message.setText("Результат обработки: " + responseText);
+            execute(message);
+        } else {
+            log.error("Ошибка при обработке: {}", response.body());
+            sendErrorMessage(update, "Тестовый сервер недоступен");
+        }
+    }
+
+    private void sendErrorMessage(Update update, String errorMessage) {
+        try {
+            SendMessage message = SendMessage.builder()
+                    .chatId(update.getMessage().getChatId().toString())
+                    .text(errorMessage)
+                    .build();
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send error message", e);
         }
     }
 

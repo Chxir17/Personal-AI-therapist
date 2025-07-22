@@ -78,7 +78,6 @@ public class MessagesHandler implements IHandler {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
-        System.out.println("DEB: " + registrationContext.getStatus(userId).toString());
         if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
@@ -226,19 +225,22 @@ public class MessagesHandler implements IHandler {
     private void handleMessageFromDoctorToUser(Update update) throws TelegramApiException {
         Message message = update.getMessage();
         Long currentDoctorId = message.getFrom().getId();
+
         List<Long> userIds = registrationContext.findUserIdsWithSendToUserStatus(currentDoctorId);
 
         for (Long userId : userIds) {
             String doctorMessage = String.format(
-                    "✉️ *Вам пришло сообщение от вашего доктора:*\n\n" +
+                    "✉️ *" +
+                            "Вам пришло сообщение от вашего доктора: %s\n\n" +
                             "━━━━━━━━━━━━━━━━━━━━\n" +
                             "%s\n" +
                             "━━━━━━━━━━━━━━━━━━━━\n\n" +
                             "Вы можете ответить доктору, просто написав сообщение в этот чат.",
-                    message.toString()
+                    userService.getUser(currentDoctorId).getName(),
+                    message.getText()
             );
 
-            messageSender.sendMessage(1085500451, doctorMessage);
+            messageSender.sendMessage(userId, doctorMessage);
         }
     }
 

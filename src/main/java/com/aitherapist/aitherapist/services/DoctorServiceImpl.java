@@ -144,4 +144,10 @@ public class DoctorServiceImpl implements IDoctorService {
         ClinicPatient clinicPatient = doctor.getPatientById(userId);
         return clinicPatient.getDailyHealthDataList();
     }
+
+    @Override
+    public String getDoctorName(Long doctorId) {
+        Doctor doctor = doctorRepository.getByTelegramId(doctorId);
+        return doctor.getName();
+    }
 }

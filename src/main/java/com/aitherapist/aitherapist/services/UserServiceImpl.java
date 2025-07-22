@@ -98,8 +98,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User getUser(Long id) {
-        User user =  userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        return user;
+        return userRepository.findByTelegramId(id);
     }
 
     @Override
