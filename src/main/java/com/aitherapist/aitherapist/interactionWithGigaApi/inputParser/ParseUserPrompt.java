@@ -5,7 +5,7 @@ import com.aitherapist.aitherapist.domain.enums.Prompts;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
-import com.aitherapist.aitherapist.functionality.QAChatBot.QAChatBot.UserQuestions;
+import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.utils.LLM;
 import org.springframework.stereotype.Component;
 
@@ -134,7 +134,7 @@ public class ParseUserPrompt {
         dailyList.add(dailyData);
 
         patient.setDailyHealthDataList(dailyList);
-        String response4 = giveMedicalRecommendationBeta(patient);
+        String response4 = MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta(patient);
 //        System.out.println(response4);
 
 //        String response5 = giveMedicalRecommendationWithScoreBeta(patient);
