@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.functionality.QAChatBot.QAChatBot;
+package com.aitherapist.aitherapist.functionality.QAChatBot;
 
 import chat.giga.model.completion.ChatMessage;
 import com.aitherapist.aitherapist.domain.enums.Prompts;
