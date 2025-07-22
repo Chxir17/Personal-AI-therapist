@@ -51,46 +51,23 @@ public class WriteDailyData implements ICommand {
                 state.setCurrentStep(2);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text(Answers.TEMPERATURE_QUESTION.getMessage())
+                        .text(Answers.MEDICAL_DATA_INPUT.getMessage())
                         .build();
             }
             case 2 -> {
-                state.getBase().append("temperature: ").append(text).append("\n");
-                state.setCurrentStep(3);
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.SLEEP_HOURS_QUESTION.getMessage())
-                        .build();
-            }
-            case 3 -> {
-                state.getBase().append("sleepHours: ").append(text).append("\n");
-                state.setCurrentStep(4);
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.PULSE_QUESTION.getMessage())
-                        .build();
-            }
-            case 4 -> {
-                state.getBase().append("pulse: ").append(text).append("\n");
-                state.setCurrentStep(5);
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.BLOOD_PRESSURE_QUESTION.getMessage())
-                        .build();
-            }
-
-            case 5 -> {
-                state.getBase().append("bloodPressure: ").append(text).append("\n");
+                state.getBase().append(text);
                 String response = ParseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
+                System.out.println("response - " + response);
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
-                System.out.println(d.toString());
+                System.out.println("daily healthdata - " + d.toString());
 
                 Patient currentPatient = patientService.getPatientWithData(userId);
                 patientService.addDailyHealthDataToPatient(userId, d);
-
+                System.out.println("patient created " + currentPatient.toString());
                 currentPatient = patientService.getPatientWithData(userId);
                 String response4 =
                         MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
+                System.out.println("response4 " + response4);
                 registrationContext.setStatus(userId, Status.NONE);
                 return SendMessage.builder()
                         .chatId(chatId.toString())

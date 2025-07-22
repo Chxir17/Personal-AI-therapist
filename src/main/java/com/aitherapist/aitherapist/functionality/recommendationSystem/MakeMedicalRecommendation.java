@@ -55,6 +55,20 @@ public class MakeMedicalRecommendation {
             Map<String, String> metaInfo = patient.makeMetaInformation(patient);
             Map<String, String> parametersHistory = patient.buildMedicalHistory();
             Map<String, String> goals = patient.buildGoalsInformation();
+            System.out.println("Meta Information:");
+            for (Map.Entry<String, String> entry : metaInfo.entrySet()) {
+                System.out.println("QQQQQQQQQQQq" + entry.getKey() + ": " + entry.getValue());
+            }
+
+            System.out.println("\nParameters History:");
+            for (Map.Entry<String, String> entry : parametersHistory.entrySet()) {
+                System.out.println("QQQQQQQQQQQq" + entry.getKey() + ": " + entry.getValue());
+            }
+
+            System.out.println("\nGoals Information:");
+            for (Map.Entry<String, String> entry : goals.entrySet()) {
+                System.out.println("QQQQQQQQQQQq" + entry.getKey() + ": " + entry.getValue());
+            }
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> userPrompt = new HashMap<>();
             userPrompt.put("metaInfo", metaInfo);

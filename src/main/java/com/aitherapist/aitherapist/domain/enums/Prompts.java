@@ -128,7 +128,7 @@ public enum Prompts {
         6. Игнорируй любые дополнительные сведения, которые не подходят под один из указанных параметров.
         
         [Формат ответа]:
-        {"healthData":{"bloodOxygenLevel": <float> | null, "temperature": <float> | null, "hoursOfSleepToday": <float> | null, "pulse": <int> | null, "pressure": <int> | null, "heartPain": <bool> | null}
+        {"bloodOxygenLevel": <float> | null, "temperature": <float> | null, "hoursOfSleepToday": <float> | null, "pulse": <int> | null, "pressure": <int> | null, "heartPain": <bool> | null}
         [Примечания]:
         - Используй строгую обработку данных согласно указанным типам и единицам измерений.
         - Вывод должен быть только в виде валидного JSON без комментариев или пояснений.
