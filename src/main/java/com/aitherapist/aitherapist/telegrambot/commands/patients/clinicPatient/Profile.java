@@ -58,6 +58,7 @@ public class Profile implements ICommand {
                 👤 *Основная информация*
                 ├ Имя: %s
                 ├ Возраст: %d лет
+                ├ Номер телефона: %s
                 ├ Пол: %s
                 └ Номер медкарты: %s
                 
@@ -68,6 +69,7 @@ public class Profile implements ICommand {
                 """,
                 escapeMarkdown(patient.getName()),
                 patient.getAge(),
+                escapeMarkdown(patient.getPhoneNumber()),
                 patient.getGender() ? "Мужской ♂" : "Женский ♀",
                 patient.getMedicalCardNumber() != null ?
                         escapeMarkdown(patient.getMedicalCardNumber()) : "не указан",
