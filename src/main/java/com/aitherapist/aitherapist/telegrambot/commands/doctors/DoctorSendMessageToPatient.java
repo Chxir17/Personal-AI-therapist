@@ -76,11 +76,12 @@ public class DoctorSendMessageToPatient implements ICommand {
         for (int i = 0; i < patients.size(); i++) {
             Patient patient = patients.get(i);
             messageText.append(String.format(
-                    "%d. <b>%s</b> (%d лет, %s)\n",
+                    "%d. <b>%s</b> (%d лет, %s)\n <b>%s</b>\n",
                     i + 1,
                     patient.getName(),
                     patient.getAge(),
-                    patient.getGender() ? "М" : "Ж"
+                    patient.getGender() ? "М" : "Ж",
+                    patient.getPhoneNumber()
             ));
         }
 

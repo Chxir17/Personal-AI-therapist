@@ -15,7 +15,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -39,8 +38,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final @Lazy MessagesHandler messagesHandler;
     @Autowired
     public Verification verification;
-    @Autowired
-    private final TelegramLongPollingBot bot;
 
     @Autowired
     private RegistrationContext registrationContext;
@@ -83,33 +80,34 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         }
     }
 
-    private void handleVoiceMessage(Update update) throws InterruptedException, TelegramApiException, IOException {
-        Voice voice = update.getMessage().getVoice();
-        String fileId = voice.getFileId();
-        GetFile getFile = new GetFile();
-        getFile.setFileId(fileId);
-        File file = execute(getFile);
-        String filePath = file.getFilePath();
-        String downloadUrl = "https://api.telegram.org/file/bot" + getBotToken() + "/" + filePath;
+    private void handleVoiceMessage(Update update) throws TelegramApiException, IOException, InterruptedException {
+        // Для теста просто эмулируем получение голосового сообщения
+        String testMessage = "Это тестовый текст из голосового сообщения";
 
+        // Формируем запрос к тестовому FastAPI серверу
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://your-python-server/transcribe"))
+                .uri(URI.create("http://localhost:8000/echo"))  // URL нашего тестового endpoint
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString("{\"url\":\"" + downloadUrl + "\"}"))
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "{\"text\":\"" + testMessage + "\"}"  // Используем структуру из тестового API
+                ))
                 .build();
 
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 200) {
-            String jsonResponse = response.body();
-            update.getMessage().setText(jsonResponse);
-            handleMessageUpdate(update, registrationContext);
+            // Парсим ответ (простая строка в JSON)
+            String responseText = response.body();
+
+            // Отправляем текст пользователю
+            SendMessage message = new SendMessage();
+            message.setChatId(update.getMessage().getChatId().toString());
+            message.setText("Результат обработки: " + responseText);
+            execute(message);
         } else {
-            log.error("Voice processing error. Status code: {}, Response: {}",
-                    response.statusCode(), response.body());
-            // Можно добавить отправку сообщения об ошибке пользователю
-            sendErrorMessage(update, "Не удалось обработать голосовое сообщение");
+            log.error("Ошибка при обработке: {}", response.body());
+            sendErrorMessage(update, "Тестовый сервер недоступен");
         }
     }
 
@@ -195,16 +193,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         } catch (TelegramApiException e) {
             log.error("Send message error", e);
             throw e;
-        }
-    }
-
-    @Override
-    public void deleteMessage(String chatId, Integer messageId) {
-        DeleteMessage deleteMessage = new DeleteMessage(chatId, messageId);
-        try {
-            bot.execute(deleteMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
         }
     }
 
