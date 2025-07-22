@@ -39,8 +39,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final @Lazy MessagesHandler messagesHandler;
     @Autowired
     public Verification verification;
-    @Autowired
-    private final TelegramLongPollingBot bot;
 
     @Autowired
     private RegistrationContext registrationContext;
@@ -202,7 +200,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     public void deleteMessage(String chatId, Integer messageId) {
         DeleteMessage deleteMessage = new DeleteMessage(chatId, messageId);
         try {
-            bot.execute(deleteMessage);
+            this.execute(deleteMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
