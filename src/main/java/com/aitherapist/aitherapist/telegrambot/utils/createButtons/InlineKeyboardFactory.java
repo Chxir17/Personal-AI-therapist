@@ -155,7 +155,7 @@ public class InlineKeyboardFactory {
                         .callbackData("/editParameters")
                         .build(),
                 InlineKeyboardButton.builder()
-                        .text("📊 История здоровья")
+                        .text("📊 Вернуться в меню")
                         .callbackData("/myHealthHistory")
                         .build()
         );
