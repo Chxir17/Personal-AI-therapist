@@ -25,14 +25,11 @@ public class DoctorMenu implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
 
-        // ✅ Удаляем сообщение, в котором была нажата кнопка
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-
             telegramExecutor.deleteMessage(chatId.toString(), messageId);
         }
 
-        // ✅ Отправляем новое сообщение
         return SendMessage.builder()
                 .chatId(chatId)
                 .text("⭐ Добро пожаловать! ⭐ \nВыберите команду:")

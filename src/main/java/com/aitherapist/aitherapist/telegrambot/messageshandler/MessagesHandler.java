@@ -335,7 +335,9 @@ public class MessagesHandler implements IHandler {
                 "📏 Рост: " + dailyHealthData.getHeight() + " см\n" +
                 "⚖️ Вес: " + dailyHealthData.getWeight() + " кг\n" +
                 "🚬 Вредные привычки: " +
-                (dailyHealthData.getBadHabits().equalsIgnoreCase("false") ? "Нет" : dailyHealthData.getBadHabits()) + "\n\n" +
+                (dailyHealthData.getBadHabits() == null || dailyHealthData.getBadHabits().isEmpty()
+                        ? "Нет"
+                        : dailyHealthData.getBadHabits()) + "\n\n" +
 
                 "Выберите действие:";
         messageSender.sendMessage(update.getMessage().getChatId(), message);
