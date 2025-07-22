@@ -1,15 +1,17 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.aitherapist.aitherapist.domain.model.PatientRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
-import com.aitherapist.aitherapist.services.InitialHealthDataServiceImpl;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.DoctorSendMessageToPatient;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
@@ -26,40 +28,53 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.format.DateTimeFormatter;
+
 @Component
 public class StartClinicPatient implements ICommand {
-    private String telephoneNumber;
+    private final RegistrationContext registrationContext;
     private IMessageSender messageSender;
     private DoctorSendMessageToPatient sendMessageUser;
-    private ClinicPatient patient;
-    private int currentRegistrationStep = 1;
     private UserServiceImpl userService;
-    private StringBuilder userInput = new StringBuilder(); // Используем StringBuilder для эффективности
-    private PatientServiceImpl patientService;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    @Autowired
-    InitialHealthDataServiceImpl initialHealthDataService;
-
-    @Autowired
     public Verification verification;
+    public PatientServiceImpl patientService;
 
     @Autowired
-    public StartClinicPatient(TelegramMessageSender messageSender, DoctorSendMessageToPatient sendMessageUser) {
+    public StartClinicPatient(
+            TelegramMessageSender messageSender,
+            DoctorSendMessageToPatient sendMessageUser,
+            PatientServiceImpl patientService,
+            UserServiceImpl userService,
+            RegistrationContext registrationContext) {
         this.messageSender = messageSender;
         this.sendMessageUser = sendMessageUser;
+        this.patientService = patientService;
+        this.userService = userService;
+        this.registrationContext = registrationContext;
     }
 
-    private SendMessage acceptOrEditMedicalInitData(InitialHealthData dailyHealthData, Update update) {
-        String genderDisplay = patient.getGender() ? "♂ Мужской" : "♀ Женский";
+    private SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, ClinicPatient clinicPatient) {
+        String genderDisplay = clinicPatient.getGender() ? "♂ Мужской" : "♀ Женский";
+
+        // Format birth date and age information
+        String birthDateAndAge;
+        if (clinicPatient.getBirthDate() != null) {
+            String formattedDate = clinicPatient.getBirthDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            int age = clinicPatient.getAge();
+            birthDateAndAge = String.format("%s (%d лет)", formattedDate, age);
+        } else {
+            birthDateAndAge = "Не указана";
+        }
 
         String message = String.format("""
         📝 *Вы ввели данные:*
         
         👤 *Имя:* %s
-        🎂 *Дата рождения:* %s
+        🎂 *Дата рождения (возраст):* %s
         🚻 *Пол:* %s
         
         💓 *Аритмия:* %s
@@ -68,116 +83,125 @@ public class StartClinicPatient implements ICommand {
         ⚖️ *Вес:* %s
         🚬 *Вредные привычки:* %s
         """,
-                patient.getName(),
-                patient.getAge(),
+                clinicPatient.getName(),
+                birthDateAndAge,
                 genderDisplay,
-                dailyHealthData.getArrhythmia(),
-                dailyHealthData.getChronicDiseases(),
-                dailyHealthData.getHeight(),
-                dailyHealthData.getWeight(),
-                dailyHealthData.getBadHabits());
+                initialHealthData.getArrhythmia() ? "Да" : "Нет",
+                initialHealthData.getChronicDiseases().equalsIgnoreCase("false") ? "Нет" : (initialHealthData.getChronicDiseases().equalsIgnoreCase("true") ? "Да" : initialHealthData.getChronicDiseases()),
+                initialHealthData.getHeight(),
+                initialHealthData.getWeight(),
+                initialHealthData.getBadHabits().equalsIgnoreCase("true") ? "Да" : initialHealthData.getBadHabits());
 
         return SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
                 .text(message + "\n\nВыберите действие:")
                 .parseMode("Markdown")
-                .replyMarkup(InlineKeyboardFactory.createAcceptOrEditKeyboard())
+                .replyMarkup(InlineKeyboardFactory.createAcceptOrEditKeyboardClinic())
                 .build();
     }
 
-    private SendMessage handleQuestionnaire(Update update) throws TelegramApiException, InterruptedException, JsonProcessingException {
+    private SendMessage handleQuestionnaire(Update update, RegistrationContext registrationContext) throws TelegramApiException, InterruptedException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
-
-        if (!update.hasMessage()) {
-            if (currentRegistrationStep == 1) {
-                return SendMessage.builder()
+        ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
+        if (update.getMessage().hasContact()) {
+            return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.GIVE_NAME.getMessage())
                         .build();
-            }
-            return null;
         }
         String text = update.getMessage().getText();
         Long userId = update.getMessage().getFrom().getId();
-
-        switch (currentRegistrationStep) {
+        switch (state.getCurrentStep()) {
             case 1 -> {
-                userInput.append("name: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getBase().append("name: ").append(text).append("\n");
+                state.setCurrentStep(2);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.AGE.getMessage())
                         .build();
             }
             case 2 -> {
-                userInput.append("age: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getBase().append("age: ").append(text).append("\n");
+                state.setCurrentStep(3);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.GENDER.getMessage())
                         .build();
             }
             case 3 -> {
-                userInput.append("gender: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getBase().append("gender: ").append(text).append("\n");
+                state.setCurrentStep(4);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Есть ли у вас аритмия?")
+                        .text(Answers.ARHYTHMIA_QUESTION.getMessage())
                         .build();
             }
             case 4 -> {
-                userInput.append("arrhythmia: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getBase().append("arrhythmia: ").append(text).append("\n");
+                state.setCurrentStep(5);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Есть ли у вас хронические заболевания?")
+                        .text(Answers.CHRONIC_DISEASES_QUESTION.getMessage())
                         .build();
             }
             case 5 -> {
-                userInput.append("chronicDiseases: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getBase().append("chronicDiseases: ").append(text).append("\n");
+                state.setCurrentStep(6);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Введите ваш рост (в сантиметрах):")
+                        .text(Answers.HEIGHT_QUESTION.getMessage())
                         .build();
             }
             case 6 -> {
-                userInput.append("height: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getBase().append("height: ").append(text).append("\n");
+                state.setCurrentStep(7);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Введите ваш вес (в килограммах):")
+                        .text(Answers.WEIGHT_QUESTION.getMessage())
                         .build();
             }
             case 7 -> {
-                userInput.append("weight: ").append(text).append("\n");
-                currentRegistrationStep++;
+                state.getBase().append("weight: ").append(text).append("\n");
+                state.setCurrentStep(8);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Есть ли у вас вредные привычки?")
+                        .text(Answers.BAD_HABITS_QUESTION.getMessage())
                         .build();
             }
             case 8 -> {
-                userInput.append("badHabits: ").append(text).append("\n");
-                String response = ParseUserPrompt.patientRegistrationParser(userInput.toString());
+                state.getBase().append("badHabits: ").append(text).append("\n");
+                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString() );
                 String jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
-
-                InitialHealthData initialHealthData = mapper.readValue(jsonWithType, InitialHealthData.class);
-                initialHealthDataService.putInitialHealthDataByUserId(initialHealthData, userId);
-                patient = mapper.readValue(jsonWithType, ClinicPatient.class);
-                patient.setInitialData(initialHealthData);
-                userService.saveUser(patient);
-                initialHealthDataService.putInitialHealthDataByUserId(initialHealthData, userId);
-
-
-                currentRegistrationStep = 0;
-                userInput.setLength(0);
-
-                return acceptOrEditMedicalInitData(initialHealthData, update);
+                PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
+                ClinicPatient patient = new ClinicPatient();
+                patient.setName(dto.getName());
+                patient.setBirthDate(dto.getBirthDate());
+                patient.setGender(dto.getGender());
+                patient.setRole(Roles.CLINIC_PATIENT);
+                patient.setClinicId(dto.getClinicId());
+                patient.setMedicalCardNumber(dto.getMedicalCardNumber());
+                InitialHealthData healthData = new InitialHealthData();
+                healthData.setArrhythmia(dto.getArrhythmia());
+                healthData.setHeight(dto.getHeight());
+                healthData.setWeight(dto.getWeight());
+                healthData.setChronicDiseases(dto.getChronicDiseases());
+                healthData.setBadHabits(dto.getBadHabits());
+                healthData.setPatient(patient);
+                patient.setInitialData(healthData);
+                try {
+                    patient.setTelegramId(userId);
+                    patient.setClinicId(1L);
+                    userService.saveUser(patient);
+                } catch (Exception e) {
+                    System.err.println("Ошибка сохранения: " + e.getMessage());
+                    e.printStackTrace();
+                    throw e;
+                }
+                registrationContext.clearClientRegistrationState(userId);
+                return acceptOrEditMedicalInitData(healthData, update, patient);
             }
             default -> {
-                currentRegistrationStep = 0;
-                userInput.setLength(0);
+                registrationContext.clearClientRegistrationState(userId);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text("Неизвестный шаг регистрации")
@@ -189,27 +213,26 @@ public class StartClinicPatient implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
-        registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
         if (userId == null) {
             return SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
                     .text("Не удалось определить пользователя")
                     .build();
         }
-
-        if (registrationContext.getStatus(userId) == Status.REGISTRATION_CLINIC_PATIENT) {
+        if (registrationContext.getStatus(userId) == Status.REGISTERED_CLINIC_PATIENT) {
             try {
-                return handleQuestionnaire(update);
+                return handleQuestionnaire(update, registrationContext);
             } catch (Exception e) {
                 return SendMessage.builder()
                         .chatId(TelegramIdUtils.getChatId(update).toString())
                         .text("Ошибка обработки данных")
                         .build();
             }
-        }
-
-        if (!registrationContext.isVerify(userId)) {
-            return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        } else {
+            if (registrationContext.isVerify(userId)) {
+                registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+                return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+            }
         }
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())

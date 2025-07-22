@@ -1,9 +1,12 @@
 package com.aitherapist.aitherapist.telegrambot;
 
+import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,25 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
-import com.aitherapist.aitherapist.domain.enums.HypertensionQA;
-//import com.aitherapist.aitherapist.telegrambot.scheduled.TelegramNotificationService;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoField;
-import java.util.Objects;
-import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
@@ -38,8 +28,9 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     private final BotProperties botProperties;
     private final CommandsHandler commandsHandler;
     private final @Lazy MessagesHandler messagesHandler;
-//    private final TelegramNotificationService notificationService;
-    private final TelegramMessageSender telegramSender; // Предполагаем, что у вас есть этот интерфейс
+    @Autowired
+    public Verification verification;
+
     @Autowired
     private RegistrationContext registrationContext;
 
@@ -53,6 +44,13 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         return botProperties.getName();
     }
 
+    public String generateSessionId(Update update) {
+        Long chatId = update.hasMessage() ? update.getMessage().getChatId() :
+                update.hasCallbackQuery() ? update.getCallbackQuery().getMessage().getChatId() :
+                        null;
+
+        return "chat_" + chatId + "_" + System.currentTimeMillis();
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -100,8 +98,19 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     }
 
     private void handleContactUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
-        execute(messagesHandler.handleVerify(update, registrationContext));
+        Long userId = update.getMessage().getFrom().getId();
+        Long chatId = update.getMessage().getChatId();
+        registrationContext.setTelephone(userId, update.getMessage().getContact().getPhoneNumber());
+
+        SendMessage sm = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text("✅ Верификация успешна.\n" +
+                        "Пожалуйста заполните анкету:")
+                .build();
+        execute(sm);
+        commandsHandler.mapStatusToHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
     }
+
 
     private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String messageText = update.getMessage().getText();
@@ -110,6 +119,18 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         } else {
             messagesHandler.handle(update, registrationContext);
         }
+    }
+
+    private void handleVerification(Update update, Long userId) throws TelegramApiException {
+        Long chatId = TelegramIdUtils.getChatId(update);
+
+        SendMessage sm = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .replyMarkup(verification.createContactRequestKeyboard())
+                .build();
+
+        sendMessage(sm);
     }
 
     private void handleCallbackQueryUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
@@ -147,5 +168,13 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
             log.error("Send message error", e);
             throw e;
         }
+    }
+
+    private SendMessage requestPhoneNumber(Long chatId) {
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .replyMarkup(verification.createContactRequestKeyboard())
+                .build();
     }
 }

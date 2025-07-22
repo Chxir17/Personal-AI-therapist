@@ -5,5 +5,4 @@ import com.aitherapist.aitherapist.services.interfaces.IInitialHealthDataService
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IInitialHealthDataRepository extends JpaRepository<InitialHealthData, Long> {
-
 }

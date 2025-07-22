@@ -9,6 +9,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.telegrambot.scheduled.TelegramNotificationService;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
@@ -28,6 +29,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,11 +48,17 @@ public class MessagesHandler implements IHandler {
     @Autowired
     private final Verification verification;
     @Autowired
-    PatientServiceImpl patientService;
+    InitialHealthDataServiceImpl initialHealthDataServiceImpl;
+    @Autowired
+    private NotificationServiceImpl notificationService;
     @Autowired
     private final UserServiceImpl userService;
     @Autowired
     private final HealthDataServiceImpl healthDataServiceImpl;
+    @Autowired
+    private TelegramNotificationService telegramNotificationService;
+    @Autowired
+    private PatientServiceImpl patientService;
     private final ObjectMapper mapper = new ObjectMapper();
     @Autowired
     @Lazy
@@ -59,7 +70,6 @@ public class MessagesHandler implements IHandler {
     @Autowired
     private CommandsHandler commandsHandler;
 
-    InitialHealthDataServiceImpl initialHealthDataService;
 
 
     @Override
@@ -68,7 +78,7 @@ public class MessagesHandler implements IHandler {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
-        System.out.println(registrationContext.getStatus(userId));
+        System.out.println("DEB: " + registrationContext.getStatus(userId).toString());
         if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
@@ -81,8 +91,19 @@ public class MessagesHandler implements IHandler {
         else if(registrationContext.getStatus(userId) == Status.EDIT_CHRONIC_DISEASES){
             handleEditChronicDiseases(update);
         }
-        else if(registrationContext.getStatus(userId) == Status.REGISTRATION_DOCTOR){
-            commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
+        else if (registrationContext.getStatus(userId) == Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER) {
+            handleMessageFromDoctorToUser(update);
+        }
+        else if (registrationContext.getStatus(userId) == Status.WRITE_DAILY_DATA) {
+            handleWriteDailyData(update);
+        }
+        if (registrationContext.getStatus(userId)  == Status.SET_NOTIFICATION_TIME) {
+            handleSetNotificationTime(update);
+        } else if (registrationContext.getStatus(userId) == Status.SET_NOTIFICATION_MESSAGE) {
+            handleSetNotificationMessage(update);
+        }
+        else if(registrationContext.getStatus(userId).isRegistered()){
+            commandsHandler.handleUserMessageAfterVerificationToFilter(update, registrationContext);
         }
         else if(registrationContext.getStatus(userId) == Status.REGISTRATION_CLINIC_PATIENT){
             commandsHandler.inProgressQuestionnairePatient(update, registrationContext);
@@ -101,6 +122,89 @@ public class MessagesHandler implements IHandler {
         }
     }
 
+    private void handleSetNotificationTime(Update update) throws TelegramApiException {
+        Long userId = update.getMessage().getFrom().getId();
+        Long chatId = update.getMessage().getChatId();
+        String timeInput = update.getMessage().getText();
+
+        try {
+            LocalTime time = LocalTime.parse(timeInput, DateTimeFormatter.ofPattern("HH:mm"));
+            User user = userService.fetchUserByTelegramId(userId);
+
+            notificationService.setNotificationTime(user, time);
+            notificationService.setNotificationEnabled(user, true);
+
+            scheduleDailyNotification(chatId, time, userId);
+
+            SendMessage response = SendMessage.builder()
+                    .chatId(chatId.toString())
+                    .text(String.format(
+                            "✅ Время уведомления установлено на %s\n\n" +
+                                    "Ежедневное напоминание будет приходить в указанное время",
+                            time.format(DateTimeFormatter.ofPattern("HH:mm"))))
+                    .build();
+
+            messageSender.sendMessage(response);
+            registrationContext.setStatus(userId, Status.NONE);
+        } catch (DateTimeParseException e) {
+            messageSender.sendMessage(chatId,
+                    "❌ Неверный формат времени. Пожалуйста, используйте формат HH:mm, например: 09:30");
+        } catch (Exception e) {
+            messageSender.sendMessage(chatId, "❌ Ошибка при настройке уведомления");
+            log.error("Error scheduling notification", e);
+        }
+    }
+
+    private void scheduleDailyNotification(Long chatId, LocalTime notificationTime, Long userId) {
+        try {
+            LocalDateTime triggerTime = LocalDateTime.now()
+                    .withHour(notificationTime.getHour())
+                    .withMinute(notificationTime.getMinute())
+                    .withSecond(0);
+
+            if (triggerTime.isBefore(LocalDateTime.now())) {
+                triggerTime = triggerTime.plusDays(1);
+            }
+
+            String notificationMessage = notificationService.getMessage(userService.fetchUserByTelegramId(userId));
+            if (notificationMessage == null || notificationMessage.isEmpty()) {
+                notificationMessage = "⏰ Напоминание от вашего терапевта!";
+            }
+
+            telegramNotificationService.scheduleNotification(
+                    chatId,
+                    notificationMessage,
+                    triggerTime,
+                    userId
+            );
+
+        } catch (Exception e) {
+            log.error("Failed to schedule daily notification", e);
+            throw new RuntimeException("Failed to schedule notification", e);
+        }
+    }
+
+    private void handleSetNotificationMessage(Update update) throws TelegramApiException {
+        Long userId = update.getMessage().getFrom().getId();
+        Long chatId = update.getMessage().getChatId();
+        String messageText = update.getMessage().getText();
+
+        User user = userService.fetchUserByTelegramId(userId);
+        notificationService.setMessage(user, messageText);
+
+        SendMessage response = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text("✅ Текст уведомления успешно изменен")
+                .build();
+
+        messageSender.sendMessage(response);
+        registrationContext.setStatus(userId, Status.NONE);
+    }
+
+    private void handleWriteDailyData(Update update) throws TelegramApiException {
+        messageSender.sendMessage(commandsHandler.handleCustomCommand(update, registrationContext));
+    }
+
     public void handleEditBirthDate(Update update) {
         try {
             String message = update.getMessage().getText();
@@ -115,7 +219,7 @@ public class MessagesHandler implements IHandler {
             registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
             acceptOrEditInitInfo(existingUser, update);
         } catch (Exception e) {
-            e.printStackTrace(); // лучше логировать
+            e.printStackTrace();
         }
     }
 
@@ -125,8 +229,16 @@ public class MessagesHandler implements IHandler {
         List<Long> userIds = registrationContext.findUserIdsWithSendToUserStatus(currentDoctorId);
 
         for (Long userId : userIds) {
-            System.out.println("__________" + userId);
-            messageSender.sendMessage(1085500451, message.toString());
+            String doctorMessage = String.format(
+                    "✉️ *Вам пришло сообщение от вашего доктора:*\n\n" +
+                            "━━━━━━━━━━━━━━━━━━━━\n" +
+                            "%s\n" +
+                            "━━━━━━━━━━━━━━━━━━━━\n\n" +
+                            "Вы можете ответить доктору, просто написав сообщение в этот чат.",
+                    message.toString()
+            );
+
+            messageSender.sendMessage(1085500451, doctorMessage);
         }
     }
 
@@ -166,27 +278,13 @@ public class MessagesHandler implements IHandler {
         }
     }
 
-    public SendMessage handleVerify(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        Long userId = update.getMessage().getFrom().getId();
-        Long chatId = update.getMessage().getChatId();
+    /**
+     * TODO: add check is verify in db or no
+     * @param update
+     * @return
+     * @throws TelegramApiException
+     */
 
-        if (registrationContext.isVerify(userId)) {
-            return new SendMessage(chatId.toString(), "Ты уже зарегистрирован");
-        } else {
-            if (Verification.verify(update, update.getMessage().getContact().getPhoneNumber())) {
-                registrationContext.setStatus(userId, Status.VERIFIED);
-                InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorDefaultKeyboard();
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text("✅ Верификация успешна. Выберите действие:")
-                        .replyMarkup(keyboard)
-                        .build();
-            } else {
-                return new SendMessage(chatId.toString(),
-                        Answers.VERIFICAATION_ERROR.getMessage());
-            }
-        }
-    }
 
 
     public boolean verify(Update update) throws TelegramApiException {
@@ -225,9 +323,20 @@ public class MessagesHandler implements IHandler {
     private void acceptOrEditMedicalInitData(InitialHealthData dailyHealthData, Update update) throws TelegramApiException {
         Map<String, String> buttons = new HashMap<>();
         Patient patient = patientService.findById(TelegramIdUtils.extractUserId(update));
-        String message = "Вы ввели:\n Имя - " + patient.getName() + "\n Дата рождения - " + patient.getAge() + "\n Пол - " + patient.getGender() +
-                "\n Аритмия - " + dailyHealthData.getArrhythmia() + "\n Хронические заболевания - " + dailyHealthData.getChronicDiseases() + "\n Вес - "
-                + dailyHealthData.getHeight() + "\n Вес - " + dailyHealthData.getWeight() + "\n Вредные привычки - " + dailyHealthData.getBadHabits();
+        String message = "📝 Вы ввели данные:\n\n" +
+                "👤 Имя: " + patient.getName() + "\n" +
+                "🎂 Возраст: " + patient.getAge() + " лет\n" +
+                "🚻 Пол: " + (patient.getGender() ? "♂ Мужской" : "♀ Женский") + "\n\n" +
+
+                "💓 Аритмия: " + (dailyHealthData.getArrhythmia() ? "Да" : "Нет") + "\n" +
+                "🏥 Хронические заболевания: " +
+                (dailyHealthData.getChronicDiseases().equalsIgnoreCase("false") ? "Нет" : dailyHealthData.getChronicDiseases()) + "\n" +
+                "📏 Рост: " + dailyHealthData.getHeight() + " см\n" +
+                "⚖️ Вес: " + dailyHealthData.getWeight() + " кг\n" +
+                "🚬 Вредные привычки: " +
+                (dailyHealthData.getBadHabits().equalsIgnoreCase("false") ? "Нет" : dailyHealthData.getBadHabits()) + "\n\n" +
+
+                "Выберите действие:";
         messageSender.sendMessage(update.getMessage().getChatId(), message);
         buttons.put("Принять", "/acceptClinicPatientInitData");
         buttons.put("Изменить параметры", "/editPatientMedicalData");
@@ -236,7 +345,7 @@ public class MessagesHandler implements IHandler {
 
         messageSender.sendMessage(SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text("Выберите команду")
+                .text("✨ Доступные действия ✨")
                 .replyMarkup(replyKeyboardDoctor)
                 .build());
     }
@@ -247,11 +356,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
 
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setArrhythmia(parsedData.getArrhythmia());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace(); // лучше логировать
@@ -264,11 +373,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
 
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setChronicDiseases(parsedData.getChronicDiseases());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace();
@@ -281,11 +390,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
 
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setHeight(parsedData.getHeight());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace();
@@ -298,11 +407,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
 
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setWeight(parsedData.getWeight());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер
@@ -314,11 +423,11 @@ public class MessagesHandler implements IHandler {
             Long userId = update.getMessage().getFrom().getId();
             String cleanJson = ParseUserPrompt.parameterEditorParser(message);
 
-            InitialHealthData initialHealthData = initialHealthDataService.getInitialHealthDataByUserId(userId);
+            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setBadHabits(parsedData.getBadHabits());
 
-            initialHealthDataService.updateInitialHealthDataByUserId(initialHealthData, userId);
+            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             acceptOrEditMedicalInitData(initialHealthData, update);
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер
@@ -349,22 +458,7 @@ public class MessagesHandler implements IHandler {
     }
 
     private void handleGivePatientIdStatus(Update update) throws TelegramApiException {
-        long chatId = update.getMessage().getChatId();
-        long doctorId = update.getMessage().getFrom().getId();
-        String response = update.getMessage().getText();
-        long userId = Integer.parseInt(response);
-        Patient patient = doctorService.getPatientById(doctorId, userId);
-        if (patient == null) {
-            messageSender.sendMessage(chatId, "Неверный id пользователя.\n Введите id пациента чтобы получить его послдение измерения");
-            return;
-        }
-        String healthData = "";
-        Map<String, String> healthDataHistory = patient.buildMedicalHistory();
-        healthData += healthDataHistory.toString();
-        messageSender.sendMessage(chatId, healthData);
-        Doctor doctor = doctorService.getDoctor(doctorId);
-        messageSender.sendMessage(doctor.showDoctorMenu(chatId));
-        registrationContext.setStatus(doctorId, Status.NONE);
+
     }
 
 

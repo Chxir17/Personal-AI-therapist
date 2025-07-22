@@ -37,11 +37,10 @@ public class InlineKeyboardFactory {
 
     public static InlineKeyboardMarkup createDoctorDefaultKeyboard() {
         Map<String, String> buttonMap = new LinkedHashMap<>();
-        buttonMap.put("📊 Последние данные", "/getLastRecords");
         buttonMap.put("💬 Сообщение пациенту", "/sendMessageToPatient");
         buttonMap.put("⚙️ Настройки", "/settingsDoctor");
         buttonMap.put("📅 Пацинты ", "/doctorPatientsMenu");
-        buttonMap.put("📁 История пациентов", "/patientHistory");
+        buttonMap.put("👤 Мой профиль", "/DoctorProfile");
         return createInlineKeyboard(buttonMap, 2);
     }
 
@@ -87,14 +86,12 @@ public class InlineKeyboardFactory {
     public static InlineKeyboardMarkup createPatientManagementKeyboard() {
         Map<String, String> buttonMap = new LinkedHashMap<>();
         buttonMap.put("➕ Добавить пациента", "/addPatient");
-        buttonMap.put("👥 Список пациентов", "/patientList");
-        buttonMap.put("ℹ️ Информация о пациенте", "/patientInfo");
         return createInlineKeyboard(buttonMap, 2);
     }
 
     public static InlineKeyboardMarkup createPatientDefaultKeyboard() {
         Map<String, String> buttonMap = new LinkedHashMap<>();
-        buttonMap.put("📊 Ввести daily данные", "/inputDailyData");
+        buttonMap.put("📊 Ввести ежедневные данные", "/inputDailyData");
         buttonMap.put("💬 Написать доктору", "/writeToDoctor");
         buttonMap.put("👤 Мой профиль", "/myProfile");
         buttonMap.put("⚙️ Настройки", "/patientSettings");
@@ -102,11 +99,39 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 2);
     }
 
+    public static InlineKeyboardMarkup createAcceptOrEditKeyboardClinic() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("✅ Принять", "/acceptInitDataClinic");
+        buttons.put("✏️ Изменить", "/editParameters");
+        return createInlineKeyboard(buttons, 2);
+    }
+
     public static InlineKeyboardMarkup createAcceptOrEditKeyboard() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("✅ Принять", "/acceptInitData");
         buttons.put("✏️ Изменить", "/editParameters");
         return createInlineKeyboard(buttons, 2);
+    }
+
+    public static InlineKeyboardMarkup createDoctorProfileKeyboard() {
+        return new InlineKeyboardMarkup(List.of(
+                List.of(
+                        InlineKeyboardButton.builder()
+                                .text("📊 Мои пациенты")
+                                .callbackData("doctor_patients_list")
+                                .build()
+                ),
+                List.of(
+                        InlineKeyboardButton.builder()
+                                .text("✏️ Редактировать профиль")
+                                .callbackData("edit_doctor_profile")
+                                .build(),
+                        InlineKeyboardButton.builder()
+                                .text("🔙 Назад")
+                                .callbackData("back_to_doctor_menu")
+                                .build()
+                )
+        ));
     }
 
     public static InlineKeyboardMarkup createPatientsKeyboard(List<Patient> patients) {
@@ -126,6 +151,25 @@ public class InlineKeyboardFactory {
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
+        return markup;
+    }
+
+    public static InlineKeyboardMarkup createProfileKeyboard() {
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+
+        List<InlineKeyboardButton> row1 = List.of(
+                InlineKeyboardButton.builder()
+                        .text("✏️ Редактировать профиль")
+                        .callbackData("/editParameters")
+                        .build(),
+                InlineKeyboardButton.builder()
+                        .text("📊 История здоровья")
+                        .callbackData("/myHealthHistory")
+                        .build()
+        );
+
+
+        markup.setKeyboard(List.of(row1));
         return markup;
     }
 }

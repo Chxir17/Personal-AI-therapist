@@ -1,8 +1,11 @@
 package com.aitherapist.aitherapist.services;
 
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IInitialHealthDataRepository;
+import com.aitherapist.aitherapist.repositories.IPatientRepository;
 import com.aitherapist.aitherapist.services.interfaces.IInitialHealthDataService;
+import com.aitherapist.aitherapist.services.interfaces.IPatientService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,26 +14,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class InitialHealthDataServiceImpl implements IInitialHealthDataService {
-    @Autowired
+
     IInitialHealthDataRepository iInitialHealthDataRepository;
+    IPatientRepository iPatientRepository;
 
-    @Override
-    @Transactional
-    public void putInitialHealthDataByUserId(InitialHealthData initialHealthData, Long userId) {
-        initialHealthData.setId(userId);
-        iInitialHealthDataRepository.save(initialHealthData);
+    @Autowired
+    public InitialHealthDataServiceImpl(IInitialHealthDataRepository iInitialHealthDataRepository, IPatientRepository iPatientRepository) {
+        this.iInitialHealthDataRepository = iInitialHealthDataRepository;
+        this.iPatientRepository = iPatientRepository;
     }
 
-    @Override
     @Transactional
-    
+    @Override
     public InitialHealthData getInitialHealthDataByUserId(Long userId) {
-        return iInitialHealthDataRepository.getById(userId);
+        Patient patient = iPatientRepository.getByTelegramId(userId);
+        return patient.getInitialData();
     }
 
+    @Transactional
     @Override
-    public void updateInitialHealthDataByUserId(InitialHealthData initialHealthData, Long userId) {
-        InitialHealthData i = getInitialHealthDataByUserId(userId);
-        BeanUtils.copyProperties(initialHealthData, i);
+    public void updateInitialHealthDataByUserId(Long userId, InitialHealthData initialHealthData) {
+        Patient patient = iPatientRepository.getByTelegramId(userId);
+        patient.setInitialData(initialHealthData);
     }
 }

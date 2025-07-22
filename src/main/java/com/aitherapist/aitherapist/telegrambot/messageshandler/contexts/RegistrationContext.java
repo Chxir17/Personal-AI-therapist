@@ -14,6 +14,33 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
+    private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
+
+
+    public void setTelephone(Long userId, String telephone) {
+        DynamicStatus status = mapOfUserStatus.computeIfAbsent(
+                userId,
+                k -> new DynamicStatus(null, null)
+        );
+
+        status.setTelephone(telephone);
+        System.out.println(status.toString());
+
+        clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
+    }
+
+    public String getTelephone(Long userId) {
+        DynamicStatus status = mapOfUserStatus.get(userId);
+        return status == null ? null : status.getTelephone();
+    }
+
+    public void clearClientRegistrationState(Long userId) {
+        clientRegistrationStates.remove(userId);
+    }
+
+    public ClientRegistrationState getClientRegistrationState(Long userId) {
+        return clientRegistrationStates.get(userId);
+    }
 
     public DoctorRegistrationState getDoctorRegistrationState(Long userId) {
         return doctorRegistrationStates.computeIfAbsent(userId, k -> new DoctorRegistrationState());
@@ -29,7 +56,7 @@ public class RegistrationContext {
 
 
     public void startRegistration(long chatId) {
-        mapOfUserStatus.put(chatId, Status.REGISTRATION_DOCTOR.withId(null));
+        mapOfUserStatus.put(chatId, Status.REGISTRATION.withId(null));
     }
 
     public void start(long chatId) {
@@ -46,7 +73,7 @@ public class RegistrationContext {
     }
 
     public boolean isVerify(Long id) {
-        return getDynamicStatus(id).is(Status.VERIFIED);
+        return getDynamicStatus(id).is(Status.REGISTRATION);
     }
 
     public void setVerify(Long userId, Status status) {
@@ -95,7 +122,6 @@ public class RegistrationContext {
 
     public List<Long> findUserIdsWithSendToUserStatus(Long doctorId) {
         List<Long> userIds = new ArrayList<>();
-
         for (Map.Entry<Long, DynamicStatus> entry : mapOfUserStatus.entrySet()) {
             DynamicStatus status = entry.getValue();
             if (status.is(Status.SEND_TO_THIS_USER) &&
