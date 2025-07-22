@@ -67,6 +67,7 @@ public class CommandsHandler {
             ClinicMenu clinicMenu,
             GetLastPatientMedicalData lastRecords,
             Help help,
+            Privacy privacy,
 //            AcceptInitData acceptInitDataCommand,
             DoctorMenu doctorMenu,
             AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
@@ -74,6 +75,7 @@ public class CommandsHandler {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
                 Map.entry("/help", help),
+                Map.entry("/privacy", privacy),
                 Map.entry("/settingsDoctor", settingsDoctorCommand),
                 Map.entry("/DoctorProfile", doctorProfile),
                 Map.entry("/getLastRecords",  lastRecords),

@@ -138,7 +138,7 @@ public class InlineKeyboardFactory {
 
         InlineKeyboardButton cancelButton = new InlineKeyboardButton();
         cancelButton.setText("❌ Отмена");
-        cancelButton.setCallbackData("cancel_message");
+        cancelButton.setCallbackData("/acceptInitData");
         keyboard.add(Collections.singletonList(cancelButton));
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
