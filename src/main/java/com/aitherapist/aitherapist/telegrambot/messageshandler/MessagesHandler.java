@@ -1,13 +1,11 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
-import com.aitherapist.aitherapist.functionality.QAChatBot.UserQuestions;
 import com.aitherapist.aitherapist.services.*;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
-import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -28,9 +26,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
@@ -39,7 +34,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -95,6 +89,9 @@ public class MessagesHandler implements IHandler {
         }
         else if(registrationContext.getStatus(userId) == Status.EDIT_CHRONIC_DISEASES){
             handleEditChronicDiseases(update);
+        }
+        else if (registrationContext.getStatus(userId) == Status.WAIT_USER_WRITE_MESSAGE_TO_DOCTOR) {
+            handleMessageFromUserToDoctor(update);
         }
         else if (registrationContext.getStatus(userId) == Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER) {
             handleMessageFromDoctorToUser(update);
@@ -252,7 +249,29 @@ public class MessagesHandler implements IHandler {
         Message message = update.getMessage();
         Long currentDoctorId = message.getFrom().getId();
 
-        List<Long> userIds = registrationContext.findUserIdsWithSendToUserStatus(currentDoctorId);
+        List<Long> userIds = registrationContext.findUserIdsWithSendToDoctorStatus(currentDoctorId);
+
+        for (Long userId : userIds) {
+            String doctorMessage = String.format(
+                    "✉️ *" +
+                            "Вам пришло сообщение от вашего доктора: %s\n\n" +
+                            "━━━━━━━━━━━━━━━━━━━━\n" +
+                            "%s\n" +
+                            "━━━━━━━━━━━━━━━━━━━━\n\n" +
+                            "Вы можете ответить доктору, просто написав сообщение в этот чат.",
+                    userService.getUser(currentDoctorId).getName(),
+                    message.getText()
+            );
+
+            messageSender.sendMessage(userId, doctorMessage);
+        }
+    }
+
+    private void handleMessageFromUserToDoctor(Update update) throws TelegramApiException {
+        Message message = update.getMessage();
+        Long currentDoctorId = message.getFrom().getId();
+
+        List<Long> userIds = registrationContext.findDoctorIdsWithSendToUserStatus(currentDoctorId);
 
         for (Long userId : userIds) {
             String doctorMessage = String.format(

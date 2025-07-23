@@ -73,8 +73,6 @@ public class PatientServiceImpl implements IPatientService {
         return patientRepository.findByTelegramId(userId);
     }
 
-
-
     @Override
     @Transactional(readOnly = true)
     public Patient findByName(String name) {

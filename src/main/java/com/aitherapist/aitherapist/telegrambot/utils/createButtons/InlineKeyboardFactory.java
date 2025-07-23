@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.utils.createButtons;
 
+import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -153,6 +154,26 @@ public class InlineKeyboardFactory {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText("💬 " + patient.getName());
             button.setCallbackData("/sendMessageToPatient " + patient.getTelegramId());
+            keyboard.add(Collections.singletonList(button));
+        }
+
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton();
+        cancelButton.setText("❌ Отмена");
+        cancelButton.setCallbackData("/acceptInitData");
+        keyboard.add(Collections.singletonList(cancelButton));
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        return markup;
+    }
+
+    public static InlineKeyboardMarkup createDoctorsKeyboard(List<Doctor> doctors) {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        for (Doctor doctor : doctors) {
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText("💬 " + doctor.getName());
+            button.setCallbackData("/sendMessageDoctor " + doctor.getTelegramId());
             keyboard.add(Collections.singletonList(button));
         }
 

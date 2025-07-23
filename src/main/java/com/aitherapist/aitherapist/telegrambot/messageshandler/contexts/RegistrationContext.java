@@ -153,11 +153,23 @@ public class RegistrationContext {
         }
     }
 
-    public List<Long> findUserIdsWithSendToUserStatus(Long doctorId) {
+    public List<Long> findUserIdsWithSendToDoctorStatus(Long doctorId) {
         List<Long> userIds = new ArrayList<>();
         for (Map.Entry<Long, DynamicStatus> entry : mapOfUserStatus.entrySet()) {
             DynamicStatus status = entry.getValue();
             if (status.is(Status.SEND_TO_THIS_USER) &&
+                    doctorId.equals(status.getAssociatedId())) {
+                userIds.add(entry.getKey());
+            }
+        }
+        return userIds;
+    }
+
+    public List<Long> findDoctorIdsWithSendToUserStatus(Long doctorId) {
+        List<Long> userIds = new ArrayList<>();
+        for (Map.Entry<Long, DynamicStatus> entry : mapOfUserStatus.entrySet()) {
+            DynamicStatus status = entry.getValue();
+            if (status.is(Status.SEND_TO_THIS_DOCTOR) &&
                     doctorId.equals(status.getAssociatedId())) {
                 userIds.add(entry.getKey());
             }
