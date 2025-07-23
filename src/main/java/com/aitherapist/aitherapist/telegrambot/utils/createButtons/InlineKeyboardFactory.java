@@ -88,7 +88,7 @@ public class InlineKeyboardFactory {
         buttonMap.put("👤 Мой профиль", "/myProfile");
         buttonMap.put("⚙️ Настройки", "/patientSettings");
         buttonMap.put("📈 История показателей", "/myHealthHistory");
-        buttonMap.put("", "/startAiDiscussion");
+        buttonMap.put("🤖 Начать общение с помощником", "/startAiDiscussion");
         return createInlineKeyboard(buttonMap, 2);
     }
 

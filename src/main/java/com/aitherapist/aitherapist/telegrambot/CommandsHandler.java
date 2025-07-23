@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.AiDiscussion;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationMessage;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationTime;
@@ -58,6 +59,7 @@ public class CommandsHandler {
             WriteDailyData writeDailyData,
             HealthHistory healthHistory,
             Profile profile,
+            AiDiscussion aiDiscussion,
             SetNotificationMessage setNotificationMessage,
             SetNotificationTime setNotificationTime,
             ToggleNotifications toggleNotifications,
@@ -75,6 +77,7 @@ public class CommandsHandler {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
                 Map.entry("/help", help),
+                Map.entry("/startAiDiscussion", aiDiscussion),
                 Map.entry("/privacy", privacy),
                 Map.entry("/settingsDoctor", settingsDoctorCommand),
                 Map.entry("/DoctorProfile", doctorProfile),
