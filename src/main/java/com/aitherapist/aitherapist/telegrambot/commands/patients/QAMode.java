@@ -2,8 +2,10 @@ package com.aitherapist.aitherapist.telegrambot.commands.patients;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.functionality.QAChatBot.UserQuestions;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
+import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
@@ -19,13 +21,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class QAMode implements ICommand {
     @Autowired
-    private PatientServiceImpl patientService;
+    private UserServiceImpl userService;
 
     private SendMessage QAModeHandler(Update update, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             registrationContext.addItemToHistory(userId, message, true);
-            String answer = UserQuestions.answerUserQuestion(patientService.findById(userId), message, registrationContext.getUserHistory(userId));
+            Patient patient = (Patient) userService.getUser(userId);
+            String answer = UserQuestions.answerUserQuestion(patient, message, registrationContext.getUserHistory(userId));
             registrationContext.addItemToHistory(userId, answer, false);
             InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
             return (SendMessage.builder()
