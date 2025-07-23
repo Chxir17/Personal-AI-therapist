@@ -28,29 +28,23 @@ public final class LLM {
         }
     }
 
+    private static String selectModel(int modelNum){
+        return switch (modelNum) {
+            case 2 -> ModelName.GIGA_CHAT_PRO;
+            case 3 -> ModelName.GIGA_CHAT_MAX;
+            default -> ModelName.GIGA_CHAT;
+        };
+    }
 
     public static String talkToChat(List<ChatMessage> messages, int model) {
-        String modelName;
-        switch (model) {
-            case 1:
-                modelName = ModelName.GIGA_CHAT;
-                break;
-            case 2:
-                modelName = ModelName.GIGA_CHAT_PRO;
-                break;
-            case 3:
-                modelName = ModelName.GIGA_CHAT_MAX;
-                break;
-            default:
-                return ModelName.GIGA_CHAT;
-        }
+
         GigaChatClient client = GigaChatClient.builder()
                 .authClient(AuthClient.builder()
                         .withProvidedTokenAuth(AccessToken.getInstance().getToken()).build())
                 .build();
         try {
             CompletionResponse response = client.completions(CompletionRequest.builder()
-                    .model(modelName)
+                    .model(selectModel(model))
                     .messages(messages)
                     .build());
             return response.choices().get(0).message().content();
