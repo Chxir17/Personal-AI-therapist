@@ -130,7 +130,8 @@ public class MessagesHandler implements IHandler {
         }
     }
 
-    private void QAModeHandler(Update update) {
+    private void QAModeHandler(Update update) throws TelegramApiException {
+        messageSender.sendMessage(commandsHandler.handleQaMode(update, registrationContext));
         try {
             Long userId = TelegramIdUtils.extractUserId(update);
             String message = update.getMessage().getText();

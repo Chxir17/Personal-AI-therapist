@@ -154,6 +154,11 @@ public class CommandsHandler {
         return commandHandler.apply(update, registrationContext);
     }
 
+    public SendMessage handleQaMode(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/QAMode");
+        return commandHandler.apply(update, registrationContext);
+    }
+
     public void mapStatusToHandler(Update update, Status s, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
         if (s == Status.REGISTRATION_DOCTOR) {
             registrationContext.setStatus(userId, Status.REGISTERED_DOCTOR);
