@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.domain.enums;
 
 public enum Status  {
     NONE,
+
     WAIT_MESSAGE_FROM_AI,
     SEND_TO_AI,
 
