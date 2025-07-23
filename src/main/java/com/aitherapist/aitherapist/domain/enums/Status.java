@@ -31,7 +31,8 @@ public enum Status  {
     NOTIFICATION_SETTINGS,
     SET_NOTIFICATION_TIME,
     SET_NOTIFICATION_MESSAGE,
-    SEND_TO_THIS_USER;
+    SEND_TO_THIS_USER,
+    QAMode;
 
 
     public boolean isRegistered() {

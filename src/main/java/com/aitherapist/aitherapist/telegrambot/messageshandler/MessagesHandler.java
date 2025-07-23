@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedica
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -26,6 +27,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
@@ -110,6 +114,9 @@ public class MessagesHandler implements IHandler {
         else if(registrationContext.getStatus(userId) == Status.EDIT_HEIGHT){
             handleEditHeight(update);
         }
+        else if(registrationContext.getStatus(userId) == Status.QAMode){
+            QAModeHandler(update);
+        }
         else if(registrationContext.getStatus(userId) == Status.EDIT_WEIGHT){
             handleEditWeight(update);
         }
@@ -118,6 +125,26 @@ public class MessagesHandler implements IHandler {
         }
         else if (registrationContext.getStatus(userId) == Status.GIVING_PATIENT_ID) {
             handleGivePatientIdStatus(update);
+        }
+    }
+
+    private void QAModeHandler(Update update) {
+        try {
+            String message = update.getMessage().getText();
+            String response = ParseUserPrompt.parameterEditorParser(message); //FIXME другой метод взять который илья пишет щас
+            KeyboardButton menuButton = new KeyboardButton("/menu");
+            KeyboardRow row = new KeyboardRow();
+            row.add(menuButton);
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+            keyboard.setKeyboard(List.of(row));
+            keyboard.setResizeKeyboard(true); // Опционально: компактный размер
+
+            messageSender.sendMessage( SendMessage.builder()
+                    .chatId(TelegramIdUtils.getChatId(update).toString())
+                    .replyMarkup(keyboard)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
