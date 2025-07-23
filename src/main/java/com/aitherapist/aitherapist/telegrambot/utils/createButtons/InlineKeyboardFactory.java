@@ -115,10 +115,6 @@ public class InlineKeyboardFactory {
                 ),
                 List.of(
                         InlineKeyboardButton.builder()
-                                .text("✏️ Редактировать профиль")
-                                .callbackData("edit_doctor_profile")
-                                .build(),
-                        InlineKeyboardButton.builder()
                                 .text("🔙 Назад")
                                 .callbackData("/acceptInitData")
                                 .build()
