@@ -134,7 +134,7 @@ public class ParseUserPrompt {
         dailyList.add(dailyData);
 
         patient.setDailyHealthDataList(dailyList);
-        String response4 = giveMedicalRecommendationBeta(patient);
+        String response4 = MakeMedicalRecommendation.giveMedicalRecommendationBeta(patient);
 //        System.out.println(response4);
 
 //        String response5 = giveMedicalRecommendationWithScoreBeta(patient);
