@@ -8,11 +8,23 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.utils.LLM;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+
+@Component
 public class MakeMedicalRecommendation {
-    public static String giveMedicalRecommendation(Patient patient){
+
+    private final LLM llm;
+
+    @Autowired
+    public MakeMedicalRecommendation(LLM llm) {
+        this.llm = llm;
+    }
+
+    public String giveMedicalRecommendation(Patient patient){
         Map<String,String> metaInfo = patient.makeMetaInformation(patient);
         Map<String,String> parametersHistory = patient.buildMedicalHistory();
         Prompts prompt = Prompts.valueOf("RECOMMENDATION_PROMPT");
@@ -22,10 +34,10 @@ public class MakeMedicalRecommendation {
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
         );
-        return LLM.talkToChat(requestMessage);
+        return llm.talkToChat(requestMessage);
     }
 
-    public static String giveMedicalRecommendationBeta(Patient patient) {
+    public String giveMedicalRecommendationBeta(Patient patient) {
         try {
             Map<String, String> metaInfo = patient.makeMetaInformation(patient);
             Map<String, String> parametersHistory = patient.buildMedicalHistory();
@@ -43,14 +55,14 @@ public class MakeMedicalRecommendation {
                     ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                     ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
             );
-            return LLM.talkToChat(requestMessage, 3);
+            return llm.talkToChat(requestMessage, 3);
         }
         catch (Exception e) {
             return null;
         }
     }
 
-    public static String giveMedicalRecommendationWithScoreBeta(ClinicPatient patient) {
+    public String giveMedicalRecommendationWithScoreBeta(ClinicPatient patient) {
         try {
             Map<String, String> metaInfo = patient.makeMetaInformation(patient);
             Map<String, String> parametersHistory = patient.buildMedicalHistory();
@@ -83,7 +95,7 @@ public class MakeMedicalRecommendation {
                     ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                     ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
             );
-            return LLM.talkToChat(requestMessage, 3);
+            return llm.talkToChat(requestMessage, 3);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -91,7 +103,7 @@ public class MakeMedicalRecommendation {
         }
     }
 
-    private static String getFullRecommendation(String jsonResponse){
+    private String getFullRecommendation(String jsonResponse){
         try{
             System.out.println("jsonReps->>>" + jsonResponse);
             ObjectMapper objectMapper = new ObjectMapper();

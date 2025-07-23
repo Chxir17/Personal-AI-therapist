@@ -3,74 +3,75 @@ package com.aitherapist.aitherapist.interactionWithGigaApi.inputParser;
 import chat.giga.model.completion.ChatMessage;
 import com.aitherapist.aitherapist.domain.enums.Prompts;
 import com.aitherapist.aitherapist.interactionWithGigaApi.utils.LLM;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 import java.util.Arrays;
 import java.util.List;
 
+
+
+
 @Component
 public class ParseUserPrompt {
-    public static String patientRegistrationParser(String userMessage) throws InterruptedException {
+
+    private final LLM llm;
+
+    @Autowired
+    public ParseUserPrompt(LLM llm) {
+        this.llm = llm;
+    }
+
+    @Retryable(
+            value = { Exception.class },
+            maxAttempts = 10,
+            backoff = @Backoff(delay = 1000)
+    )
+    public String patientRegistrationParser(String userMessage) {
         Prompts prompt = Prompts.valueOf("PATIENT_REGISTRATION_PROMPT");
         String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessage = Arrays.asList(
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
         );
-        //FIXME вынести это
-        String response = "";
-        for (int i = 0; i < 10; i++) {
-            try {
-                response = LLM.talkToChat(requestMessage);
-                break;
-            } catch (Exception e) {
-                if (i == 10 - 1) throw e;
-                Thread.sleep(1000);
-            }
-        }
-        return response;
+        return llm.talkToChat(requestMessage);
     }
 
-
-    public static String doctorRegistrationParser(String userMessage) throws InterruptedException {
+    @Retryable(
+            value = { Exception.class },
+            maxAttempts = 10,
+            backoff = @Backoff(delay = 1000)
+    )
+    public String doctorRegistrationParser(String userMessage) {
         Prompts prompt = Prompts.valueOf("DOCTOR_REGISTRATION_PROMPT");
         String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessage = Arrays.asList(
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
         );
-        //FIXME вынести это
-        String response = "";
-        for (int i = 0; i < 10; i++) {
-            try {
-                response = LLM.talkToChat(requestMessage);
-                break;
-            } catch (Exception e) {
-                if (i == 10 - 1) throw e;
-                Thread.sleep(1000);
-            }
-        }
-        return response;
+        return llm.talkToChat(requestMessage);
     }
 
-
-    public static String dailyQuestionnaireParser(String userMessage){
+    public String dailyQuestionnaireParser(String userMessage) {
         Prompts prompt = Prompts.valueOf("DAILY_QUESTIONNAIRE_PROMPT");
         String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessage = Arrays.asList(
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
         );
-        return LLM.talkToChat(requestMessage);
+        return llm.talkToChat(requestMessage);
     }
 
-    public static String parameterEditorParser(String userMessage){
+    public String parameterEditorParser(String userMessage) {
         Prompts prompt = Prompts.valueOf("PARAMETERS_EDITOR_PROMPT");
         String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessage = Arrays.asList(
                 ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                 ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
         );
-        return LLM.talkToChat(requestMessage);
+        return llm.talkToChat(requestMessage);
     }
 }
+

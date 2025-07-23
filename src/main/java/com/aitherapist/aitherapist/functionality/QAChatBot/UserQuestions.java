@@ -6,11 +6,22 @@ import com.aitherapist.aitherapist.domain.enums.Prompts;
 import com.aitherapist.aitherapist.domain.model.entities.History;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.utils.LLM;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Component
 public class UserQuestions {
-    public static String answerUserQuestion(Patient patient, String userMessage, List<History> historyList) {
+
+    private final LLM llm;
+
+    @Autowired
+    public UserQuestions(LLM llm) {
+        this.llm = llm;
+    }
+
+    public String answerUserQuestion(Patient patient, String userMessage, List<History> historyList) {
         Map<String, String> metaInfo = patient.makeMetaInformation(patient);
         Map<String, String> parametersHistory = patient.buildMedicalHistory();
         Prompts prompt = Prompts.valueOf("CHAT_BOT_PROMPT");
@@ -33,13 +44,14 @@ public class UserQuestions {
                 requestMessages.add(ChatMessage.builder().role(ChatMessage.Role.ASSISTANT).content(botMessages.poll()).build());
             }
         }
+
         String fullMessage = "Вопрос: " + userMessage + " Информация о пациенте: " + metaInfo + parametersHistory;
         requestMessages.add(ChatMessage.builder().role(ChatMessage.Role.USER).content(fullMessage).build());
-        String response = LLM.talkToChat(requestMessages, 2);
+
+        String response = llm.talkToChat(requestMessages, 2);
         if ("no".equalsIgnoreCase(response.trim())) {
             return ChatBotAnswers.getRandomMessage();
         }
         return response;
     }
-
 }

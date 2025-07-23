@@ -36,6 +36,7 @@ public class StartClinicPatient implements ICommand {
     private IMessageSender messageSender;
     private DoctorSendMessageToPatient sendMessageUser;
     private UserServiceImpl userService;
+    private final ParseUserPrompt parseUserPrompt;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -49,12 +50,14 @@ public class StartClinicPatient implements ICommand {
             DoctorSendMessageToPatient sendMessageUser,
             PatientServiceImpl patientService,
             UserServiceImpl userService,
+            ParseUserPrompt parseUserPrompt,
             RegistrationContext registrationContext) {
         this.messageSender = messageSender;
         this.sendMessageUser = sendMessageUser;
         this.patientService = patientService;
         this.userService = userService;
         this.registrationContext = registrationContext;
+        this.parseUserPrompt = parseUserPrompt;
     }
 
     private SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, ClinicPatient clinicPatient) {
@@ -170,7 +173,7 @@ public class StartClinicPatient implements ICommand {
             }
             case 8 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
-                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString() );
+                String response = parseUserPrompt.patientRegistrationParser(state.getBase().toString() );
                 String jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
                 ClinicPatient patient = new ClinicPatient();

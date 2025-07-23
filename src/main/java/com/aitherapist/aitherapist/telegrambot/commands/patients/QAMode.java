@@ -21,14 +21,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class QAMode implements ICommand {
     @Autowired
-    private UserServiceImpl userService;
+    private PatientServiceImpl patientService;
+    @Autowired
+    private UserQuestions userQuestions;
 
     private SendMessage QAModeHandler(Update update, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             registrationContext.addItemToHistory(userId, message, true);
-            Patient patient = (Patient) userService.getUser(userId);
-            String answer = UserQuestions.answerUserQuestion(patient, message, registrationContext.getUserHistory(userId));
+            String answer = userQuestions.answerUserQuestion(patientService.findById(userId), message, registrationContext.getUserHistory(userId));
             registrationContext.addItemToHistory(userId, answer, false);
             InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
             return (SendMessage.builder()

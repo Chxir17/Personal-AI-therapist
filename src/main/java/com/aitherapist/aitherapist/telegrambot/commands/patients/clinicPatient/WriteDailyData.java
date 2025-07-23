@@ -28,10 +28,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class WriteDailyData implements ICommand {
     private UserServiceImpl userService;
     private PatientServiceImpl patientService;
+    private ParseUserPrompt parseUserPrompt;
+    private MakeMedicalRecommendation makeMedicalRecommendation;
     @Autowired
-    public WriteDailyData(UserServiceImpl userService, PatientServiceImpl patientService) {
+    public WriteDailyData(UserServiceImpl userService, PatientServiceImpl patientService, ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation) {
         this.userService = userService;
         this.patientService = patientService;
+        this.parseUserPrompt = parseUserPrompt;
+        this.makeMedicalRecommendation = makeMedicalRecommendation;
     }
 
     private final ObjectMapper mapper = new ObjectMapper()
@@ -56,7 +60,7 @@ public class WriteDailyData implements ICommand {
             }
             case 2 -> {
                 state.getBase().append(text);
-                String response = ParseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
+                String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
                 System.out.println("response - " + response);
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
                 System.out.println("daily healthdata - " + d.toString());
@@ -66,7 +70,7 @@ public class WriteDailyData implements ICommand {
                 System.out.println("patient created " + currentPatient.toString());
                 currentPatient = patientService.getPatientWithData(userId);
                 String response4 =
-                        MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
+                        makeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
                 System.out.println("response4 " + response4);
                 registrationContext.setStatus(userId, Status.NONE);
                 return SendMessage.builder()
