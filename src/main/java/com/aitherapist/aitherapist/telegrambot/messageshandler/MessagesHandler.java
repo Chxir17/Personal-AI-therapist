@@ -132,19 +132,19 @@ public class MessagesHandler implements IHandler {
 
     private void QAModeHandler(Update update) throws TelegramApiException {
         messageSender.sendMessage(commandsHandler.handleQaMode(update, registrationContext));
-        try {
-            Long userId = TelegramIdUtils.extractUserId(update);
-            String message = update.getMessage().getText();
-            String answer = UserQuestions.answerUserQuestion(patientService.findById(userId), message, null);
-            InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
-            messageSender.sendMessage(SendMessage.builder()
-                    .chatId(TelegramIdUtils.getChatId(update).toString())
-                    .text(answer)
-                    .replyMarkup(keyboard)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Long userId = TelegramIdUtils.extractUserId(update);
+//            String message = update.getMessage().getText();
+//            String answer = UserQuestions.answerUserQuestion(patientService.findById(userId), message, null);
+//            InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
+//            messageSender.sendMessage(SendMessage.builder()
+//                    .chatId(TelegramIdUtils.getChatId(update).toString())
+//                    .text(answer)
+//                    .replyMarkup(keyboard)
+//                    .build());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void handleSetNotificationTime(Update update) throws TelegramApiException {
