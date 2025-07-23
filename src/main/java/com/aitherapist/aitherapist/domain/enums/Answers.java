@@ -156,6 +156,7 @@ public enum Answers {
             Пожалуйста, укажите медицинскую информацию:
             1. Есть ли у вас аритмия? (да/нет)""");
 
+    QA_MODE_INIT_MESSAGE("Введите вопрос который хотите задать или вернитесь в меню");
     private final String message;
 
     Answers(String message) {
