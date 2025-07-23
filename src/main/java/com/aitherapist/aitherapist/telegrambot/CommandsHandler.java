@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationMessage;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationTime;
@@ -66,9 +67,10 @@ public class CommandsHandler {
 //            EditPatientMedicalData editMedicalDataCommand,
             ClinicMenu clinicMenu,
             GetLastPatientMedicalData lastRecords,
+            QAMode qaMode,
+//            AcceptInitData acceptInitDataCommand,
             Help help,
             Privacy privacy,
-//            AcceptInitData acceptInitDataCommand,
             DoctorMenu doctorMenu,
             AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
     ) {
@@ -83,7 +85,8 @@ public class CommandsHandler {
                 Map.entry("/setNotificationTime", setNotificationTime),
                 Map.entry("/setNotificationMessage", setNotificationMessage),
                 Map.entry("/acceptInitData", doctorMenu),
-                Map.entry("/acceptInitDataClinic", clinicMenu),
+                Map.entry("/clinicPatientMenu", clinicMenu),
+                Map.entry("/QAMode", qaMode),
                 Map.entry("/inputDailyData", writeDailyData),
                 Map.entry("/information", informationCommand),
                 Map.entry("/startDoctor", doctorCommand),
@@ -148,6 +151,11 @@ public class CommandsHandler {
 
     public SendMessage handleCustomCommand(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         ICommand commandHandler = commands.get("/inputDailyData");
+        return commandHandler.apply(update, registrationContext);
+    }
+
+    public SendMessage handleQaMode(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        ICommand commandHandler = commands.get("/QAMode");
         return commandHandler.apply(update, registrationContext);
     }
 

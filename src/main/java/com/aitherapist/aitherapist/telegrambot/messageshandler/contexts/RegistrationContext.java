@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
 
 import com.aitherapist.aitherapist.domain.enums.DynamicStatus;
 import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.domain.model.entities.History;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -15,7 +16,26 @@ public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
     private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
+    private final Map<Long, History> mapUserToHistory = new ConcurrentHashMap<>();
 
+    public History getUserToHistory(Long userId) {
+        return mapUserToHistory.get(userId);
+    }
+
+    public void setUserToHistory(Long userId, History history) {
+        mapUserToHistory.put(userId, history);
+    }
+
+    public void addItemToHistory(Long userId, String item, Boolean role) {
+        History history = mapUserToHistory.get(userId);
+        if (history == null) {
+            history = new History();
+            history.addData(item);
+            history.setRole(role);
+            mapUserToHistory.put(userId, history);
+        }
+        history.addData(item);
+    }
 
     public void setTelephone(Long userId, String telephone) {
         DynamicStatus status = mapOfUserStatus.computeIfAbsent(

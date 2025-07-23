@@ -3,8 +3,6 @@ package com.aitherapist.aitherapist.domain.model.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.beans.BeanUtils;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.*;
 
 @Getter
@@ -35,13 +33,6 @@ public abstract class Patient extends User {
                             dailyHealthDataList.add(dailyHealthData);
                         }
                 );
-    }
-
-    public void printValueOfDailyData() {
-        List<DailyHealthData> lst = getDailyHealthDataList();
-        for (DailyHealthData dailyHealthData : lst) {
-            System.out.println(dailyHealthData.toString());
-        }
     }
 
     public void addDailyHealthData(DailyHealthData dailyHealthData) {

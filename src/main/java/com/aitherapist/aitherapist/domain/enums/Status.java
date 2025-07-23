@@ -2,6 +2,10 @@ package com.aitherapist.aitherapist.domain.enums;
 
 public enum Status  {
     NONE,
+
+    WAIT_MESSAGE_FROM_AI,
+    SEND_TO_AI,
+
     REGISTERED_DOCTOR,
     REGISTERED_CLINIC_PATIENT,
     REGISTERED_NO_CLINIC_PATIENT,
@@ -28,7 +32,8 @@ public enum Status  {
     NOTIFICATION_SETTINGS,
     SET_NOTIFICATION_TIME,
     SET_NOTIFICATION_MESSAGE,
-    SEND_TO_THIS_USER;
+    SEND_TO_THIS_USER,
+    QAMode;
 
 
     public boolean isRegistered() {

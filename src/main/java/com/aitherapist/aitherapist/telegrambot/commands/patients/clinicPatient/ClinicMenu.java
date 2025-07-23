@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
+import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class ClinicMenu implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+        registrationContext.setStatus(TelegramIdUtils.extractUserId(update), Status.NONE);
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update))
                 .text("✨ Доступные действия ✨  ")

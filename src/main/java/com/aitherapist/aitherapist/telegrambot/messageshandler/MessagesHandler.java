@@ -1,11 +1,13 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
+import com.aitherapist.aitherapist.functionality.QAChatBot.UserQuestions;
 import com.aitherapist.aitherapist.services.*;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -26,6 +28,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
@@ -34,6 +39,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -110,6 +116,9 @@ public class MessagesHandler implements IHandler {
         else if(registrationContext.getStatus(userId) == Status.EDIT_HEIGHT){
             handleEditHeight(update);
         }
+        else if(registrationContext.getStatus(userId) == Status.QAMode){
+            QAModeHandler(update);
+        }
         else if(registrationContext.getStatus(userId) == Status.EDIT_WEIGHT){
             handleEditWeight(update);
         }
@@ -118,6 +127,23 @@ public class MessagesHandler implements IHandler {
         }
         else if (registrationContext.getStatus(userId) == Status.GIVING_PATIENT_ID) {
             handleGivePatientIdStatus(update);
+        }
+    }
+
+    private void QAModeHandler(Update update) throws TelegramApiException {
+        messageSender.sendMessage(commandsHandler.handleQaMode(update, registrationContext));
+        try {
+            Long userId = TelegramIdUtils.extractUserId(update);
+            String message = update.getMessage().getText();
+            String answer = UserQuestions.answerUserQuestion(patientService.findById(userId), message, null);
+            InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
+            messageSender.sendMessage(SendMessage.builder()
+                    .chatId(TelegramIdUtils.getChatId(update).toString())
+                    .text(answer)
+                    .replyMarkup(keyboard)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
