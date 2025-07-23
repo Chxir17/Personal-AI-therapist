@@ -3,6 +3,8 @@ package com.aitherapist.aitherapist.domain.model.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.*;
 
 @Getter

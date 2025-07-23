@@ -2,8 +2,10 @@ package com.aitherapist.aitherapist.telegrambot.commands.patients;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.functionality.QAChatBot.UserQuestions;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
+import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
