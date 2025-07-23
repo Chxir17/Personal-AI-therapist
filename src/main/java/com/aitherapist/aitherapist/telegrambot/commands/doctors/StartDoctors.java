@@ -28,6 +28,8 @@ public class StartDoctors implements ICommand {
     public Verification verification;
     public Doctor doctor;
     @Autowired
+    public ParseUserPrompt parseUserPrompt;
+    @Autowired
     private final DoctorServiceImpl doctorService;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -90,7 +92,7 @@ public class StartDoctors implements ICommand {
 
             case 3:
                 state.getUserInput().append("gender: ").append(text).append("\n");
-                String response = ParseUserPrompt.doctorRegistrationParser(state.getUserInput().toString());
+                String response = parseUserPrompt.doctorRegistrationParser(state.getUserInput().toString());
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
                 try {
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);

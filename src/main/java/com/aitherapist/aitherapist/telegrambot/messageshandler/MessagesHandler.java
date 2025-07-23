@@ -69,8 +69,10 @@ public class MessagesHandler implements IHandler {
     @Autowired
     @Lazy
     private IMessageSender messageSender;
-    private final ParseUserPrompt parseUserPrompt = new ParseUserPrompt();
-    private final MakeMedicalRecommendation makeMedicalRecommendation = new MakeMedicalRecommendation();
+    @Autowired
+    private final ParseUserPrompt parseUserPrompt;
+    @Autowired
+    private final MakeMedicalRecommendation makeMedicalRecommendation;
     private DoctorServiceImpl doctorService;
     private PatientServiceImpl patientServiceImpl;
     @Autowired
@@ -505,7 +507,7 @@ public class MessagesHandler implements IHandler {
     private String generateMedicalRecommendation(Update update) {
         User user = userService.getUserByUserId(getUserId(update));
         if (user instanceof Patient patient) {
-            return MakeMedicalRecommendation.giveMedicalRecommendation(patient);
+            return makeMedicalRecommendation.giveMedicalRecommendation(patient);
         } else {
             return null;
         }
