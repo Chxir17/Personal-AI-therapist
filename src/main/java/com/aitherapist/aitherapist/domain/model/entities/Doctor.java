@@ -52,13 +52,4 @@ public class Doctor extends User {
         return patient != null ? patient.getDailyHealthDataList() : new ArrayList<>();
     }
 
-    public SendMessage showDoctorMenu(Long chatId) {
-        InlineKeyboardMarkup commands = InlineKeyboardFactory.createDoctorDefaultKeyboard();
-
-        return SendMessage.builder()
-                .chatId(chatId.toString())
-                .text("✨ Доступные действия ✨")
-                .replyMarkup(commands)
-                .build();
-    }
 }

@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationMessage;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationTime;
@@ -68,6 +69,8 @@ public class CommandsHandler {
             GetLastPatientMedicalData lastRecords,
             QAMode qaMode,
 //            AcceptInitData acceptInitDataCommand,
+            Help help,
+            Privacy privacy,
             DoctorMenu doctorMenu,
             AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
     ) {

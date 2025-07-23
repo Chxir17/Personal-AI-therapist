@@ -8,6 +8,12 @@ import java.util.*;
 
 public class InlineKeyboardFactory {
 
+    public static InlineKeyboardMarkup createBackToMainMenuKeyboard() {
+        Map<String, String> buttonMap = new LinkedHashMap<>();
+        buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");
+        return createInlineKeyboard(buttonMap, 1);
+    }
+
     public static InlineKeyboardMarkup createInlineKeyboard(Map<String, String> buttonMap, int buttonsPerRow) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
@@ -48,7 +54,7 @@ public class InlineKeyboardFactory {
         Map<String, String> buttonMap = new LinkedHashMap<>();
         buttonMap.put("✏️ Редактировать профиль", "/editDoctorAccountData");
         buttonMap.put("🔄 Сменить роль пользователя", "/changeRole");
-        buttonMap.put("🔙 Вернуться в главное меню", "/doctorMenu");
+        buttonMap.put("🔙 Вернуться в главное меню", "/acceptInitData");
         return createInlineKeyboard(buttonMap, 2);
     }
 
@@ -59,6 +65,9 @@ public class InlineKeyboardFactory {
         buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");
         return createInlineKeyboard(buttonMap, 2);
     }
+
+
+
 
     public static InlineKeyboardMarkup createEditClinicPatientData(){
         Map<String, String> buttons = new LinkedHashMap<>();

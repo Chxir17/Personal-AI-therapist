@@ -15,7 +15,7 @@ import java.util.Objects;
 public class UserQuestions {
     public static String answerUserQuestion(Patient patient, String userMessage, List<Message> history){
         Map<String, String> metaInfo = patient.makeMetaInformation(patient);
-        Map<String, String> parametersHistory = patient.buildMedicalHistory();
+        //Map<String, String> parametersHistory = patient.buildMedicalHistory();
         Prompts prompt = Prompts.valueOf("CHAT_BOT_PROMPT");
         String systemPrompt = prompt.getMessage();
         List<ChatMessage> requestMessages = new ArrayList<>();
@@ -34,7 +34,8 @@ public class UserQuestions {
             }
         }
 
-        String fullMessage = userMessage + metaInfo + parametersHistory;
+        //String fullMessage = userMessage + metaInfo + parametersHistory;
+        String fullMessage = userMessage + metaInfo ;
         requestMessages.add(ChatMessage.builder()
                 .role(ChatMessage.Role.USER)
                 .content(fullMessage)

@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
+import com.aitherapist.aitherapist.functionality.QAChatBot.UserQuestions;
 import com.aitherapist.aitherapist.services.*;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
@@ -38,6 +39,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -130,17 +132,13 @@ public class MessagesHandler implements IHandler {
 
     private void QAModeHandler(Update update) {
         try {
+            Long userId = TelegramIdUtils.extractUserId(update);
             String message = update.getMessage().getText();
-            String response = ParseUserPrompt.parameterEditorParser(message); //FIXME другой метод взять который илья пишет щас
-            KeyboardButton menuButton = new KeyboardButton("/menu");
-            KeyboardRow row = new KeyboardRow();
-            row.add(menuButton);
-            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-            keyboard.setKeyboard(List.of(row));
-            keyboard.setResizeKeyboard(true); // Опционально: компактный размер
-
-            messageSender.sendMessage( SendMessage.builder()
+            String answer = UserQuestions.answerUserQuestion(patientService.findById(userId), message, null);
+            InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
+            messageSender.sendMessage(SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
+                    .text(answer)
                     .replyMarkup(keyboard)
                     .build());
         } catch (Exception e) {
