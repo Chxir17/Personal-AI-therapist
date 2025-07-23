@@ -17,7 +17,7 @@ public class ClinicMenu implements ICommand {
         registrationContext.setStatus(TelegramIdUtils.extractUserId(update), Status.NONE);
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update))
-                .text("Выберите команду:")
+                .text("✨ Доступные действия ✨  ")
                 .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
                 .build();
 

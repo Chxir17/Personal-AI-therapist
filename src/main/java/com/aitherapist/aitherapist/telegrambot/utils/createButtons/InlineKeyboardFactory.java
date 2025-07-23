@@ -37,11 +37,10 @@ public class InlineKeyboardFactory {
 
     public static InlineKeyboardMarkup createDoctorDefaultKeyboard() {
         Map<String, String> buttonMap = new LinkedHashMap<>();
-        buttonMap.put("📊 Последние данные", "/getLastRecords");
         buttonMap.put("💬 Сообщение пациенту", "/sendMessageToPatient");
         buttonMap.put("⚙️ Настройки", "/settingsDoctor");
-        buttonMap.put("📅 Пацинты ", "/doctorPatientsMenu");
-        buttonMap.put("📁 История пациентов", "/patientHistory");
+        buttonMap.put("📅 Пациенты ", "/patientHistory");
+        buttonMap.put("👤 Мой профиль", "/DoctorProfile");
         return createInlineKeyboard(buttonMap, 2);
     }
 
@@ -87,8 +86,6 @@ public class InlineKeyboardFactory {
     public static InlineKeyboardMarkup createPatientManagementKeyboard() {
         Map<String, String> buttonMap = new LinkedHashMap<>();
         buttonMap.put("➕ Добавить пациента", "/addPatient");
-        buttonMap.put("👥 Список пациентов", "/patientList");
-        buttonMap.put("ℹ️ Информация о пациенте", "/patientInfo");
         return createInlineKeyboard(buttonMap, 2);
     }
 
@@ -123,19 +120,36 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttons, 2);
     }
 
+    public static InlineKeyboardMarkup createDoctorProfileKeyboard() {
+        return new InlineKeyboardMarkup(List.of(
+                List.of(
+                        InlineKeyboardButton.builder()
+                                .text("📊 Мои пациенты")
+                                .callbackData("/patientHistory")
+                                .build()
+                ),
+                List.of(
+                        InlineKeyboardButton.builder()
+                                .text("🔙 Назад")
+                                .callbackData("/acceptInitData")
+                                .build()
+                )
+        ));
+    }
+
     public static InlineKeyboardMarkup createPatientsKeyboard(List<Patient> patients) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
         for (Patient patient : patients) {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText("💬 " + patient.getName());
-            button.setCallbackData("/sendMessageToPatient " + patient.getId());
+            button.setCallbackData("/sendMessageToPatient " + patient.getTelegramId());
             keyboard.add(Collections.singletonList(button));
         }
 
         InlineKeyboardButton cancelButton = new InlineKeyboardButton();
         cancelButton.setText("❌ Отмена");
-        cancelButton.setCallbackData("cancel_message");
+        cancelButton.setCallbackData("/acceptInitData");
         keyboard.add(Collections.singletonList(cancelButton));
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -152,7 +166,7 @@ public class InlineKeyboardFactory {
                         .callbackData("/editParameters")
                         .build(),
                 InlineKeyboardButton.builder()
-                        .text("📊 История здоровья")
+                        .text("📊 Вернуться в меню")
                         .callbackData("/myHealthHistory")
                         .build()
         );

@@ -3,7 +3,7 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
+keys.env
 ### STS ###
 .apt_generated
 .classpath
@@ -36,3 +36,6 @@ build/
 src/main/resources/application.yml
 src/main/resources/application*.yml
 !src/main/resources/application-example.yml
+
+/Users/archi/PycharmProjects/ai-therapist/speachToText/Dockerfile
+/Users/archi/PycharmProjects/ai-therapist/speachToText/requirements.txt

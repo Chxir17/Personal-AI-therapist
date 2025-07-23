@@ -2,8 +2,8 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.*;
-import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
@@ -82,7 +82,6 @@ public class MessagesHandler implements IHandler {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
         long userId = getUserId(update);
-        System.out.println(registrationContext.getStatus(userId));
         if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
         } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
@@ -106,8 +105,8 @@ public class MessagesHandler implements IHandler {
         } else if (registrationContext.getStatus(userId) == Status.SET_NOTIFICATION_MESSAGE) {
             handleSetNotificationMessage(update);
         }
-        else if(registrationContext.getStatus(userId) == Status.REGISTERED){
-            commandsHandler.inProgressQuestionnaireDoctor(update, registrationContext);
+        else if(registrationContext.getStatus(userId).isRegistered()){
+            commandsHandler.handleUserMessageAfterVerificationToFilter(update, registrationContext);
         }
         else if(registrationContext.getStatus(userId) == Status.REGISTRATION_CLINIC_PATIENT){
             commandsHandler.inProgressQuestionnairePatient(update, registrationContext);
@@ -253,19 +252,22 @@ public class MessagesHandler implements IHandler {
     private void handleMessageFromDoctorToUser(Update update) throws TelegramApiException {
         Message message = update.getMessage();
         Long currentDoctorId = message.getFrom().getId();
+
         List<Long> userIds = registrationContext.findUserIdsWithSendToUserStatus(currentDoctorId);
 
         for (Long userId : userIds) {
             String doctorMessage = String.format(
-                    "✉️ *Вам пришло сообщение от вашего доктора:*\n\n" +
+                    "✉️ *" +
+                            "Вам пришло сообщение от вашего доктора: %s\n\n" +
                             "━━━━━━━━━━━━━━━━━━━━\n" +
                             "%s\n" +
                             "━━━━━━━━━━━━━━━━━━━━\n\n" +
                             "Вы можете ответить доктору, просто написав сообщение в этот чат.",
-                    message.toString()
+                    userService.getUser(currentDoctorId).getName(),
+                    message.getText()
             );
 
-            messageSender.sendMessage(1085500451, doctorMessage);
+            messageSender.sendMessage(userId, doctorMessage);
         }
     }
 
@@ -372,7 +374,7 @@ public class MessagesHandler implements IHandler {
 
         messageSender.sendMessage(SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text("Выберите команду")
+                .text("✨ Доступные действия ✨")
                 .replyMarkup(replyKeyboardDoctor)
                 .build());
     }

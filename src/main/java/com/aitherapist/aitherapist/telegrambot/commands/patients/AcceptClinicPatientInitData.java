@@ -26,7 +26,7 @@ public class AcceptClinicPatientInitData implements ICommand {
         InlineKeyboardMarkup commands = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
         return SendMessage.builder()
                 .chatId(String.valueOf(chatId))
-                .text("Выберите команду")
+                .text("✨ Доступные действия ✨  ")
                 .replyMarkup(commands)
                 .build();
     }

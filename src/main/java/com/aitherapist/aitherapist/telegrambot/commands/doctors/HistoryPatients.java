@@ -57,7 +57,7 @@ public class HistoryPatients implements ICommand {
                         "<b>🎂 Возраст:</b> %d\n" +
                         "<b>🚻 Пол:</b> %s",
                 patient.getName(),
-                patient.getPhoneNumber() != null ? patient.getPhoneNumber() : "не указан",
+                patient.getPhoneNumber() != null ? "+" + patient.getPhoneNumber() : "не указан",
                 patient.getAge() != null ? patient.getAge() : 0,
                 patient.getGender() != null ? (patient.getGender() ? "Мужской" : "Женский") : "не указан"
         );
@@ -70,9 +70,14 @@ public class HistoryPatients implements ICommand {
         StringBuilder healthInfo = new StringBuilder("<b>📊 Медицинские данные:</b>\n");
 
         if (initHealthData != null) {
-            if (initHealthData.getChronicDiseases() != null && !initHealthData.getChronicDiseases().isEmpty()) {
-                healthInfo.append("🩺 <b>Хронические заболевания:</b> ")
-                        .append(initHealthData.getChronicDiseases()).append("\n");
+            if (initHealthData.getChronicDiseases() != null) {
+                String chronicDiseases = "false".equals(initHealthData.getChronicDiseases())
+                        ? "нет"
+                        : initHealthData.getChronicDiseases();
+                if (!chronicDiseases.isEmpty()) {
+                    healthInfo.append("🩺 <b>Хронические заболевания:</b> ")
+                            .append(chronicDiseases).append("\n");
+                }
             }
             if (initHealthData.getHeight() != null) {
                 healthInfo.append("📏 <b>Рост:</b> ").append(initHealthData.getHeight()).append(" см\n");
@@ -80,31 +85,15 @@ public class HistoryPatients implements ICommand {
             if (initHealthData.getWeight() != null) {
                 healthInfo.append("⚖️ <b>Вес:</b> ").append(initHealthData.getWeight()).append(" кг\n");
             }
-            if (initHealthData.getBadHabits() != null && !initHealthData.getBadHabits().isEmpty()) {
-                healthInfo.append("🚬 <b>Вредные привычки:</b> ").append(initHealthData.getBadHabits()).append("\n");
+            if (initHealthData.getBadHabits() != null) {
+                String badHabits = "false".equals(initHealthData.getBadHabits())
+                        ? "нет"
+                        : initHealthData.getBadHabits();
+                if (!badHabits.isEmpty()) {
+                    healthInfo.append("🚬 <b>Вредные привычки:</b> ").append(badHabits).append("\n");
+                }
             }
         }
-
-        if (dailyHealthDataList != null && !dailyHealthDataList.isEmpty()) {
-            for (DailyHealthData data : dailyHealthDataList) {
-                healthInfo.append("\n<b>🗓️ Измерения:</b>\n")
-                        .append(String.format(
-                                "🫀 <b>Пульс:</b> %d\n" +
-                                        "💊 <b>Давление:</b> %s\n" +
-                                        "🌡 <b>Температура:</b> %.1f\n" +
-                                        "💤 <b>Сон:</b> %.1f часов\n",
-                                data.getPulse() != null ? data.getPulse() : 0,
-                                data.getPressure() != null ? data.getPressure() : "не измерялось",
-                                data.getTemperature() != null ? data.getTemperature() : 0,
-                                data.getHoursOfSleepToday() != null ? data.getHoursOfSleepToday() : 0
-                        ));
-            }
-        }
-
-        if (healthInfo.toString().equals("<b>📊 Медицинские данные:</b>\n")) {
-            return "<i>Медицинские данные отсутствуют</i>";
-        }
-
         return healthInfo.toString();
     }
 

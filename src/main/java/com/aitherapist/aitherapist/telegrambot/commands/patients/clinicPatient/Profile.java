@@ -29,51 +29,107 @@ public class Profile implements ICommand {
 
     @Override
     @Transactional(readOnly = true)
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext) {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
         ClinicPatient patient = userService.getClinicPatientById(userId);
         if (patient == null) {
-            return SendMessage.builder()
-                    .chatId(chatId.toString())
-                    .text("❌ Профиль не найден")
-                    .build();
+            return buildErrorMessage(chatId);
         }
 
+        return buildProfileMessage(chatId, patient);
+    }
+
+    private SendMessage buildErrorMessage(Long chatId) {
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text("❌ Профиль не найден")
+                .build();
+    }
+
+    private SendMessage buildProfileMessage(Long chatId, ClinicPatient patient) {
         InitialHealthData initialData = patient.getInitialData();
 
-        StringBuilder message = new StringBuilder();
-        message.append("👤 *Ваш профиль*\n\n");
-
-        message.append("📝 *Основная информация:*\n");
-        message.append(String.format("• Имя: %s\n", patient.getName()));
-        message.append(String.format("• Возраст: %d лет\n", patient.getAge()));
-        message.append(String.format("• Пол: %s\n", patient.getGender() ? "Мужской" : "Женский"));
-        message.append(String.format("• Телефон: %s\n", patient.getPhoneNumber()));
-        message.append(String.format("• Номер медкарты: %s\n\n", patient.getMedicalCardNumber() != null ? patient.getMedicalCardNumber() : "не указан"));
-
-        message.append("🩺 *Медицинские данные:*\n");
-        if (initialData != null) {
-            message.append(String.format("• Рост: %.1f см\n", initialData.getHeight()));
-            message.append(String.format("• Вес: %.1f кг\n", initialData.getWeight()));
-            message.append(String.format("• Хронические заболевания: %s\n",
-                    initialData.getChronicDiseases() != null ? initialData.getChronicDiseases() : "нет"));
-            message.append(String.format("• Вредные привычки: %s\n",
-                    initialData.getBadHabits() != null ? initialData.getBadHabits() : "нет"));
-            message.append(String.format("• Боли в сердце: %s\n",
-                    initialData.getHeartPain() != null ? (initialData.getHeartPain() ? "да" : "нет") : "не указано"));
-            message.append(String.format("• Аритмия: %s\n",
-                    initialData.getArrhythmia() != null ? (initialData.getArrhythmia() ? "да" : "нет") : "не указано"));
-        } else {
-            message.append("Медицинские данные не заполнены\n");
-        }
+        String message = String.format(
+                """
+                🏥 *Ваш медицинский профиль*
+                
+                👤 *Основная информация*
+                ├ Имя: %s
+                ├ Возраст: %d лет
+                ├ Номер телефона: %s
+                ├ Пол: %s
+                └ Номер медкарты: %s
+                
+                🩺 *Медицинские показатели*
+                %s
+                
+                ✏️ Вы можете изменить данные через меню профиля
+                """,
+                escapeMarkdown(patient.getName()),
+                patient.getAge(),
+                escapeMarkdown(patient.getPhoneNumber()),
+                patient.getGender() ? "Мужской ♂" : "Женский ♀",
+                patient.getMedicalCardNumber() != null ?
+                        escapeMarkdown(patient.getMedicalCardNumber()) : "не указан",
+                buildHealthDataSection(initialData)
+        );
 
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text(message.toString())
+                .text(message)
                 .parseMode("MarkdownV2")
                 .replyMarkup(InlineKeyboardFactory.createProfileKeyboard())
                 .build();
+    }
+
+    private String buildHealthDataSection(InitialHealthData initialData) {
+        if (initialData == null) {
+            return "└ Данные не заполнены";
+        }
+
+        return String.format(
+                """
+                ├ Рост: %.1f см
+                ├ Вес: %.1f кг
+                ├ Хронические заболевания: %s
+                ├ Вредные привычки: %s
+                ├ Боли в сердце: %s
+                └ Аритмия: %s
+                """,
+                initialData.getHeight(),
+                initialData.getWeight(),
+                escapeMarkdown(initialData.getChronicDiseases() != null ?
+                        initialData.getChronicDiseases() : "нет"),
+                escapeMarkdown(initialData.getBadHabits() != null ?
+                        initialData.getBadHabits() : "нет"),
+                initialData.getHeartPain() != null ?
+                        (initialData.getHeartPain() ? "да" : "нет") : "не указано",
+                initialData.getArrhythmia() != null ?
+                        (initialData.getArrhythmia() ? "да" : "нет") : "не указано"
+        );
+    }
+
+    private String escapeMarkdown(String text) {
+        if (text == null) return "";
+        return text.replace("_", "\\_")
+                .replace("*", "\\*")
+                .replace("[", "\\[")
+                .replace("]", "\\]")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace("~", "\\~")
+                .replace("`", "\\`")
+                .replace(">", "\\>")
+                .replace("#", "\\#")
+                .replace("+", "\\+")
+                .replace("-", "\\-")
+                .replace("=", "\\=")
+                .replace("|", "\\|")
+                .replace("{", "\\{")
+                .replace("}", "\\}")
+                .replace(".", "\\.")
+                .replace("!", "\\!");
     }
 }

@@ -57,7 +57,7 @@ public class Doctor extends User {
 
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text("Выберите команду")
+                .text("✨ Доступные действия ✨")
                 .replyMarkup(commands)
                 .build();
     }

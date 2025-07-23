@@ -2,7 +2,12 @@ package com.aitherapist.aitherapist.domain.enums;
 
 public enum Status  {
     NONE,
-    REGISTERED,
+    WAIT_MESSAGE_FROM_AI,
+    SEND_TO_AI,
+
+    REGISTERED_DOCTOR,
+    REGISTERED_CLINIC_PATIENT,
+    REGISTERED_NO_CLINIC_PATIENT,
     REGISTRATION,
     REGISTRATION_DOCTOR,
     REGISTRATION_CLINIC_PATIENT,
@@ -28,6 +33,11 @@ public enum Status  {
     SET_NOTIFICATION_MESSAGE,
     SEND_TO_THIS_USER,
     QAMode;
+
+
+    public boolean isRegistered() {
+        return this.name().startsWith("REGISTERED_");
+    }
 
     public DynamicStatus withId(Long id) {
         return new DynamicStatus(this, id);

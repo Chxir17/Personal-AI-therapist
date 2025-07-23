@@ -1,7 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
@@ -61,10 +61,13 @@ public class StartDoctors implements ICommand {
         Long chatId = TelegramIdUtils.getChatId(update);
         DoctorRegistrationState state = registrationContext.getDoctorRegistrationState(userId);
         if (update.getMessage().hasContact()) {
+            String phoneNumber = update.getMessage().getContact().getPhoneNumber();
+            registrationContext.setTelephone(userId, phoneNumber);
+
             return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.GIVE_NAME.getMessage())
-                        .build();
+                    .chatId(chatId.toString())
+                    .text(Answers.GIVE_NAME.getMessage())
+                    .build();
         }
 
         String text = update.getMessage().getText();
@@ -91,6 +94,7 @@ public class StartDoctors implements ICommand {
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
                 try {
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
+                    doctorInput.setPhoneNumber(registrationContext.getTelephone(userId));
                     Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
                     registrationContext.clearDoctorRegistrationState(userId);
                     return acceptOrEditDoctorInfo(savedDoctor, update);
@@ -121,7 +125,7 @@ public class StartDoctors implements ICommand {
         }
 
 
-        if (registrationContext.getStatus(userId) == Status.REGISTERED) {
+        if (registrationContext.getStatus(userId) == Status.REGISTERED_DOCTOR) {
             try {
                 return handleQuestionnaire(update, userId, registrationContext);
             } catch (Exception e) {

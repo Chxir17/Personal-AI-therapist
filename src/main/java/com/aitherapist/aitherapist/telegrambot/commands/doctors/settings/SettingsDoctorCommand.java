@@ -30,7 +30,7 @@ public class SettingsDoctorCommand implements ICommand {
 
         return SendMessage.builder()
                 .chatId(String.valueOf(chatId))
-                .text("Выберите команду")
+                .text("✨ Доступные действия ✨")
                 .replyMarkup(commands)
                 .build();
     }

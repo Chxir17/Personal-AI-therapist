@@ -6,7 +6,7 @@ import com.aitherapist.aitherapist.domain.model.PatientRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
@@ -100,18 +100,17 @@ public class StartClinicPatient implements ICommand {
                 .build();
     }
 
-    private SendMessage handleQuestionnaire(Update update, RegistrationContext registrationContext) throws TelegramApiException, InterruptedException, JsonProcessingException {
+    private SendMessage handleQuestionnaire(Update update, RegistrationContext registrationContext, Long userId) throws TelegramApiException, InterruptedException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
         ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
         if (update.getMessage().hasContact()) {
+            registrationContext.setTelephone(userId, update.getMessage().getContact().getPhoneNumber());
             return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.GIVE_NAME.getMessage())
                         .build();
         }
         String text = update.getMessage().getText();
-        Long userId = update.getMessage().getFrom().getId();
-
         switch (state.getCurrentStep()) {
             case 1 -> {
                 state.getBase().append("name: ").append(text).append("\n");
@@ -171,10 +170,11 @@ public class StartClinicPatient implements ICommand {
             }
             case 8 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
-                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString());
+                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString() );
                 String jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
                 ClinicPatient patient = new ClinicPatient();
+                patient.setPhoneNumber(registrationContext.getTelephone(userId));
                 patient.setName(dto.getName());
                 patient.setBirthDate(dto.getBirthDate());
                 patient.setGender(dto.getGender());
@@ -214,17 +214,15 @@ public class StartClinicPatient implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
-
         if (userId == null) {
             return SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
                     .text("Не удалось определить пользователя")
                     .build();
         }
-
-        if (registrationContext.getStatus(userId) == Status.REGISTERED) {
+        if (registrationContext.getStatus(userId) == Status.REGISTERED_CLINIC_PATIENT) {
             try {
-                return handleQuestionnaire(update, registrationContext);
+                return handleQuestionnaire(update, registrationContext, userId);
             } catch (Exception e) {
                 return SendMessage.builder()
                         .chatId(TelegramIdUtils.getChatId(update).toString())

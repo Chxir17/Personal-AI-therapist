@@ -5,9 +5,8 @@ import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
-import com.aitherapist.aitherapist.domain.model.entities.User;
-import com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation;
-import com.aitherapist.aitherapist.interactionWithGigaApi.ParseUserPrompt;
+import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import static com.aitherapist.aitherapist.interactionWithGigaApi.MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta;
 
 @Component
 public class WriteDailyData implements ICommand {
@@ -54,46 +51,23 @@ public class WriteDailyData implements ICommand {
                 state.setCurrentStep(2);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text(Answers.TEMPERATURE_QUESTION.getMessage())
+                        .text(Answers.MEDICAL_DATA_INPUT.getMessage())
                         .build();
             }
             case 2 -> {
-                state.getBase().append("temperature: ").append(text).append("\n");
-                state.setCurrentStep(3);
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.SLEEP_HOURS_QUESTION.getMessage())
-                        .build();
-            }
-            case 3 -> {
-                state.getBase().append("sleepHours: ").append(text).append("\n");
-                state.setCurrentStep(4);
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.PULSE_QUESTION.getMessage())
-                        .build();
-            }
-            case 4 -> {
-                state.getBase().append("pulse: ").append(text).append("\n");
-                state.setCurrentStep(5);
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.BLOOD_PRESSURE_QUESTION.getMessage())
-                        .build();
-            }
-
-            case 5 -> {
-                state.getBase().append("bloodPressure: ").append(text).append("\n");
+                state.getBase().append(text);
                 String response = ParseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
+                System.out.println("response - " + response);
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
-                System.out.println(d.toString());
+                System.out.println("daily healthdata - " + d.toString());
 
                 Patient currentPatient = patientService.getPatientWithData(userId);
                 patientService.addDailyHealthDataToPatient(userId, d);
-
+                System.out.println("patient created " + currentPatient.toString());
                 currentPatient = patientService.getPatientWithData(userId);
-                System.out.println(1);
-                String response4 = MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
+                String response4 =
+                        MakeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
+                System.out.println("response4 " + response4);
                 registrationContext.setStatus(userId, Status.NONE);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
