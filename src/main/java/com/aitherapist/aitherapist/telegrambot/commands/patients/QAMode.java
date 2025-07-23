@@ -25,7 +25,7 @@ public class QAMode implements ICommand {
         try {
             String message = update.getMessage().getText();
             registrationContext.addItemToHistory(userId, message, true);
-            String answer = UserQuestions.answerUserQuestion(patientService.findById(userId), message, null);
+            String answer = UserQuestions.answerUserQuestion(patientService.findById(userId), message, registrationContext.getUserHistory(userId));
             registrationContext.addItemToHistory(userId, answer, false);
             InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
             return (SendMessage.builder()
@@ -35,7 +35,10 @@ public class QAMode implements ICommand {
                     .build());
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return (SendMessage.builder()
+                    .chatId(TelegramIdUtils.getChatId(update).toString())
+                    .text("error")
+                    .build());
         }
     }
 

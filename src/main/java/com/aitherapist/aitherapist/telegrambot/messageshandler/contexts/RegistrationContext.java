@@ -17,17 +17,23 @@ public class RegistrationContext {
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
     private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
     private final Map<Long, History> mapUserToHistory = new ConcurrentHashMap<>();
+    private final Map<Long, History> mapQaToHistory = new ConcurrentHashMap<>();
 
-    public History getUserToHistory(Long userId) {
-        return mapUserToHistory.get(userId);
-    }
 
-    public void setUserToHistory(Long userId, History history) {
-        mapUserToHistory.put(userId, history);
+    public List<History> getUserHistory(long userId) {
+        List<History> historyList = new ArrayList<>();
+        historyList.add(mapUserToHistory.get(userId));
+        historyList.add(mapQaToHistory.get(userId));
+        return historyList;
     }
 
     public void addItemToHistory(Long userId, String item, Boolean role) {
-        History history = mapUserToHistory.get(userId);
+        History history;
+        if (role) {
+            history = mapUserToHistory.get(userId);
+        } else {
+            history = mapQaToHistory.get(userId);
+        }
         if (history == null) {
             history = new History();
             history.addData(item);
@@ -35,6 +41,14 @@ public class RegistrationContext {
             mapUserToHistory.put(userId, history);
         }
         history.addData(item);
+//        History history = mapUserToHistory.get(userId);
+//        if (history == null) {
+//            history = new History();
+//            history.addData(item);
+//            history.setRole(role);
+//            mapUserToHistory.put(userId, history);
+//        }
+//        history.addData(item);
     }
 
     public void setTelephone(Long userId, String telephone) {

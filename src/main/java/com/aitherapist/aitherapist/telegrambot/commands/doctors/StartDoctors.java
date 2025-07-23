@@ -136,7 +136,7 @@ public class StartDoctors implements ICommand {
             }
         } else {
             if (registrationContext.isVerify(userId)) {
-                registrationContext.setStatus(userId, Status.пREGISTRATION_DOCTOR);
+                registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
                 return requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
