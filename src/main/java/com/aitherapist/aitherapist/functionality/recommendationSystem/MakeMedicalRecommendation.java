@@ -43,7 +43,7 @@ public class MakeMedicalRecommendation {
                     ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                     ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
             );
-            return getFullRecommendation(LLM.talkToChat(requestMessage, 3));
+            return LLM.talkToChat(requestMessage, 3);
         }
         catch (Exception e) {
             return null;
@@ -83,7 +83,7 @@ public class MakeMedicalRecommendation {
                     ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                     ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
             );
-            return getFullRecommendation(LLM.talkToChat(requestMessage, 3));
+            return LLM.talkToChat(requestMessage, 3);
         }
         catch (Exception e) {
             e.printStackTrace();
