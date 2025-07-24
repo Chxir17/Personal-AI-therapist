@@ -1,11 +1,13 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.*;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.RegistrationProcess;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -36,6 +38,8 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors.acceptOrEditDoctorInfo;
 
 @Getter
 @Setter
@@ -242,8 +246,14 @@ public class MessagesHandler implements IHandler {
 
             existingUser.setBirthDate(parsedUser.getBirthDate());
             userService.updateUser(existingUser, userId);
-            registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
-            acceptOrEditInitInfo(existingUser, update);
+            registrationContext.setStatus(userId, Status.NONE);
+            if (existingUser.getRole() == Roles.DOCTOR){
+                acceptOrEditDoctorInfo(existingUser, update);
+            }
+            else{
+                InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
+                RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -304,8 +314,14 @@ public class MessagesHandler implements IHandler {
 
             existingUser.setName(parsedUser.getName());
             userService.updateUser(existingUser, userId);
-            registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
-            acceptOrEditInitInfo(existingUser, update);
+            registrationContext.setStatus(userId, Status.NONE);
+            if (existingUser.getRole() == Roles.DOCTOR){
+                acceptOrEditDoctorInfo(existingUser, update);
+            }
+            else{
+                InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
+                RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -322,8 +338,14 @@ public class MessagesHandler implements IHandler {
 
             existingUser.setGender(parsedUser.getGender());
             userService.updateUser(existingUser, userId);
-            registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
-            acceptOrEditInitInfo(existingUser, update);
+            registrationContext.setStatus(userId, Status.NONE);
+            if (existingUser.getRole() == Roles.DOCTOR){
+                acceptOrEditDoctorInfo(existingUser, update);
+            }
+            else{
+                InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
+                RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -371,35 +393,7 @@ public class MessagesHandler implements IHandler {
 
 
 
-    private void acceptOrEditMedicalInitData(InitialHealthData dailyHealthData, Update update) throws TelegramApiException {
-        Map<String, String> buttons = new HashMap<>();
-        Patient patient = patientService.findById(TelegramIdUtils.extractUserId(update));
-        String message = "📝 Вы ввели данные:\n\n" +
-                "👤 Имя: " + patient.getName() + "\n" +
-                "🎂 Возраст: " + patient.getAge() + " лет\n" +
-                "🚻 Пол: " + (patient.getGender() ? "♂ Мужской" : "♀ Женский") + "\n\n" +
 
-                "💓 Аритмия: " + (dailyHealthData.getArrhythmia() ? "Да" : "Нет") + "\n" +
-                "🏥 Хронические заболевания: " +
-                (dailyHealthData.getChronicDiseases().equalsIgnoreCase("false") ? "Нет" : dailyHealthData.getChronicDiseases()) + "\n" +
-                "📏 Рост: " + dailyHealthData.getHeight() + " см\n" +
-                "⚖️ Вес: " + dailyHealthData.getWeight() + " кг\n" +
-                "🚬 Вредные привычки: " +
-                (dailyHealthData.getBadHabits().equalsIgnoreCase("false") ? "Нет" : dailyHealthData.getBadHabits()) + "\n\n" +
-
-                "Выберите действие:";
-        messageSender.sendMessage(update.getMessage().getChatId(), message);
-        buttons.put("Принять", "/acceptClinicPatientInitData");
-        buttons.put("Изменить параметры", "/editPatientMedicalData");
-
-        InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
-
-        messageSender.sendMessage(SendMessage.builder()
-                .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text("✨ Доступные действия ✨")
-                .replyMarkup(replyKeyboardDoctor)
-                .build());
-    }
 
     public void handleEditArrhythmia(Update update) {
         try {
@@ -410,9 +404,9 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setArrhythmia(parsedData.getArrhythmia());
-
+            registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            acceptOrEditMedicalInitData(initialHealthData, update);
+            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace(); // лучше логировать
         }
@@ -427,9 +421,9 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setChronicDiseases(parsedData.getChronicDiseases());
-
+            registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            acceptOrEditMedicalInitData(initialHealthData, update);
+            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update,  patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -444,9 +438,9 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setHeight(parsedData.getHeight());
-
+            registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            acceptOrEditMedicalInitData(initialHealthData, update);
+            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -461,9 +455,9 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setWeight(parsedData.getWeight());
-
+            registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            acceptOrEditMedicalInitData(initialHealthData, update);
+            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер
         }
@@ -477,35 +471,12 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setBadHabits(parsedData.getBadHabits());
-
+            registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            acceptOrEditMedicalInitData(initialHealthData, update);
+            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер
         }
-    }
-
-    private SendMessage acceptOrEditInitInfo(User user, Update update) {
-        String genderDisplay = user.getGender() ? "♂ Мужской" : "♀ Женский";
-
-        String message = String.format("""
-        📝 *Вы ввели данные:*
-        
-        👤 *Имя:* %s
-        🎂 *Дата рождения:* %s (%d лет)
-        🚻 *Пол:* %s
-        """,
-                user.getName(),
-                user.getBirthDate(),
-                user.getAge(),
-                genderDisplay);
-
-        return SendMessage.builder()
-                .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text(message + "\n\nВыберите действие:")
-                .parseMode("Markdown")
-                .replyMarkup(InlineKeyboardFactory.createAcceptOrEditKeyboard())
-                .build();
     }
 
     private void handleGivePatientIdStatus(Update update) throws TelegramApiException {

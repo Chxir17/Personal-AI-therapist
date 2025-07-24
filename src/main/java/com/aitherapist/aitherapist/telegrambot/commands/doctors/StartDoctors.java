@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
+import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
@@ -37,7 +38,7 @@ public class StartDoctors implements ICommand {
 
     private StringBuilder userInput = new StringBuilder();
 
-    private SendMessage acceptOrEditDoctorInfo(Doctor doctor, Update update) {
+    public static SendMessage acceptOrEditDoctorInfo(User doctor, Update update) {
         String genderDisplay = doctor.getGender() ? "♂ Мужской" : "♀ Женский";
 
         String message = String.format("""

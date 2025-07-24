@@ -9,6 +9,7 @@ import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.RegistrationProcess;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
@@ -58,7 +59,7 @@ public class StartClinicPatient implements ICommand {
         }
         if (registrationContext.getStatus(userId) == Status.REGISTERED_CLINIC_PATIENT) {
             try {
-                return TelegramIdUtils.handleQuestionnaire(update, registrationContext, userId, userService, mapper, true);
+                return RegistrationProcess.handleQuestionnaire(update, registrationContext, userId, userService, mapper, true);
             } catch (Exception e) {
                 e.printStackTrace();
                 return SendMessage.builder()
@@ -69,7 +70,7 @@ public class StartClinicPatient implements ICommand {
         } else {
             if (registrationContext.isVerify(userId)) {
                 registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
-                return TelegramIdUtils.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+                return RegistrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
         return SendMessage.builder()
