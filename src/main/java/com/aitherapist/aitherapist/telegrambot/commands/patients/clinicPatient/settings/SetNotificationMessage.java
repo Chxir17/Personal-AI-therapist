@@ -1,4 +1,3 @@
-// SetNotificationMessage.java
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings;
 
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -37,7 +36,6 @@ public class SetNotificationMessage implements ICommand {
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text("📝 Введите новый текст уведомления:")
-                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
                 .build();
     }
 }

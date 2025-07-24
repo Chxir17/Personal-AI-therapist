@@ -77,7 +77,7 @@ public class WriteDailyData implements ICommand {
                         .chatId(chatId.toString())
                         .text(response4 != null ? response4 : "Рекомендации не сгенерированы")
                         .parseMode("HTML")
-                        .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
+                        .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
                         .build();
             }
             default -> {

@@ -4,10 +4,12 @@ import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.services.NotificationServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -25,17 +27,27 @@ public class Settings implements ICommand {
 
     private final UserServiceImpl userService;
     private final NotificationServiceImpl notificationService;
+    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
-    public Settings(UserServiceImpl userService, NotificationServiceImpl notificationService) {
+    public Settings(UserServiceImpl userService,
+                    NotificationServiceImpl notificationService,
+                    @Lazy ITelegramExecutor telegramExecutor) {
         this.userService = userService;
         this.notificationService = notificationService;
+        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
+
+        // Удаление предыдущего сообщения, если был Callback
+        if (update.hasCallbackQuery()) {
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            telegramExecutor.deleteMessage(chatId.toString(), messageId);
+        }
 
         User user = userService.fetchUserByTelegramId(userId);
         if (user == null) {
@@ -44,7 +56,6 @@ public class Settings implements ICommand {
                     .text("❌ Пользователь не найден")
                     .build();
         }
-
 
         registrationContext.setStatus(userId, Status.NOTIFICATION_SETTINGS);
         return showSettingsMenu(chatId, user);
@@ -66,31 +77,32 @@ public class Settings implements ICommand {
                 customMessage != null ? customMessage : "не установлен"
         );
 
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        row1.add(InlineKeyboardButton.builder()
-                .text(notificationsEnabled ? "🔕 Выключить уведомления" : "🔔 Включить уведомления")
-                .callbackData("/toggleNotification")
-                .build());
+        rows.add(List.of(
+                InlineKeyboardButton.builder()
+                        .text(notificationsEnabled ? "🔕 Выключить уведомления" : "🔔 Включить уведомления")
+                        .callbackData("/toggleNotification")
+                        .build()
+        ));
 
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        row2.add(InlineKeyboardButton.builder()
-                .text("⏰ Установить время")
-                .callbackData("/setNotificationTime")
-                .build());
+        rows.add(List.of(
+                InlineKeyboardButton.builder()
+                        .text("⏰ Установить время")
+                        .callbackData("/setNotificationTime")
+                        .build()
+        ));
 
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        row3.add(InlineKeyboardButton.builder()
-                .text("📝 Изменить текст")
-                .callbackData("/setNotificationMessage")
-                .build());
+        rows.add(List.of(
+                InlineKeyboardButton.builder()
+                        .text("📝 Изменить текст")
+                        .callbackData("/setNotificationMessage")
+                        .build()
+        ));
 
-        rows.add(row1);
-        rows.add(row2);
-        rows.add(row3);
-        keyboardMarkup.setKeyboard(rows);
+        InlineKeyboardMarkup keyboardMarkup = InlineKeyboardMarkup.builder()
+                .keyboard(rows)
+                .build();
 
         return SendMessage.builder()
                 .chatId(chatId.toString())

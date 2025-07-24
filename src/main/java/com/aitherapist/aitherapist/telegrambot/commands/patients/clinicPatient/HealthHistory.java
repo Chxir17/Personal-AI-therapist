@@ -1,12 +1,14 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -22,10 +24,11 @@ import java.util.Objects;
 public class HealthHistory implements ICommand {
 
     private final PatientServiceImpl patientService;
+    private final ITelegramExecutor telegramExecutor;
 
-    @Autowired
-    public HealthHistory(PatientServiceImpl patientService) {
+    public HealthHistory(PatientServiceImpl patientService, @Lazy ITelegramExecutor telegramExecutor) {
         this.patientService = patientService;
+        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
@@ -33,6 +36,13 @@ public class HealthHistory implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext) {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
+
+        Patient patient = patientService.findById(userId);
+
+        if (update.hasCallbackQuery()) {
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            telegramExecutor.deleteMessage(chatId.toString(), messageId);
+        }
 
         List<DailyHealthData> healthData = patientService.getPatientDailyHealthData(userId);
         healthData.sort(Comparator.comparingLong(DailyHealthData::getId).reversed());
@@ -54,7 +64,7 @@ public class HealthHistory implements ICommand {
                 .chatId(chatId.toString())
                 .text(message.toString())
                 .parseMode("MarkdownV2")
-                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
+                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patient))
                 .build();
     }
 

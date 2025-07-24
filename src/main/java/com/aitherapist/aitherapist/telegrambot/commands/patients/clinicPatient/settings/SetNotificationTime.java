@@ -37,7 +37,6 @@ public class SetNotificationTime implements ICommand {
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text("⏰ Введите время в формате HH:mm (например, 09:30):")
-                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
                 .build();
     }
 }

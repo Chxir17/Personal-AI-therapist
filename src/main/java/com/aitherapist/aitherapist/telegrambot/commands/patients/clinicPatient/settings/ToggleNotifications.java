@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.
 
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.services.NotificationServiceImpl;
+import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -19,9 +20,11 @@ public class ToggleNotifications implements ICommand {
 
     private final UserServiceImpl userService;
     private final NotificationServiceImpl notificationService;
+    private PatientServiceImpl patientService;
 
     @Autowired
-    public ToggleNotifications(UserServiceImpl userService, NotificationServiceImpl notificationService) {
+    public ToggleNotifications(PatientServiceImpl patientService, UserServiceImpl userService, NotificationServiceImpl notificationService) {
+        this.patientService = patientService;
         this.userService = userService;
         this.notificationService = notificationService;
     }
@@ -45,7 +48,7 @@ public class ToggleNotifications implements ICommand {
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text("🔔 Уведомления " + (!currentStatus ? "включены" : "выключены"))
-                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard())
+                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
                 .build();
     }
 }
