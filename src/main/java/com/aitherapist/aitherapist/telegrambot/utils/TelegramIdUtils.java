@@ -9,10 +9,13 @@ import com.aitherapist.aitherapist.domain.model.entities.NonClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -21,11 +24,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.format.DateTimeFormatter;
 
+@Component
 public class TelegramIdUtils {
+    @Autowired
+    public static Verification verification;
+    @Autowired
+    private static ParseUserPrompt parseUserPrompt;
     public static Long getChatId(Update update) {
         return update.hasCallbackQuery() ?
                 update.getCallbackQuery().getMessage().getChatId() :
                 update.getMessage().getChatId();
+    }
+    public static SendMessage requestPhoneNumber(Long chatId) {
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .replyMarkup(verification.createContactRequestKeyboard())
+                .build();
     }
 
     public static Long extractUserId(Update update) {
@@ -168,7 +183,8 @@ public class TelegramIdUtils {
             }
             case 8 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
-                String response = ParseUserPrompt.patientRegistrationParser(state.getBase().toString() );
+                System.out.println("STATE " + state.getBase().toString());
+                String response = parseUserPrompt.patientRegistrationParser(state.getBase().toString() );
                 String jsonWithType;
                 if (isClinicPatient) {
                     jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
@@ -194,7 +210,7 @@ public class TelegramIdUtils {
                 try {
                     userService.saveUser(patient);
                 } catch (Exception e) {
-                    System.err.println("Ошибка сохранения: " + e.getMessage());
+                    System.err.println("Ошибка сохранения попробуйте снова... ");
                     e.printStackTrace();
                     throw e;
                 }

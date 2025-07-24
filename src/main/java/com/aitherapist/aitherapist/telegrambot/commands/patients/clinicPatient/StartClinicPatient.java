@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 
 import com.aitherapist.aitherapist.services.UserServiceImpl;
@@ -24,6 +25,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class StartClinicPatient implements ICommand {
     private UserServiceImpl userService;
+    @Autowired
     private final ParseUserPrompt parseUserPrompt;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -38,15 +40,10 @@ public class StartClinicPatient implements ICommand {
             UserServiceImpl userService,
             ParseUserPrompt parseUserPrompt,
             RegistrationContext registrationContext) {
-        this.messageSender = messageSender;
-        this.sendMessageUser = sendMessageUser;
         this.patientService = patientService;
         this.userService = userService;
-        this.registrationContext = registrationContext;
         this.parseUserPrompt = parseUserPrompt;
     }
-
-
 
 
     @Override
@@ -63,15 +60,16 @@ public class StartClinicPatient implements ICommand {
             try {
                 return TelegramIdUtils.handleQuestionnaire(update, registrationContext, userId, userService, mapper, true);
             } catch (Exception e) {
+                e.printStackTrace();
                 return SendMessage.builder()
                         .chatId(TelegramIdUtils.getChatId(update).toString())
-                        .text("Ошибка обработки данных")
+                        .text("Ошибка обработки данных" + e.getMessage())
                         .build();
             }
         } else {
             if (registrationContext.isVerify(userId)) {
                 registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
-                return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+                return TelegramIdUtils.requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
         return SendMessage.builder()
@@ -80,11 +78,5 @@ public class StartClinicPatient implements ICommand {
                 .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patient))
                 .build();
     }
-    private SendMessage requestPhoneNumber(Long chatId) {
-        return SendMessage.builder()
-                .chatId(chatId.toString())
-                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
-                .replyMarkup(verification.createContactRequestKeyboard())
-                .build();
-    }
+
 }

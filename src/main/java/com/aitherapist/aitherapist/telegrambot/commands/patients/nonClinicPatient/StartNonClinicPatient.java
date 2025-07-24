@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.nonClinicPatient;
 
+import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
@@ -52,6 +53,11 @@ public class StartNonClinicPatient implements ICommand {
                         .text("Ошибка обработки данных")
                         .build();
             }
+        } else {
+            if (registrationContext.isVerify(userId)) {
+                registrationContext.setStatus(userId, Status.REGISTRATION_NO_CLINIC_PATIENT);
+                return TelegramIdUtils.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+            }
         }
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
@@ -59,5 +65,6 @@ public class StartNonClinicPatient implements ICommand {
                 .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
                 .build();
     }
+
 
 }

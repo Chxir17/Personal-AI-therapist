@@ -170,8 +170,6 @@ public class CommandsHandler {
         }
     }
 
-
-
     public void mapStatusHandler(Update update, Status s, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
         if (s == Status.REGISTERED_DOCTOR) {
             inProgressQuestionnaireDoctor(update, registrationContext);
