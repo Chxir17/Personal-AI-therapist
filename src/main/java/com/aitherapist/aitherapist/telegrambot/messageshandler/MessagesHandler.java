@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.aitherapist.aitherapist.domain.model.UserRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.*;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
@@ -241,7 +242,7 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             String cleanJson = parseUserPrompt.parameterEditorParser(message);
-            User parsedUser = mapper.readValue(cleanJson, User.class);
+            UserRegistrationDto parsedUser = mapper.readValue(cleanJson, UserRegistrationDto.class);
 
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
@@ -309,7 +310,7 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             String cleanJson = parseUserPrompt.parameterEditorParser(message);
-            User parsedUser = mapper.readValue(cleanJson, User.class);
+            UserRegistrationDto parsedUser = mapper.readValue(cleanJson, UserRegistrationDto.class);
 
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
@@ -333,8 +334,7 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             String cleanJson = parseUserPrompt.parameterEditorParser(message);
-            User parsedUser = mapper.readValue(cleanJson, User.class);
-
+            UserRegistrationDto parsedUser = mapper.readValue(cleanJson, UserRegistrationDto.class);
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
 
@@ -430,7 +430,6 @@ public class MessagesHandler implements IHandler {
             e.printStackTrace();
         }
     }
-
     public void handleEditHeight(Update update) {
         try {
             String message = update.getMessage().getText();
@@ -510,7 +509,6 @@ public class MessagesHandler implements IHandler {
     private void sendInitialResponse(long chatId) throws TelegramApiException {
         messageSender.sendMessage(chatId, Answers.GIVE_ANSWER.getMessage());
     }
-
     private void sendRecommendation(long chatId, String recommendation) throws TelegramApiException {
         messageSender.sendMessage(chatId, recommendation);
     }
