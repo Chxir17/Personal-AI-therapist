@@ -6,7 +6,6 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import javax.management.relation.Role;
 import java.util.*;
 
 public class InlineKeyboardFactory {
@@ -73,27 +72,27 @@ public class InlineKeyboardFactory {
 
 
 
-    public static InlineKeyboardMarkup createEditClinicPatientData(){
+    public static InlineKeyboardMarkup createEditClinicPatientData() {
         Map<String, String> buttons = new LinkedHashMap<>();
-        buttons.put("Изменить имя", "/editName");
-        buttons.put("Изменить дату рождения", "/editBirthDate");
-        buttons.put("Изменить пол", "/editGender");
-        buttons.put("Аритмия", "/editArrhythmia");
-        buttons.put("Хронические заболевания", "/editChronicDiseases");
-        buttons.put("Рост", "/editHeight");
-        buttons.put("Вес", "/editWeight");
-        buttons.put("Вредные привычки", "/editBadHabits");
+        buttons.put("✏️ Изменить имя", "/editName");
+        buttons.put("🎂 Изменить дату рождения", "/editBirthDate");
+        buttons.put("⚧️ Изменить пол", "/editGender");
+        buttons.put("❤️ Аритмия", "/editArrhythmia");
+        buttons.put("🏥 Хронические заболевания", "/editChronicDiseases");
+        buttons.put("📏 Рост", "/editHeight");
+        buttons.put("⚖️ Вес", "/editWeight");
+        buttons.put("🚬 Вредные привычки", "/editBadHabits");
 
-
-        return  InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
+        return InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
     }
 
-    public static InlineKeyboardMarkup createEditDoctorData(){
+    public static InlineKeyboardMarkup createEditDoctorData() {
         Map<String, String> buttons = new LinkedHashMap<>();
-        buttons.put("Изменить имя", "/editName");
-        buttons.put("Изменить дату рождения", "/editBirthDate");
-        buttons.put("Изменить пол", "/editGender");
-        return  InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
+        buttons.put("✏️ Изменить имя", "/editName");
+        buttons.put("🎂 Изменить дату рождения", "/editBirthDate");
+        buttons.put("⚧️ Изменить пол", "/editGender");
+
+        return InlineKeyboardFactory.createInlineKeyboard(buttons, 2);
     }
 
     public static InlineKeyboardMarkup createPatientManagementKeyboard() {
@@ -123,10 +122,10 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 2);
     }
 
-    public static InlineKeyboardMarkup createAcceptOrEditKeyboardClinic() {
+    public static InlineKeyboardMarkup createAcceptOrEditKeyboardPatient() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("✅ Принять", "/clinicPatientMenu");
-        buttons.put("✏️ Изменить", "/editParameters");
+        buttons.put("✏️ Изменить", "/editPatientMedicalData");
         return createInlineKeyboard(buttons, 2);
     }
 
@@ -135,7 +134,7 @@ public class InlineKeyboardFactory {
     public static InlineKeyboardMarkup createAcceptOrEditKeyboard() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("✅ Принять", "/acceptInitData");
-        buttons.put("✏️ Изменить", "/editParameters");
+        buttons.put("✏️ Изменить", "/editDoctorAccountData");
         return createInlineKeyboard(buttons, 2);
     }
 

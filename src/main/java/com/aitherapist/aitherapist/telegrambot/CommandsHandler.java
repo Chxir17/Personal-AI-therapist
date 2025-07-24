@@ -5,6 +5,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
+import com.aitherapist.aitherapist.telegrambot.commands.patients.EditPatientAccountData;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationMessage;
@@ -62,14 +63,15 @@ public class CommandsHandler {
             SetNotificationTime setNotificationTime,
             ToggleNotifications toggleNotifications,
             DoctorProfile doctorProfile,
-//            EditParameters editParametersCommand,
-//            EditPatientMedicalData editMedicalDataCommand,
+//            EditPatientAccountData editParametersCommand,
+            EditPatientAccountData editMedicalDataCommand,
             ClinicMenu clinicMenu,
             GetLastPatientMedicalData lastRecords,
             QAMode qaMode,
 //            AcceptInitData acceptInitDataCommand,
             Help help,
             Privacy privacy,
+            EditDoctorAccountData editDoctorAccountData,
             DoctorMenu doctorMenu
     ) {
         this.commands = Map.ofEntries(
@@ -105,10 +107,10 @@ public class CommandsHandler {
                 Map.entry("/editChronicDiseases", editChronicDiseasesCommand),
                 Map.entry("/editHeight", editHeightCommand),
                 Map.entry("/editWeight", editWeightCommand),
-                Map.entry("/editBadHabits", editBadHabitsCommand)
-
-//                Map.entry("/editParameters", editParametersCommand),
-//                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
+                Map.entry("/editBadHabits", editBadHabitsCommand),
+                Map.entry("/editDoctorAccountData", editDoctorAccountData),
+//                Map.entry("/editParameters", editParametersCommand)
+                Map.entry("/editPatientMedicalData", editMedicalDataCommand)
 //
 //                Map.entry("/acceptInitData", acceptInitDataCommand),
         );
