@@ -46,7 +46,7 @@ public abstract class Patient extends User {
         dailyHealthDataList.removeIf(hd -> Objects.equals(hd.getId(), healthDataId));
     }
 
-
+    @Transactional(readOnly = true)
     public Map<String, String> buildMedicalHistory() {
         var result = new LinkedHashMap<String, String>();
 

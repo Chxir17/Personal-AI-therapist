@@ -232,7 +232,7 @@ public class MessagesHandler implements IHandler {
     public void handleEditBirthDate(Update update) {
         try {
             String message = update.getMessage().getText();
-            String cleanJson = ParseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser(message);
             User parsedUser = mapper.readValue(cleanJson, User.class);
 
             Long userId = update.getMessage().getFrom().getId();
@@ -294,7 +294,7 @@ public class MessagesHandler implements IHandler {
     public void handleEditName(Update update) {
         try {
             String message = update.getMessage().getText();
-            String cleanJson = ParseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser(message);
             User parsedUser = mapper.readValue(cleanJson, User.class);
 
             Long userId = update.getMessage().getFrom().getId();
@@ -312,7 +312,7 @@ public class MessagesHandler implements IHandler {
     public void handleEditGender(Update update) {
         try {
             String message = update.getMessage().getText();
-            String cleanJson = ParseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser(message);
             User parsedUser = mapper.readValue(cleanJson, User.class);
 
             Long userId = update.getMessage().getFrom().getId();
@@ -404,7 +404,7 @@ public class MessagesHandler implements IHandler {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
 
-            String cleanJson = ParseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser(message);
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setArrhythmia(parsedData.getArrhythmia());
@@ -421,7 +421,7 @@ public class MessagesHandler implements IHandler {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
 
-            String cleanJson = ParseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser(message);
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setChronicDiseases(parsedData.getChronicDiseases());
@@ -437,7 +437,7 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
-            String cleanJson = ParseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser(message);
 
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
@@ -454,7 +454,7 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
-            String cleanJson = ParseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser(message);
 
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
@@ -470,7 +470,7 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
-            String cleanJson = ParseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser(message);
 
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
@@ -512,7 +512,7 @@ public class MessagesHandler implements IHandler {
 
 
     private DailyHealthData parseHealthData(String messageText) throws JsonProcessingException {
-        String rawJsonResponse = ParseUserPrompt.dailyQuestionnaireParser(messageText);
+        String rawJsonResponse = parseUserPrompt.dailyQuestionnaireParser(messageText);
 
         String cleanJson = cleanJsonResponse(rawJsonResponse);
         System.out.println(cleanJson);

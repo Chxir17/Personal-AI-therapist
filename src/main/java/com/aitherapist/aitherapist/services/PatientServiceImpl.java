@@ -7,6 +7,7 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IDailyHealthDataRepository;
 import com.aitherapist.aitherapist.repositories.IPatientRepository;
 import com.aitherapist.aitherapist.services.interfaces.IPatientService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +71,11 @@ public class PatientServiceImpl implements IPatientService {
     @Override
     @Transactional(readOnly = true)
     public Patient findById(Long userId) {
-        return patientRepository.findByTelegramId(userId);
+        Patient patient = patientRepository.findByTelegramId(userId);
+        if (patient != null) {
+            Hibernate.initialize(patient.getDailyHealthDataList());
+        }
+        return patient;
     }
 
     @Override
