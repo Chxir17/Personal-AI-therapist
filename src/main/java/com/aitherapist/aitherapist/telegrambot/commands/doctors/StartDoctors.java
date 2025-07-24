@@ -38,7 +38,7 @@ public class StartDoctors implements ICommand {
 
     private StringBuilder userInput = new StringBuilder();
 
-    public static SendMessage acceptOrEditDoctorInfo(User doctor, Update update) {
+    public SendMessage acceptOrEditDoctorInfo(User doctor, Update update) {
         String genderDisplay = doctor.getGender() ? "♂ Мужской" : "♀ Женский";
 
         String message = String.format("""

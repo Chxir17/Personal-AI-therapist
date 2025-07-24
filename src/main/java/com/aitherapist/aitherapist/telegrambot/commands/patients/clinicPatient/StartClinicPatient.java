@@ -28,6 +28,8 @@ public class StartClinicPatient implements ICommand {
     private UserServiceImpl userService;
     @Autowired
     private final ParseUserPrompt parseUserPrompt;
+    @Autowired
+    private RegistrationProcess registrationProcess;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -59,7 +61,7 @@ public class StartClinicPatient implements ICommand {
         }
         if (registrationContext.getStatus(userId) == Status.REGISTERED_CLINIC_PATIENT) {
             try {
-                return RegistrationProcess.handleQuestionnaire(update, registrationContext, userId, userService, mapper, true);
+                return registrationProcess.handleQuestionnaire(update, registrationContext, userId, userService, mapper, true);
             } catch (Exception e) {
                 e.printStackTrace();
                 return SendMessage.builder()
@@ -70,7 +72,7 @@ public class StartClinicPatient implements ICommand {
         } else {
             if (registrationContext.isVerify(userId)) {
                 registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
-                return RegistrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+                return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
         return SendMessage.builder()

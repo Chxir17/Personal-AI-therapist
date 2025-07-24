@@ -26,6 +26,8 @@ public class StartNonClinicPatient implements ICommand {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+    @Autowired
+    private RegistrationProcess registrationProcess;
     public Verification verification;
     public PatientServiceImpl patientService;
 
@@ -47,7 +49,7 @@ public class StartNonClinicPatient implements ICommand {
         }
         if (registrationContext.getStatus(userId) == Status.REGISTERED_NO_CLINIC_PATIENT) {
             try {
-                return RegistrationProcess.handleQuestionnaire(update, registrationContext, userId, userService, mapper, false);
+                return registrationProcess.handleQuestionnaire(update, registrationContext, userId, userService, mapper, false);
             } catch (Exception e) {
                 return SendMessage.builder()
                         .chatId(TelegramIdUtils.getChatId(update).toString())
@@ -57,7 +59,7 @@ public class StartNonClinicPatient implements ICommand {
         } else {
             if (registrationContext.isVerify(userId)) {
                 registrationContext.setStatus(userId, Status.REGISTRATION_NO_CLINIC_PATIENT);
-                return RegistrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+                return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
         return SendMessage.builder()
