@@ -26,7 +26,7 @@ public class RegistrationProcess {
     @Autowired
     private static ParseUserPrompt parseUserPrompt;
 
-    public static SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, User patient) {
+    public SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, User patient) {
         String genderDisplay = patient.getGender() ? "♂ Мужской" : "♀ Женский";
 
         // Format birth date and age information
@@ -70,7 +70,7 @@ public class RegistrationProcess {
 
     }
 
-    public static SendMessage requestPhoneNumber(Long chatId) {
+    public SendMessage requestPhoneNumber(Long chatId) {
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
@@ -78,7 +78,7 @@ public class RegistrationProcess {
                 .build();
     }
 
-    private static void fillCommonPatientFields(Patient patient, Long userId, PatientRegistrationDto dto, RegistrationContext registrationContext) {
+    private void fillCommonPatientFields(Patient patient, Long userId, PatientRegistrationDto dto, RegistrationContext registrationContext) {
         patient.setPhoneNumber(registrationContext.getTelephone(userId));
         patient.setName(dto.getName());
         patient.setBirthDate(dto.getBirthDate());
@@ -96,7 +96,7 @@ public class RegistrationProcess {
         patient.setInitialData(healthData);
     }
 
-    public static SendMessage handleQuestionnaire(Update update, RegistrationContext registrationContext, Long userId, UserServiceImpl userService, ObjectMapper mapper, boolean isClinicPatient) throws TelegramApiException, InterruptedException, JsonProcessingException {
+    public SendMessage handleQuestionnaire(Update update, RegistrationContext registrationContext, Long userId, UserServiceImpl userService, ObjectMapper mapper, boolean isClinicPatient) throws TelegramApiException, InterruptedException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
         ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
         if (update.getMessage().hasContact()) {

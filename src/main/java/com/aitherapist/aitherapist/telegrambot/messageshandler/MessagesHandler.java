@@ -7,6 +7,7 @@ import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedica
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.telegrambot.CommandsHandler;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.RegistrationProcess;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
@@ -38,8 +39,6 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.aitherapist.aitherapist.telegrambot.commands.doctors.StartDoctors.acceptOrEditDoctorInfo;
 
 @Getter
 @Setter
@@ -75,7 +74,10 @@ public class MessagesHandler implements IHandler {
     private PatientServiceImpl patientServiceImpl;
     @Autowired
     private CommandsHandler commandsHandler;
-
+    @Autowired
+    private RegistrationProcess registrationProcess;
+    @Autowired
+    private StartDoctors startDoctors;
 
 
     @Override
@@ -248,11 +250,11 @@ public class MessagesHandler implements IHandler {
             userService.updateUser(existingUser, userId);
             registrationContext.setStatus(userId, Status.NONE);
             if (existingUser.getRole() == Roles.DOCTOR){
-                acceptOrEditDoctorInfo(existingUser, update);
+                startDoctors.acceptOrEditDoctorInfo(existingUser, update);
             }
             else{
                 InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
-                RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+                registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -316,11 +318,11 @@ public class MessagesHandler implements IHandler {
             userService.updateUser(existingUser, userId);
             registrationContext.setStatus(userId, Status.NONE);
             if (existingUser.getRole() == Roles.DOCTOR){
-                acceptOrEditDoctorInfo(existingUser, update);
+                startDoctors.acceptOrEditDoctorInfo(existingUser, update);
             }
             else{
                 InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
-                RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+                registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -340,11 +342,11 @@ public class MessagesHandler implements IHandler {
             userService.updateUser(existingUser, userId);
             registrationContext.setStatus(userId, Status.NONE);
             if (existingUser.getRole() == Roles.DOCTOR){
-                acceptOrEditDoctorInfo(existingUser, update);
+                startDoctors.acceptOrEditDoctorInfo(existingUser, update);
             }
             else{
                 InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
-                RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+                registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -406,7 +408,7 @@ public class MessagesHandler implements IHandler {
             initialHealthData.setArrhythmia(parsedData.getArrhythmia());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
+            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace(); // лучше логировать
         }
@@ -423,7 +425,7 @@ public class MessagesHandler implements IHandler {
             initialHealthData.setChronicDiseases(parsedData.getChronicDiseases());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update,  patientService.findById(TelegramIdUtils.extractUserId(update)));
+            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update,  patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -440,7 +442,7 @@ public class MessagesHandler implements IHandler {
             initialHealthData.setHeight(parsedData.getHeight());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
+            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -457,7 +459,7 @@ public class MessagesHandler implements IHandler {
             initialHealthData.setWeight(parsedData.getWeight());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
+            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер
         }
@@ -473,7 +475,7 @@ public class MessagesHandler implements IHandler {
             initialHealthData.setBadHabits(parsedData.getBadHabits());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            RegistrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
+            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер
         }
