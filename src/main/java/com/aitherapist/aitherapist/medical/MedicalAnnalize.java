@@ -26,24 +26,6 @@ public class MedicalAnnalize {
         this.userServiceImpl = userServiceImpl;
     }
 
-    public MedicalNormalData defaultTest(ClinicPatient clinicPatient) {
-        return new MedicalNormalData(clinicPatient, 8.5, 80L, "120/80");
-    }
-
-    public SendMessage getMedicalNormsMessage(Update update, ClinicPatient clinicPatient) throws TelegramApiException {
-        Long chatId = update.getMessage().getChatId();
-        MedicalNormalData norms = setUpMedicalData(clinicPatient);
-
-        String message = formatMedicalNormsForTelegram(clinicPatient, norms);
-
-        SendMessage response = new SendMessage(chatId.toString(), message);
-        response.enableHtml(true);
-        return response;
-    }
-
-    public MedicalNormalData setUpMedicalData(ClinicPatient clinicPatient) {
-        return defaultTest(clinicPatient);
-    }
 
     private String formatMedicalNormsForTelegram(ClinicPatient patient, MedicalNormalData norms) {
         return String.format(

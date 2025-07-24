@@ -63,41 +63,48 @@ public class Settings implements ICommand {
         return showSettingsMenu(chatId, user, userId);
     }
 
+
     private SendMessage showSettingsMenu(Long chatId, User user, Long userId) {
         boolean notificationsEnabled = notificationService.getNotificationEnabled(user);
         LocalTime notificationTime = notificationService.getNotificationTime(user);
         String customMessage = notificationService.getMessage(user);
-
-        String messageText = String.format(
-                "⚙️ *Настройки уведомлений*\n\n" +
-                        "🔔 Уведомления: %s\n" +
-                        "⏰ Время напоминания: %s\n" +
-                        "📝 Текст напоминания: %s\n\n" +
-                        "Вы можете изменить эти настройки:",
-                notificationsEnabled ? "ВКЛ" : "ВЫКЛ",
-                notificationTime != null ? notificationTime.format(DateTimeFormatter.ofPattern("HH:mm")) : "не установлено",
-                customMessage != null ? customMessage : "не установлен"
-        );
-
         MedicalNormalData medicalData = registrationContext.getMedicalNormalData(userId);
-        messageText += "\n" + medicalData.formatMedicalNormsForTelegram();
+
+        String messageText = "✨ <b>Ваши персональные настройки и нормативы</b> ✨\n\n";
+
+        messageText += "⚙️ <b><u>Настройки уведомлений</u></b>\n" +
+                "┌───────────────────────────────┐\n" +
+                "│  🔔  <b>Статус:</b> " + (notificationsEnabled ? "ВКЛ ✅" : "ВЫКЛ ❌") + "\n" +
+                "│  ⏰  <b>Время:</b> " + (notificationTime != null ?
+                notificationTime.format(DateTimeFormatter.ofPattern("HH:mm")) : "не установлено") + "\n" +
+                "│  📝  <b>Текст:</b> " + (customMessage != null ? customMessage : "не установлен") + "\n" +
+                "└───────────────────────────────┘\n\n";
+
+
+        messageText += "🩺 <b><u>Ваши медицинские нормативы</u></b>\n" +
+                "┌───────────────────────────────┐\n" +
+                "│  💤  <b>Сон:</b> " + String.format("%.1f", medicalData.getHoursOfSleepToday()) + " ч/сутки\n" +
+                "│  ❤️  <b>Пульс:</b> " + medicalData.getPulse() + " уд/мин\n" +
+                "│  🩸  <b>Давление:</b> " + medicalData.getPressure() + "\n" +
+                "└───────────────────────────────┘\n\n" +
+                "⏱ <i>Обновлено: " + medicalData.getLastUpdate() + "</i>\n\n" +
+                "<i>Эти показатели рассчитаны специально для вас</i> 💙";
+
+
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         rows.add(List.of(
                 InlineKeyboardButton.builder()
-                        .text(notificationsEnabled ? "🔕 Выключить уведомления" : "🔔 Включить уведомления")
+                        .text(notificationsEnabled ? "🔕 Выключить" : "🔔 Включить")
                         .callbackData("/toggleNotification")
                         .build()
         ));
 
         rows.add(List.of(
                 InlineKeyboardButton.builder()
-                        .text("⏰ Установить время")
+                        .text("⏰ Изменить время")
                         .callbackData("/setNotificationTime")
-                        .build()
-        ));
-
-        rows.add(List.of(
+                        .build(),
                 InlineKeyboardButton.builder()
                         .text("📝 Изменить текст")
                         .callbackData("/setNotificationMessage")
@@ -111,7 +118,7 @@ public class Settings implements ICommand {
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text(messageText)
-                .parseMode("Markdown")
+                .parseMode("HTML")
                 .replyMarkup(keyboardMarkup)
                 .build();
     }

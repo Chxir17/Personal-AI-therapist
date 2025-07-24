@@ -5,7 +5,6 @@ import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.History;
 import com.aitherapist.aitherapist.domain.model.entities.MedicalNormalData;
-import com.aitherapist.aitherapist.medical.MedicalAnnalize;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.DoctorRegistrationState;
 import org.springframework.stereotype.Component;
