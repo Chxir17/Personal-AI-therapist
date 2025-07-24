@@ -1,6 +1,8 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
@@ -21,20 +23,23 @@ import java.util.Map;
 public class StartCommand implements ICommand {
     private final IMessageSender messageSender;
     private final UserServiceImpl userRegistrationService;
-    private final RegistrationContext registrationContext;
+    private final PatientServiceImpl patientService;
 
     @Autowired
     public StartCommand(IMessageSender messageSender,
                         UserServiceImpl userRegistrationService,
-                        RegistrationContext registrationContext) {
+                        PatientServiceImpl patientService) {
         this.messageSender = messageSender;
         this.userRegistrationService = userRegistrationService;
-        this.registrationContext = registrationContext;
+        this.patientService = patientService;
+
     }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long userId = extractUserId(update);
+        Patient patient = patientService.findById(userId);
+
         if (userId == null) {
             throw new TelegramApiException("Error value. Can't find userId");
         }
@@ -78,7 +83,7 @@ public class StartCommand implements ICommand {
         }
         else {
             return SendMessage.builder().chatId(TelegramIdUtils.getChatId(update)).text(Answers.START_MESSAGE
-                    .getMessage()).replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard()).build();
+                    .getMessage()).replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patient)).build();
         }
 
     }

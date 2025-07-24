@@ -153,10 +153,10 @@ public class MessagesHandler implements IHandler {
 
         try {
             LocalTime time = LocalTime.parse(timeInput, DateTimeFormatter.ofPattern("HH:mm"));
-            User user = userService.fetchUserByTelegramId(userId);
+            Patient patient = patientService.findById(userId);
 
-            notificationService.setNotificationTime(user, time);
-            notificationService.setNotificationEnabled(user, true);
+            notificationService.setNotificationTime(patient, time);
+            notificationService.setNotificationEnabled(patient, true);
 
             scheduleDailyNotification(chatId, time, userId);
 
@@ -166,9 +166,10 @@ public class MessagesHandler implements IHandler {
                             "✅ Время уведомления установлено на %s\n\n" +
                                     "Ежедневное напоминание будет приходить в указанное время",
                             time.format(DateTimeFormatter.ofPattern("HH:mm"))))
+                    .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patient))
                     .build();
-
             messageSender.sendMessage(response);
+
             registrationContext.setStatus(userId, Status.NONE);
         } catch (DateTimeParseException e) {
             messageSender.sendMessage(chatId,
@@ -219,6 +220,7 @@ public class MessagesHandler implements IHandler {
         SendMessage response = SendMessage.builder()
                 .chatId(chatId.toString())
                 .text("✅ Текст уведомления успешно изменен")
+                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId))) // <- сюда
                 .build();
 
         messageSender.sendMessage(response);

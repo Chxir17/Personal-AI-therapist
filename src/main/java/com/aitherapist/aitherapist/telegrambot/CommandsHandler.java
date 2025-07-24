@@ -5,7 +5,6 @@ import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
-import com.aitherapist.aitherapist.telegrambot.commands.patients.AcceptClinicPatientInitData;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.QAMode;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.SetNotificationMessage;
@@ -71,8 +70,7 @@ public class CommandsHandler {
 //            AcceptInitData acceptInitDataCommand,
             Help help,
             Privacy privacy,
-            DoctorMenu doctorMenu,
-            AcceptClinicPatientInitData acceptClinicPatientInitDataCommand
+            DoctorMenu doctorMenu
     ) {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
@@ -107,13 +105,12 @@ public class CommandsHandler {
                 Map.entry("/editChronicDiseases", editChronicDiseasesCommand),
                 Map.entry("/editHeight", editHeightCommand),
                 Map.entry("/editWeight", editWeightCommand),
-                Map.entry("/editBadHabits", editBadHabitsCommand),
+                Map.entry("/editBadHabits", editBadHabitsCommand)
 
 //                Map.entry("/editParameters", editParametersCommand),
 //                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
 //
 //                Map.entry("/acceptInitData", acceptInitDataCommand),
-                Map.entry("/acceptClinicPatientInitData", acceptClinicPatientInitDataCommand)
         );
     }
 

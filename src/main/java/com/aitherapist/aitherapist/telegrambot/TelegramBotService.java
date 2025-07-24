@@ -15,6 +15,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -193,6 +194,16 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         } catch (TelegramApiException e) {
             log.error("Send message error", e);
             throw e;
+        }
+    }
+
+    @Override
+    public void deleteMessage(String chatId, Integer messageId) {
+        DeleteMessage deleteMessage = new DeleteMessage(chatId, messageId);
+        try {
+            this.execute(deleteMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 

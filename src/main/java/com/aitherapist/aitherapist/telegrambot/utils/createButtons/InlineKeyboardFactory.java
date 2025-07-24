@@ -5,15 +5,10 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import javax.management.relation.Role;
 import java.util.*;
 
 public class InlineKeyboardFactory {
-
-    public static InlineKeyboardMarkup createBackToMainMenuKeyboard() {
-        Map<String, String> buttonMap = new LinkedHashMap<>();
-        buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");
-        return createInlineKeyboard(buttonMap, 1);
-    }
 
     public static InlineKeyboardMarkup createInlineKeyboard(Map<String, String> buttonMap, int buttonsPerRow) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -64,6 +59,8 @@ public class InlineKeyboardFactory {
         buttonMap.put("✏️ Редактировать профиль", "/editPatientAccountData");
         buttonMap.put("🔄 Сменить роль пользователя", "/changeRole");
         buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");
+
+
         return createInlineKeyboard(buttonMap, 2);
     }
 
@@ -99,16 +96,20 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 2);
     }
 
-    public static InlineKeyboardMarkup createBackToMenuButton(){
+    public static InlineKeyboardMarkup createBackToMenuButtonClinic(){
         Map<String, String> buttonMap = new LinkedHashMap<>();
         buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");
         return createInlineKeyboard(buttonMap, 2);
     }
 
-    public static InlineKeyboardMarkup createPatientDefaultKeyboard() {
+
+
+    public static InlineKeyboardMarkup createPatientDefaultKeyboard(Patient patient) {
         Map<String, String> buttonMap = new LinkedHashMap<>();
         buttonMap.put("📊 Ввести ежедневные данные", "/inputDailyData");
-        buttonMap.put("💬 Написать доктору", "/writeToDoctor");
+        if(patient.getRole() == Roles.CLINIC_PATIENT){
+            buttonMap.put("💬 Написать доктору", "/writeToDoctor");
+        }
         buttonMap.put("👤 Мой профиль", "/myProfile");
         buttonMap.put("⚙️ Настройки", "/patientSettings");
         buttonMap.put("📈 История показателей", "/myHealthHistory");
@@ -122,6 +123,8 @@ public class InlineKeyboardFactory {
         buttons.put("✏️ Изменить", "/editParameters");
         return createInlineKeyboard(buttons, 2);
     }
+
+
 
     public static InlineKeyboardMarkup createAcceptOrEditKeyboard() {
         Map<String, String> buttons = new LinkedHashMap<>();

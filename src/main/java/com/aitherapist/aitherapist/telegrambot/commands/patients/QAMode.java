@@ -56,7 +56,7 @@ public class QAMode implements ICommand {
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
                 .text(Answers.QA_MODE_INIT_MESSAGE.getMessage())
-                .replyMarkup(InlineKeyboardFactory.createBackToMenuButton())
+                .replyMarkup(InlineKeyboardFactory.createBackToMenuButtonClinic())
                 .build();
     }
 }

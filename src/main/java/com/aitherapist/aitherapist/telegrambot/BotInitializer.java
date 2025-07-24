@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.telegrambot;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Slf4j
 @RequiredArgsConstructor
 public class BotInitializer {
-    private final TelegramBotService bot;
+    private final @Lazy  TelegramBotService bot;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() {
