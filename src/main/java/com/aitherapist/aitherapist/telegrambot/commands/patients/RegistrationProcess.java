@@ -7,29 +7,32 @@ import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
-import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.ClientRegistrationState;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.format.DateTimeFormatter;
 
+
+@Component
 public class RegistrationProcess {
     @Autowired
-    public static Verification verification;
+    public Verification verification;
     @Autowired
-    private static ParseUserPrompt parseUserPrompt;
+    private  ParseUserPrompt parseUserPrompt;
 
     public SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, User patient) {
         String genderDisplay = patient.getGender() ? "♂ Мужской" : "♀ Женский";
 
-        // Format birth date and age information
+
         String birthDateAndAge;
         if (patient.getBirthDate() != null) {
             String formattedDate = patient.getBirthDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));

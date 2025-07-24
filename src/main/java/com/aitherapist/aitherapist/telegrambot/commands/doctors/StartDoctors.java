@@ -6,7 +6,7 @@ import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserP
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
-import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.DoctorRegistrationState;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.DoctorRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;

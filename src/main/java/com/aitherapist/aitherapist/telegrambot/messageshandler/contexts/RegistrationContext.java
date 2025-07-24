@@ -2,7 +2,12 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
 
 import com.aitherapist.aitherapist.domain.enums.DynamicStatus;
 import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.History;
+import com.aitherapist.aitherapist.domain.model.entities.MedicalNormalData;
+import com.aitherapist.aitherapist.medical.MedicalAnnalize;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.DoctorRegistrationState;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,9 +21,25 @@ public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
     private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
+
     private final Map<Long, History> mapUserToHistory = new ConcurrentHashMap<>();
     private final Map<Long, History> mapQaToHistory = new ConcurrentHashMap<>();
 
+    private final Map<Long, MedicalNormalData>  mapMedicalNormalData = new ConcurrentHashMap<>();
+
+    public void addMedicalNormalData(Long userId, MedicalNormalData medicalNormalData) {
+        if (mapMedicalNormalData.containsKey(userId)) {
+            return;
+        }
+        mapMedicalNormalData.put(userId, medicalNormalData);
+    }
+
+    public MedicalNormalData getMedicalNormalData(Long userId) {
+        if (!mapMedicalNormalData.containsKey(userId)) {
+            mapMedicalNormalData.put(userId, new MedicalNormalData(userId, 8.5, 80L, "120/80"));
+        }
+        return mapMedicalNormalData.get(userId);
+    }
 
     public List<History> getUserHistory(long userId) {
         List<History> historyList = new ArrayList<>();

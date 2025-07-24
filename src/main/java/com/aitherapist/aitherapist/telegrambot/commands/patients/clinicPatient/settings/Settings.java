@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings;
 
 import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.domain.model.entities.MedicalNormalData;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.services.NotificationServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
@@ -28,14 +29,16 @@ public class Settings implements ICommand {
     private final UserServiceImpl userService;
     private final NotificationServiceImpl notificationService;
     private final ITelegramExecutor telegramExecutor;
+    private final RegistrationContext registrationContext;
 
     @Autowired
     public Settings(UserServiceImpl userService,
                     NotificationServiceImpl notificationService,
-                    @Lazy ITelegramExecutor telegramExecutor) {
+                    @Lazy ITelegramExecutor telegramExecutor, RegistrationContext registrationContext) {
         this.userService = userService;
         this.notificationService = notificationService;
         this.telegramExecutor = telegramExecutor;
+        this.registrationContext = registrationContext;
     }
 
     @Override
@@ -43,7 +46,6 @@ public class Settings implements ICommand {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
-        // Удаление предыдущего сообщения, если был Callback
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
             telegramExecutor.deleteMessage(chatId.toString(), messageId);
@@ -58,10 +60,10 @@ public class Settings implements ICommand {
         }
 
         registrationContext.setStatus(userId, Status.NOTIFICATION_SETTINGS);
-        return showSettingsMenu(chatId, user);
+        return showSettingsMenu(chatId, user, userId);
     }
 
-    private SendMessage showSettingsMenu(Long chatId, User user) {
+    private SendMessage showSettingsMenu(Long chatId, User user, Long userId) {
         boolean notificationsEnabled = notificationService.getNotificationEnabled(user);
         LocalTime notificationTime = notificationService.getNotificationTime(user);
         String customMessage = notificationService.getMessage(user);
@@ -77,6 +79,8 @@ public class Settings implements ICommand {
                 customMessage != null ? customMessage : "не установлен"
         );
 
+        MedicalNormalData medicalData = registrationContext.getMedicalNormalData(userId);
+        messageText += "\n" + medicalData.formatMedicalNormsForTelegram();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         rows.add(List.of(

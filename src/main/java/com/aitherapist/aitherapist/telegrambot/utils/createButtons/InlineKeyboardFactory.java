@@ -119,6 +119,7 @@ public class InlineKeyboardFactory {
         buttonMap.put("⚙️ Настройки", "/patientSettings");
         buttonMap.put("📈 История показателей", "/myHealthHistory");
         buttonMap.put("❓ Задать вопрос", "/QAMode");
+
         return createInlineKeyboard(buttonMap, 2);
     }
 

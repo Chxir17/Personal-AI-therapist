@@ -1,4 +1,4 @@
-package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
+package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model;
 
 import lombok.Getter;
 import lombok.Setter;
