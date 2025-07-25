@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.messageshandler;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.aitherapist.aitherapist.domain.model.PatientRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.UserRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.*;
@@ -19,6 +20,8 @@ import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboar
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -63,7 +66,9 @@ public class MessagesHandler implements IHandler {
     private TelegramNotificationService telegramNotificationService;
     @Autowired
     private PatientServiceImpl patientService;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     @Autowired
     @Lazy
     private IMessageSender messageSender;
@@ -403,13 +408,13 @@ public class MessagesHandler implements IHandler {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
 
-            String cleanJson = parseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser("Аритмия" + message);
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
-            InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
+            PatientRegistrationDto parsedData = mapper.readValue(cleanJson, PatientRegistrationDto.class);
             initialHealthData.setArrhythmia(parsedData.getArrhythmia());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
+            messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
             e.printStackTrace(); // лучше логировать
         }
@@ -420,7 +425,7 @@ public class MessagesHandler implements IHandler {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
 
-            String cleanJson = parseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser("Хронические заболевания " + message);
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setChronicDiseases(parsedData.getChronicDiseases());
@@ -435,14 +440,14 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
-            String cleanJson = parseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser("Рост " + message);
 
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setHeight(parsedData.getHeight());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
+            messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -452,30 +457,30 @@ public class MessagesHandler implements IHandler {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
-            String cleanJson = parseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser("Вес " + message);
 
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setWeight(parsedData.getWeight());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
+            messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
-            e.printStackTrace(); // TODO: заменить на логгер
+            e.printStackTrace();
         }
     }
     public void handleEditBadHabits(Update update) {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
-            String cleanJson = parseUserPrompt.parameterEditorParser(message);
+            String cleanJson = parseUserPrompt.parameterEditorParser("Вредные привычки " + message);
 
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
             initialHealthData.setBadHabits(parsedData.getBadHabits());
             registrationContext.setStatus(userId, Status.NONE);
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(TelegramIdUtils.extractUserId(update)));
+            messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
             e.printStackTrace(); // TODO: заменить на логгер
         }

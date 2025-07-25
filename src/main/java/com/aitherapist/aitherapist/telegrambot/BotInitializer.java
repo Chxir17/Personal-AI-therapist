@@ -12,7 +12,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 
 /**
- * BotInitializer - initianal class TelegramBotService
+ * BotInitializer - initinal class TelegramBotService
  */
 @Component
 @Slf4j
