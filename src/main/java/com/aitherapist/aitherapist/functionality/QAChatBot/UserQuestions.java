@@ -51,9 +51,11 @@ public class UserQuestions {
                 .findFirst()
                 .orElse(null);
 
-        Queue<String> userMessages = userHistory != null && userHistory.getData() != null ? new LinkedList<>(userHistory.getData()) : new LinkedList<>();
+        Queue<String> userMessages = userHistory != null && userHistory.getData() != null
+                ? new LinkedList<>(userHistory.getData()) : new LinkedList<>();
 
-        Queue<String> botMessages = botHistory != null && botHistory.getData() != null ? new LinkedList<>(botHistory.getData()) : new LinkedList<>();
+        Queue<String> botMessages = botHistory != null && botHistory.getData() != null
+                ? new LinkedList<>(botHistory.getData()) : new LinkedList<>();
 
         while (!userMessages.isEmpty() || !botMessages.isEmpty()) {
             if (!userMessages.isEmpty()) {
@@ -69,6 +71,7 @@ public class UserQuestions {
                         .build());
             }
         }
+
         String fullMessage = "Вопрос: " + userMessage + " Информация о пациенте: " + metaInfo + parametersHistory;
         requestMessages.add(ChatMessage.builder()
                 .role(ChatMessage.Role.USER)
@@ -80,40 +83,33 @@ public class UserQuestions {
         if ("no".equalsIgnoreCase(rawResponse)) {
             return ChatBotAnswers.getRandomMessage();
         }
+
         String result = parseJsonAnswer(rawResponse);
         return result != null ? result : ChatBotAnswers.getRandomMessage();
     }
-
-
 
     private String parseJsonAnswer(String jsonResponse) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(jsonResponse);
             String text = root.has("text") ? root.get("text").asText() : null;
-            String articleTitle = root.has("article") ? root.get("article").asText() : "";
+            String articleTitle = root.has("article") ? root.get("article").asText() : "no";
 
             if (text == null || text.isBlank()) {
                 return null;
             }
 
-            if (articleTitle != null && !articleTitle.isBlank()) {
+            if (!"no".equalsIgnoreCase(articleTitle)) {
                 HypertensionQA article = HypertensionQA.findByQuestion(articleTitle);
                 if (article != null) {
-                    return text + "\nТак же эта статья может быть полезна: " + articleTitle + "\n" + article.getAnswer() + "\n" + article.getAuthor();
+                    return text + "\nТакже эта статья может быть полезна: " + articleTitle + "\n" +
+                            article.getAnswer() + "\n" + article.getAuthor();
                 }
             }
-
             return text;
+
         } catch (Exception e) {
             return null;
         }
     }
-
-
-
-
-
-
-
 }
