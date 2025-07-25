@@ -1,8 +1,10 @@
 package com.aitherapist.aitherapist.telegrambot.utils.createButtons;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
@@ -101,8 +103,9 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 2);
     }
 
-    public static InlineKeyboardMarkup createBackToMenuButtonClinic(){
+    public static InlineKeyboardMarkup createBackToMenuButtonClinic(Long userId, RegistrationContext registrationContext) {
         Map<String, String> buttonMap = new LinkedHashMap<>();
+        registrationContext.setStatus(userId, Status.NONE);
         buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");
         return createInlineKeyboard(buttonMap, 2);
     }

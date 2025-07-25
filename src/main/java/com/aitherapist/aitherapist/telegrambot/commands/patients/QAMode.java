@@ -52,11 +52,11 @@ public class QAMode implements ICommand {
         if (registrationContext.getStatus(userId) == Status.QAMode) {
             return QAModeHandler(update, userId, registrationContext);
         }
-        registrationContext.setStatus(TelegramIdUtils.extractUserId(update), Status.QAMode);
+        registrationContext.setStatus(userId, Status.QAMode);
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
                 .text(Answers.QA_MODE_INIT_MESSAGE.getMessage())
-                .replyMarkup(InlineKeyboardFactory.createBackToMenuButtonClinic())
+                .replyMarkup(InlineKeyboardFactory.createBackToMenuButtonClinic(userId, registrationContext))
                 .build();
     }
 }
