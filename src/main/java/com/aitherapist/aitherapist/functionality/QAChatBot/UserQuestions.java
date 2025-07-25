@@ -78,8 +78,8 @@ public class UserQuestions {
                 .content(fullMessage)
                 .build());
 
-        String rawResponse = llm.talkToChat(requestMessages, 2).trim();
-        System.out.println("RAWRESPONSE" + rawResponse);
+        String rawResponse = llm.talkToChat(requestMessages, 3).trim();
+        System.out.println("RAWRESPONSE " + rawResponse);
         if ("no".equalsIgnoreCase(rawResponse)) {
             return ChatBotAnswers.getRandomMessage();
         }
