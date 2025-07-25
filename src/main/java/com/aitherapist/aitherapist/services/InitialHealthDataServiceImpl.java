@@ -27,14 +27,15 @@ public class InitialHealthDataServiceImpl implements IInitialHealthDataService {
     @Transactional
     @Override
     public InitialHealthData getInitialHealthDataByUserId(Long userId) {
-        Patient patient = iPatientRepository.getByTelegramId(userId);
+        Patient patient = iPatientRepository.findByTelegramId(userId);
         return patient.getInitialData();
     }
 
     @Transactional
     @Override
     public void updateInitialHealthDataByUserId(Long userId, InitialHealthData initialHealthData) {
-        Patient patient = iPatientRepository.getByTelegramId(userId);
-        patient.setInitialData(initialHealthData);
+        Patient patient = iPatientRepository.findByTelegramId(userId);
+        BeanUtils.copyProperties(patient, initialHealthData, "id"); // ignore id, чтобы
+        iPatientRepository.save(patient);
     }
 }

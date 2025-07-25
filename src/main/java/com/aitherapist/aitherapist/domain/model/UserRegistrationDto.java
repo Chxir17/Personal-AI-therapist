@@ -1,5 +1,7 @@
 package com.aitherapist.aitherapist.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +12,8 @@ import java.time.LocalDate;
 public class UserRegistrationDto {
     private String user_type;
     private String name;
+    @JsonProperty("birthDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
     private Boolean gender;
 
