@@ -76,8 +76,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public void updateUser(User user, Long id) {
-        User currentUser = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User currentUser = userRepository.findByTelegramId(id);
         BeanUtils.copyProperties(user, currentUser, "id"); // ignore id, чтобы
         userRepository.save(currentUser);
     }

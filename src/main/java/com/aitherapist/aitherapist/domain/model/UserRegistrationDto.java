@@ -12,4 +12,9 @@ public class UserRegistrationDto {
     private String name;
     private LocalDate birthDate;
     private Boolean gender;
+
+    @Override
+    public String toString() {
+        return "TEST" + this.user_type + "\n" + this.name + "\n" + this.birthDate + "\n" + this.gender;
+    }
 }

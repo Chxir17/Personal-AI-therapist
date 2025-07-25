@@ -76,7 +76,7 @@ public class UserQuestions {
                 .build());
 
         String rawResponse = llm.talkToChat(requestMessages, 2).trim();
-
+        System.out.println("RAWRESPONSE" + rawResponse);
         if ("no".equalsIgnoreCase(rawResponse)) {
             return ChatBotAnswers.getRandomMessage();
         }

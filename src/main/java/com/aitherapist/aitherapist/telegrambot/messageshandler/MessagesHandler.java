@@ -309,21 +309,22 @@ public class MessagesHandler implements IHandler {
     public void handleEditName(Update update) {
         try {
             String message = update.getMessage().getText();
+            System.out.println("Message: " + message);
             String cleanJson = parseUserPrompt.parameterEditorParser(message);
+            System.out.println("DEB-  CLEANJSON" + cleanJson);
             UserRegistrationDto parsedUser = mapper.readValue(cleanJson, UserRegistrationDto.class);
-
+            System.out.println(parsedUser.toString());
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
 
             existingUser.setName(parsedUser.getName());
             userService.updateUser(existingUser, userId);
-            registrationContext.setStatus(userId, Status.NONE);
             if (existingUser.getRole() == Roles.DOCTOR){
-                startDoctors.acceptOrEditDoctorInfo(existingUser, update);
+                messageSender.sendMessage(startDoctors.acceptOrEditDoctorInfo(existingUser, update));
             }
             else{
                 InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
-                registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+                messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser));
             }
         } catch (Exception e) {
             e.printStackTrace();
