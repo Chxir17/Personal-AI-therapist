@@ -7,6 +7,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -18,6 +19,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class EditDoctorAccountData implements ICommand {
 
     private final ITelegramExecutor telegramExecutor;
+    @Autowired
     private DoctorServiceImpl doctorService;
 
     public EditDoctorAccountData(@Lazy ITelegramExecutor telegramExecutor) {

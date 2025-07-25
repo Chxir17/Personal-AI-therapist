@@ -105,7 +105,7 @@ public class InlineKeyboardFactory {
 
     public static InlineKeyboardMarkup createBackToMenuButtonClinic(Long userId, RegistrationContext registrationContext) {
         Map<String, String> buttonMap = new LinkedHashMap<>();
-        registrationContext.setStatus(userId, Status.NONE);
+//        registrationContext.setStatus(userId, Status.NONE);
         buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");
         return createInlineKeyboard(buttonMap, 2);
     }
@@ -116,7 +116,7 @@ public class InlineKeyboardFactory {
         Map<String, String> buttonMap = new LinkedHashMap<>();
         buttonMap.put("📊 Ввести ежедневные данные", "/inputDailyData");
         if(patient.getRole() == Roles.CLINIC_PATIENT){
-            buttonMap.put("💬 Написать доктору", "/writeToDoctor");
+            buttonMap.put("💬 Написать доктору", "/sendMessageDoctor");
         }
         buttonMap.put("👤 Мой профиль", "/myProfile");
         buttonMap.put("⚙️ Настройки", "/patientSettings");

@@ -23,6 +23,7 @@ public class UserQuestions {
     }
 
     public String answerUserQuestion(Patient patient, String userMessage, List<History> historyList) {
+        System.out.println("1321324312`");
         if (patient == null) {
             throw new IllegalArgumentException("Patient cannot be null");
         }

@@ -77,6 +77,7 @@ public class CommandsHandler {
         this.commands = Map.ofEntries(
                 Map.entry("/start", startCommand),
                 Map.entry("/help", help),
+
                 Map.entry("/privacy", privacy),
                 Map.entry("/settingsDoctor", settingsDoctorCommand),
                 Map.entry("/DoctorProfile", doctorProfile),

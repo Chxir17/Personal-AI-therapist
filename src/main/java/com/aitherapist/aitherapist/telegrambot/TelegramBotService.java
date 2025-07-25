@@ -81,34 +81,34 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         }
     }
 
-    private void handleVoiceMessage(Update update) throws TelegramApiException, IOException, InterruptedException {
-        // Для теста просто эмулируем получение голосового сообщения
-        String testMessage = "Это тестовый текст из голосового сообщения";
 
-        // Формируем запрос к тестовому FastAPI серверу
+    private void handleVoiceMessage(Update update) throws InterruptedException, TelegramApiException, IOException {
+        Voice voice = update.getMessage().getVoice();
+        String fileId = voice.getFileId();
+        GetFile getFile = new GetFile();
+        getFile.setFileId(fileId);
+        File file = execute(getFile);
+        String filePath = file.getFilePath();
+        String downloadUrl = "https://api.telegram.org/file/bot" + getBotToken() + "/" + filePath;
+
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8000/echo"))  // URL нашего тестового endpoint
+                .uri(URI.create("http://localhost:8000/transcribe"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(
-                        "{\"text\":\"" + testMessage + "\"}"  // Используем структуру из тестового API
-                ))
+                .POST(HttpRequest.BodyPublishers.ofString("{\"url\":\"" + downloadUrl + "\"}"))
                 .build();
 
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 200) {
-            // Парсим ответ (простая строка в JSON)
-            String responseText = response.body();
-
-            // Отправляем текст пользователю
-            SendMessage message = new SendMessage();
-            message.setChatId(update.getMessage().getChatId().toString());
-            message.setText("Результат обработки: " + responseText);
-            execute(message);
+            String jsonResponse = response.body();
+            update.getMessage().setText(jsonResponse);
+            handleMessageUpdate(update, registrationContext);
         } else {
-            log.error("Ошибка при обработке: {}", response.body());
-            sendErrorMessage(update, "Тестовый сервер недоступен");
+            log.error("Voice processing error. Status code: {}, Response: {}",
+                    response.statusCode(), response.body());
+            // Можно добавить отправку сообщения об ошибке пользователю
+            sendErrorMessage(update, "Не удалось обработать голосовое сообщение");
         }
     }
 
