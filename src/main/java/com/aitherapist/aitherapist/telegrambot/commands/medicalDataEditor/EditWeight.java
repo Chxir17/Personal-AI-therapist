@@ -14,7 +14,7 @@ public class EditWeight implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
-        Long userId = update.getMessage().getFrom().getId();
+        Long userId = TelegramIdUtils.extractUserId(update);
 
         registrationContext.setStatus(userId, Status.EDIT_WEIGHT);
 
