@@ -2,15 +2,17 @@ package com.aitherapist.aitherapist.functionality.QAChatBot;
 
 import chat.giga.model.completion.ChatMessage;
 import com.aitherapist.aitherapist.domain.enums.ChatBotAnswers;
+import com.aitherapist.aitherapist.domain.enums.HypertensionQA;
 import com.aitherapist.aitherapist.domain.enums.Prompts;
 import com.aitherapist.aitherapist.domain.model.entities.History;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.utils.LLM;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class UserQuestions {
@@ -23,7 +25,6 @@ public class UserQuestions {
     }
 
     public String answerUserQuestion(Patient patient, String userMessage, List<History> historyList) {
-        // Проверка на null для patient
         if (patient == null) {
             throw new IllegalArgumentException("Patient cannot be null");
         }
@@ -36,10 +37,8 @@ public class UserQuestions {
         List<ChatMessage> requestMessages = new ArrayList<>();
         requestMessages.add(ChatMessage.builder().role(ChatMessage.Role.SYSTEM).content(systemPrompt).build());
 
-        // Безопасная обработка historyList
         List<History> safeHistoryList = historyList != null ? historyList : Collections.emptyList();
 
-        // Фильтрация с проверкой на null
         History userHistory = safeHistoryList.stream()
                 .filter(Objects::nonNull)
                 .filter(h -> Boolean.TRUE.equals(h.getRole()))
@@ -52,16 +51,10 @@ public class UserQuestions {
                 .findFirst()
                 .orElse(null);
 
-        // Создание безопасных очередей
-        Queue<String> userMessages = userHistory != null && userHistory.getData() != null
-                ? new LinkedList<>(userHistory.getData())
-                : new LinkedList<>();
+        Queue<String> userMessages = userHistory != null && userHistory.getData() != null ? new LinkedList<>(userHistory.getData()) : new LinkedList<>();
 
-        Queue<String> botMessages = botHistory != null && botHistory.getData() != null
-                ? new LinkedList<>(botHistory.getData())
-                : new LinkedList<>();
+        Queue<String> botMessages = botHistory != null && botHistory.getData() != null ? new LinkedList<>(botHistory.getData()) : new LinkedList<>();
 
-        // Добавление сообщений в запрос
         while (!userMessages.isEmpty() || !botMessages.isEmpty()) {
             if (!userMessages.isEmpty()) {
                 requestMessages.add(ChatMessage.builder()
@@ -76,17 +69,46 @@ public class UserQuestions {
                         .build());
             }
         }
-
         String fullMessage = "Вопрос: " + userMessage + " Информация о пациенте: " + metaInfo + parametersHistory;
         requestMessages.add(ChatMessage.builder()
                 .role(ChatMessage.Role.USER)
                 .content(fullMessage)
                 .build());
 
-        String response = llm.talkToChat(requestMessages, 2);
-        if ("no".equalsIgnoreCase(response.trim())) {
+        String rawResponse = llm.talkToChat(requestMessages, 2).trim();
+
+        if ("no".equalsIgnoreCase(rawResponse)) {
             return ChatBotAnswers.getRandomMessage();
         }
-        return response;
+        String result = parseJsonAnswer(rawResponse);
+        return result != null ? result : ChatBotAnswers.getRandomMessage();
     }
+
+
+
+    private String parseJsonAnswer(String jsonResponse) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(jsonResponse);
+            String text = root.has("text") ? root.get("text").asText() : null;
+            String articleTitle = root.has("article") ? root.get("article").asText() : "";
+
+            if (text == null || text.isBlank()) {
+                return null;
+            }
+
+            if (articleTitle != null && !articleTitle.isBlank()) {
+                HypertensionQA article = HypertensionQA.findByQuestion(articleTitle);
+                if (article != null) {
+                    return text + "\nТак же эта статья может быть полезна: " + articleTitle + "\n" + article.getAnswer();
+                }
+            }
+
+            return text;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
 }
