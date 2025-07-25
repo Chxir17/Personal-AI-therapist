@@ -251,11 +251,11 @@ public class MessagesHandler implements IHandler {
             userService.updateUser(existingUser, userId);
             registrationContext.setStatus(userId, Status.NONE);
             if (existingUser.getRole() == Roles.DOCTOR){
-                startDoctors.acceptOrEditDoctorInfo(existingUser, update);
+                messageSender.sendMessage(startDoctors.acceptOrEditDoctorInfo(existingUser, update));
             }
             else{
                 InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
-                registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+                messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -343,11 +343,11 @@ public class MessagesHandler implements IHandler {
             userService.updateUser(existingUser, userId);
             registrationContext.setStatus(userId, Status.NONE);
             if (existingUser.getRole() == Roles.DOCTOR){
-                startDoctors.acceptOrEditDoctorInfo(existingUser, update);
+                messageSender.sendMessage(startDoctors.acceptOrEditDoctorInfo(existingUser, update));
             }
             else{
                 InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
-                registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser);
+                messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser));
             }
         } catch (Exception e) {
             e.printStackTrace();
