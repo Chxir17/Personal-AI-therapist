@@ -62,7 +62,7 @@ public class RegistrationProcess {
                 initialHealthData.getChronicDiseases().equalsIgnoreCase("false") ? "Нет" : (initialHealthData.getChronicDiseases().equalsIgnoreCase("true") ? "Да" : initialHealthData.getChronicDiseases()),
                 initialHealthData.getHeight(),
                 initialHealthData.getWeight(),
-                initialHealthData.getBadHabits().equalsIgnoreCase("true") ? "Да" : initialHealthData.getBadHabits());
+                initialHealthData.getBadHabits().equalsIgnoreCase("false") ? "Нет" : initialHealthData.getBadHabits());
 
         return SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))

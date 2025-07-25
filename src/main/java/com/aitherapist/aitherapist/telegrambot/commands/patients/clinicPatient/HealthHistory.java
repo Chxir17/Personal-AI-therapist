@@ -34,6 +34,7 @@ public class HealthHistory implements ICommand {
     @Override
     @Transactional(readOnly = true)
     public SendMessage apply(Update update, RegistrationContext registrationContext) {
+
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 

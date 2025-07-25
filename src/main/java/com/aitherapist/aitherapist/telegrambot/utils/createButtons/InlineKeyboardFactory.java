@@ -206,7 +206,7 @@ public class InlineKeyboardFactory {
                         .build(),
                 InlineKeyboardButton.builder()
                         .text("📊 Вернуться в меню")
-                        .callbackData("/myHealthHistory")
+                        .callbackData("/clinicPatientMenu")
                         .build()
         );
 
