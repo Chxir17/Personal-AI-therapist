@@ -7,8 +7,6 @@ import com.aitherapist.aitherapist.domain.enums.Prompts;
 import com.aitherapist.aitherapist.domain.model.entities.History;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.utils.LLM;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +27,18 @@ public class UserQuestions {
             throw new IllegalArgumentException("Patient cannot be null");
         }
 
+        String articleTitle = findArticleTitleWithLLM(userMessage);
+        if (!"no".equalsIgnoreCase(articleTitle)) {
+            HypertensionQA article = HypertensionQA.findByQuestion(articleTitle);
+            if (article != null) {
+                return article.getAnswer() + "\nТакже эта статья может быть полезна: " +
+                        article.getQuestion() + "\n" + article.getAuthor();
+            }
+        }
+
         Map<String, String> metaInfo = patient.makeMetaInformation(patient);
         Map<String, String> parametersHistory = patient.buildMedicalHistory();
-        Prompts prompt = Prompts.valueOf("CHAT_BOT_PROMPT");
-        String systemPrompt = prompt.getMessage();
+        String systemPrompt = Prompts.valueOf("CHAT_BOT_PROMPT").getMessage();
 
         List<ChatMessage> requestMessages = new ArrayList<>();
         requestMessages.add(ChatMessage.builder().role(ChatMessage.Role.SYSTEM).content(systemPrompt).build());
@@ -42,14 +48,12 @@ public class UserQuestions {
         History userHistory = safeHistoryList.stream()
                 .filter(Objects::nonNull)
                 .filter(h -> Boolean.TRUE.equals(h.getRole()))
-                .findFirst()
-                .orElse(null);
+                .findFirst().orElse(null);
 
         History botHistory = safeHistoryList.stream()
                 .filter(Objects::nonNull)
                 .filter(h -> Boolean.FALSE.equals(h.getRole()))
-                .findFirst()
-                .orElse(null);
+                .findFirst().orElse(null);
 
         Queue<String> userMessages = userHistory != null && userHistory.getData() != null
                 ? new LinkedList<>(userHistory.getData()) : new LinkedList<>();
@@ -79,37 +83,24 @@ public class UserQuestions {
                 .build());
 
         String rawResponse = llm.talkToChat(requestMessages, 3).trim();
-        System.out.println("RAWRESPONSE " + rawResponse);
         if ("no".equalsIgnoreCase(rawResponse)) {
             return ChatBotAnswers.getRandomMessage();
         }
-
-        String result = parseJsonAnswer(rawResponse);
-        return result != null ? result : ChatBotAnswers.getRandomMessage();
+        return rawResponse;
     }
 
-    private String parseJsonAnswer(String jsonResponse) {
+    private String findArticleTitleWithLLM(String userMessage) {
+        String prompt = Prompts.valueOf("FIND_ARTICLE_PROMPT").getMessage();
+
+        List<ChatMessage> request = List.of(
+                ChatMessage.builder().role(ChatMessage.Role.SYSTEM).content(prompt).build(),
+                ChatMessage.builder().role(ChatMessage.Role.USER).content(userMessage).build()
+        );
+
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode root = objectMapper.readTree(jsonResponse);
-            String text = root.has("text") ? root.get("text").asText() : null;
-            String articleTitle = root.has("article") ? root.get("article").asText() : "no";
-
-            if (text == null || text.isBlank()) {
-                return null;
-            }
-
-            if (!"no".equalsIgnoreCase(articleTitle)) {
-                HypertensionQA article = HypertensionQA.findByQuestion(articleTitle);
-                if (article != null) {
-                    return text + "\nТакже эта статья может быть полезна: " + articleTitle + "\n" +
-                            article.getAnswer() + "\n" + article.getAuthor();
-                }
-            }
-            return text;
-
+            return llm.talkToChat(request, 1).trim();
         } catch (Exception e) {
-            return null;
+            return "no";
         }
     }
 }
