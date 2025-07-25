@@ -67,22 +67,6 @@ public class MakeMedicalRecommendation {
             Map<String, String> metaInfo = patient.makeMetaInformation(patient);
             Map<String, String> parametersHistory = patient.buildMedicalHistory();
             Map<String, String> goals = patient.buildGoalsInformation();
-            System.out.println("Meta Information:");
-            for (Map.Entry<String, String> entry : metaInfo.entrySet()) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
-            }
-
-            // Печать parametersHistory
-            System.out.println("\nParameters History:");
-            for (Map.Entry<String, String> entry : parametersHistory.entrySet()) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
-            }
-
-            // Печать goals
-            System.out.println("\nGoals Information:");
-            for (Map.Entry<String, String> entry : goals.entrySet()) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
-            }
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> userPrompt = new HashMap<>();
             userPrompt.put("metaInfo", metaInfo);
@@ -98,32 +82,7 @@ public class MakeMedicalRecommendation {
             return llm.talkToChat(requestMessage, 3);
         }
         catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
-    }
-
-    private String getFullRecommendation(String jsonResponse){
-        try{
-            System.out.println("jsonReps->>>" + jsonResponse);
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-            String recommendation = jsonNode.get("text").asText();
-            String articleTitle = jsonNode.get("article").asText();
-            if (articleTitle != null && !articleTitle.isBlank()) {
-                HypertensionQA article = HypertensionQA.findByQuestion(articleTitle);
-                if (article != null) {
-                    String articleText = article.getAnswer();
-                    return recommendation + "\nЭта статья может быть полезна: " + articleTitle + "\n" + articleText;
-                }
-            }
-            else {
-                return recommendation;
-            }
-        }
-        catch (Exception e){
-            return null;
-        }
-        return null;
     }
 }
