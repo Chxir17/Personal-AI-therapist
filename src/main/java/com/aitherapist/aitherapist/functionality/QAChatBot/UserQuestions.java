@@ -100,7 +100,7 @@ public class UserQuestions {
             if (articleTitle != null && !articleTitle.isBlank()) {
                 HypertensionQA article = HypertensionQA.findByQuestion(articleTitle);
                 if (article != null) {
-                    return text + "\nТак же эта статья может быть полезна: " + articleTitle + "\n" + article.getAnswer();
+                    return text + "\nТак же эта статья может быть полезна: " + articleTitle + "\n" + article.getAnswer() + "\n" + article.getAuthor();
                 }
             }
 
@@ -109,6 +109,11 @@ public class UserQuestions {
             return null;
         }
     }
+
+
+
+
+
 
 
 }
