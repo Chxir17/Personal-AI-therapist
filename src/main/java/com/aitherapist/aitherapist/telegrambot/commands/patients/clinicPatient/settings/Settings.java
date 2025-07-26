@@ -73,20 +73,19 @@ public class Settings implements ICommand {
         String messageText = "✨ <b>Ваши персональные настройки и нормативы</b> ✨\n\n";
 
         messageText += "⚙️ <b><u>Настройки уведомлений</u></b>\n" +
-                "┌───────────────────────────────┐\n" +
-                "│  🔔  <b>Статус:</b> " + (notificationsEnabled ? "ВКЛ ✅" : "ВЫКЛ ❌") + "\n" +
-                "│  ⏰  <b>Время:</b> " + (notificationTime != null ?
+                "\n" +
+                "🔔  <b>Статус:</b> " + (notificationsEnabled ? "ВКЛ ✅" : "ВЫКЛ ❌") + "\n" +
+                "⏰  <b>Время:</b> " + (notificationTime != null ?
                 notificationTime.format(DateTimeFormatter.ofPattern("HH:mm")) : "не установлено") + "\n" +
-                "│  📝  <b>Текст:</b> " + (customMessage != null ? customMessage : "не установлен") + "\n" +
-                "└───────────────────────────────┘\n\n";
+                "📝  <b>Текст:</b> " + (customMessage != null ? customMessage : "не установлен") + "\n" +
+                "\n\n";
 
 
         messageText += "🩺 <b><u>Ваши медицинские нормативы</u></b>\n" +
-                "┌───────────────────────────────┐\n" +
-                "│  💤  <b>Сон:</b> " + String.format("%.1f", medicalData.getHoursOfSleepToday()) + " ч/сутки\n" +
-                "│  ❤️  <b>Пульс:</b> " + medicalData.getPulse() + " уд/мин\n" +
-                "│  🩸  <b>Давление:</b> " + medicalData.getPressure() + "\n" +
-                "└───────────────────────────────┘\n\n" +
+                "💤  <b>Сон:</b> " + String.format("%.1f", medicalData.getHoursOfSleepToday()) + " ч/сутки\n" +
+                "❤️  <b>Пульс:</b> " + medicalData.getPulse() + " уд/мин\n" +
+                "🩸  <b>Давление:</b> " + medicalData.getPressure() + "\n" +
+                "\n\n" +
                 "⏱ <i>Обновлено: " + medicalData.getLastUpdate() + "</i>\n\n" +
                 "<i>Эти показатели рассчитаны специально для вас</i> 💙";
 
@@ -95,6 +94,10 @@ public class Settings implements ICommand {
 
         rows.add(List.of(
                 InlineKeyboardButton.builder()
+                        .text("⏰ Изменить время")
+                        .callbackData("/setNotificationTime")
+                        .build(),
+                InlineKeyboardButton.builder()
                         .text(notificationsEnabled ? "🔕 Выключить" : "🔔 Включить")
                         .callbackData("/toggleNotification")
                         .build()
@@ -102,12 +105,12 @@ public class Settings implements ICommand {
 
         rows.add(List.of(
                 InlineKeyboardButton.builder()
-                        .text("⏰ Изменить время")
-                        .callbackData("/setNotificationTime")
-                        .build(),
-                InlineKeyboardButton.builder()
                         .text("📝 Изменить текст")
                         .callbackData("/setNotificationMessage")
+                        .build(),
+                InlineKeyboardButton.builder()
+                        .text("✏️ Редактировать профиль")
+                        .callbackData("/editPatientMedicalData")
                         .build()
         ));
 

@@ -23,6 +23,4 @@ public class InformationCommand implements ICommand {
         return new SendMessage(String.valueOf(chatId), Answers.INFORMATION_MESSAGE.getMessage());
     }
 
-
-
 }

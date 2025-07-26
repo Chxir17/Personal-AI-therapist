@@ -27,12 +27,6 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public void registerUser(Long userId, User user) {
-        saveUser(user);
-    }
-
-    @Override
-    @Transactional
     public ClinicPatient getClinicPatientById(Long telegramId) {
         User user = userRepository.findByTelegramId(telegramId);
         if (user instanceof ClinicPatient) {
@@ -82,20 +76,6 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    @Transactional
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        userRepository.delete(user);
-    }
-
-    @Override
-    public void deleteUserIfExists(Long id) {
-        if (userRepository.findById(id).isPresent()) {
-            userRepository.delete(userRepository.findById(id).get());
-        }
-    }
-
-    @Override
     public User getUser(Long id) {
         return userRepository.findByTelegramId(id);
     }
@@ -112,19 +92,6 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public Boolean isUserInClinic(Long userId) {
-        User user = fetchUserByTelegramId(userId);
-       return user.getRole() == Roles.DOCTOR ||  user.getRole() == Roles.CLINIC_PATIENT;
-    }
-
-    @Override
-    public void changeUserRoles(Long userId, Roles role) {
-        User user = fetchUserByTelegramId(userId);
-        user.setRole(role);
-        userRepository.save(user);
-    }
-
-    @Override
     public void editUserInformation(User user, Long id) {
         editUserInformation(user, id);
     }
@@ -134,34 +101,5 @@ public class UserServiceImpl implements IUserService {
         editUserHealthData(user, id, dailyHealthData);
     }
 
-    @Override
-    @Transactional
-    public void addActivityLog(User user, String actionType, Long messageId) {
-        UserActivityLog log = new UserActivityLog();
-        log.setUser(user);
-        log.setActionTime(LocalDateTime.now());
-        log.setActionType(actionType);
-        log.setMessageId(messageId);
-
-        user.getActivityLogs().add(log);
-        userRepository.save(user);
-    }
-
-    @Override
-    public UserActivityLog getUserActivityLog(User user, Long id) {
-        return user.getActivityLogs().stream().filter(activityLog -> activityLog.getId().equals(id)).findFirst().get();
-    }
-
-    @Override
-    public void editActivityLog(User user, Long id, UserActivityLog userActivityLog) {
-        List<UserActivityLog> userActivityLogs = user.getActivityLogs();
-        for (UserActivityLog cur : userActivityLogs) {
-            if (cur.getId().equals(id)) {
-                userActivityLogs.remove(cur);
-                userActivityLogs.add(userActivityLog);
-                break;
-            }
-        }
-    }
 }
 

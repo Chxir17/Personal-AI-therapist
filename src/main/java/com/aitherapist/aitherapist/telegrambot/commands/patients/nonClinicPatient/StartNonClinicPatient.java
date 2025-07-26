@@ -21,22 +21,21 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class StartNonClinicPatient implements ICommand {
-    private UserServiceImpl userService;
+    private final UserServiceImpl userService;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    @Autowired
-    private RegistrationProcess registrationProcess;
-    public Verification verification;
-    public PatientServiceImpl patientService;
+    private final RegistrationProcess registrationProcess;
+    private final PatientServiceImpl patientService;
 
     @Autowired
     public StartNonClinicPatient(
             PatientServiceImpl patientService,
-            UserServiceImpl userService) {
+            UserServiceImpl userService, RegistrationProcess registrationProcess) {
         this.patientService = patientService;
-        this.userService = userService;}
+        this.userService = userService;
+        this.registrationProcess = registrationProcess;}
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {

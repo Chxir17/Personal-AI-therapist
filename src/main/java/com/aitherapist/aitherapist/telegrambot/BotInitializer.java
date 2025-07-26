@@ -18,7 +18,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Slf4j
 @RequiredArgsConstructor
 public class BotInitializer {
-    private final @Lazy  TelegramBotService bot;
+    private final @Lazy TelegramBotService bot;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() {

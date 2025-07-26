@@ -50,14 +50,4 @@ public class Verification {
         return phoneNumber.replaceAll("[^0-9]", "");
     }
 
-    /**
-     * isContactRequest - check is Update contain request for provision data.
-     * @param update
-     * @return
-     */
-    public static boolean isContactRequest(Update update) {
-        return update.hasMessage() &&
-                update.getMessage().hasText() &&
-                update.getMessage().getText().equalsIgnoreCase("/share_contact");
-    }
 }

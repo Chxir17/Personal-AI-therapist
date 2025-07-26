@@ -19,11 +19,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class EditDoctorAccountData implements ICommand {
 
     private final ITelegramExecutor telegramExecutor;
-    @Autowired
     private DoctorServiceImpl doctorService;
 
-    public EditDoctorAccountData(@Lazy ITelegramExecutor telegramExecutor) {
+    @Autowired
+    public EditDoctorAccountData(@Lazy ITelegramExecutor telegramExecutor, DoctorServiceImpl doctorService){
         this.telegramExecutor = telegramExecutor;
+        this.doctorService = doctorService;
     }
 
     @Override

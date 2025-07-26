@@ -17,6 +17,7 @@ public class InlineKeyboardFactory {
         buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");
         return createInlineKeyboard(buttonMap, 1);
     }
+
     public static InlineKeyboardMarkup createInlineKeyboard(Map<String, String> buttonMap, int buttonsPerRow) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
@@ -42,6 +43,14 @@ public class InlineKeyboardFactory {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
         return markup;
+    }
+
+    public static InlineKeyboardMarkup createRoleSelectionKeyboard() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("🩺 Доктор", "/startDoctor");
+        buttons.put("💊 Обычный пациент", "/botPatient");
+        buttons.put("🏥 Пациент клиники", "/clinicPatient");
+        return createInlineKeyboard(buttons, 3);
     }
 
     public static InlineKeyboardMarkup createDoctorDefaultKeyboard() {
@@ -110,6 +119,12 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 2);
     }
 
+
+    public static InlineKeyboardMarkup createReturnToMenu() {
+        Map<String, String> buttonMap = new LinkedHashMap<>();
+        buttonMap.put("🔙 Вернуться в главное меню", "/acceptInitData");
+        return createInlineKeyboard(buttonMap, 2);
+    }
 
 
     public static InlineKeyboardMarkup createPatientDefaultKeyboard(Patient patient) {
@@ -191,7 +206,7 @@ public class InlineKeyboardFactory {
 
         InlineKeyboardButton cancelButton = new InlineKeyboardButton();
         cancelButton.setText("❌ Отмена");
-        cancelButton.setCallbackData("/acceptInitData");
+        cancelButton.setCallbackData("/clinicPatientMenu");
         keyboard.add(Collections.singletonList(cancelButton));
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -203,10 +218,6 @@ public class InlineKeyboardFactory {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
 
         List<InlineKeyboardButton> row1 = List.of(
-                InlineKeyboardButton.builder()
-                        .text("✏️ Редактировать профиль")
-                        .callbackData("/editParameters")
-                        .build(),
                 InlineKeyboardButton.builder()
                         .text("📊 Вернуться в меню")
                         .callbackData("/clinicPatientMenu")

@@ -25,18 +25,19 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 @RequiredArgsConstructor
 public class StartDoctors implements ICommand {
-    @Autowired
-    public Verification verification;
-    public Doctor doctor;
-    @Autowired
-    public ParseUserPrompt parseUserPrompt;
-    @Autowired
+    private Verification verification;
+    private ParseUserPrompt parseUserPrompt;
     private final DoctorServiceImpl doctorService;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    private StringBuilder userInput = new StringBuilder();
+    @Autowired
+    public StartDoctors(Verification verification, ParseUserPrompt parseUserPrompt, DoctorServiceImpl doctorService) {
+        this.verification = verification;
+        this.parseUserPrompt = parseUserPrompt;
+        this.doctorService = doctorService;
+    }
 
     public SendMessage acceptOrEditDoctorInfo(User doctor, Update update) {
         String genderDisplay = doctor.getGender() ? "♂ Мужской" : "♀ Женский";

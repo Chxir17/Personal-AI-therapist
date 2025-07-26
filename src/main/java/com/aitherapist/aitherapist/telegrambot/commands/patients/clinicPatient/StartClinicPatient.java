@@ -25,27 +25,22 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class StartClinicPatient implements ICommand {
-    private UserServiceImpl userService;
-    @Autowired
-    private final ParseUserPrompt parseUserPrompt;
-    @Autowired
-    private RegistrationProcess registrationProcess;
+    private final UserServiceImpl userService;
+    private final RegistrationProcess registrationProcess;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    public Verification verification;
-    public PatientServiceImpl patientService;
+    private final PatientServiceImpl patientService;
 
     @Autowired
     public StartClinicPatient(
+            RegistrationProcess registrationProcess,
             PatientServiceImpl patientService,
-            UserServiceImpl userService,
-            ParseUserPrompt parseUserPrompt,
-            RegistrationContext registrationContext) {
+            UserServiceImpl userService) {
         this.patientService = patientService;
         this.userService = userService;
-        this.parseUserPrompt = parseUserPrompt;
+        this.registrationProcess = registrationProcess;
     }
 
 

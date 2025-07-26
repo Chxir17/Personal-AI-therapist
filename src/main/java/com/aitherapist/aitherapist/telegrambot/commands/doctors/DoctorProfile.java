@@ -25,6 +25,7 @@ public class DoctorProfile implements ICommand {
         this.doctorService = doctorService;
         this.telegramExecutor = telegramExecutor;
     }
+
     @Override
     public SendMessage apply(Update update, RegistrationContext context) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);

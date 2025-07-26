@@ -1,13 +1,12 @@
 package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
-import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +15,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.objects.Contact;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -82,33 +79,46 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     }
 
 
-    private void handleVoiceMessage(Update update) throws InterruptedException, TelegramApiException, IOException {
-        Voice voice = update.getMessage().getVoice();
-        String fileId = voice.getFileId();
-        GetFile getFile = new GetFile();
-        getFile.setFileId(fileId);
-        File file = execute(getFile);
-        String filePath = file.getFilePath();
-        String downloadUrl = "https://api.telegram.org/file/bot" + getBotToken() + "/" + filePath;
+    private void handleVoiceMessage(Update update) throws TelegramApiException, IOException, InterruptedException {
+        try {
+            Voice voice = update.getMessage().getVoice();
+            String fileId = voice.getFileId();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8000/transcribe"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString("{\"url\":\"" + downloadUrl + "\"}"))
-                .build();
+            // Получаем файл из Telegram
+            GetFile getFile = new GetFile();
+            getFile.setFileId(fileId);
+            org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
+            String fileUrl = file.getFileUrl(getBotToken());
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            // Формируем запрос к FastAPI
+            String jsonRequest = String.format("{\"url\":\"%s\"}", fileUrl);
 
-        if (response.statusCode() == 200) {
-            String jsonResponse = response.body();
-            update.getMessage().setText(jsonResponse);
-            handleMessageUpdate(update, registrationContext);
-        } else {
-            log.error("Voice processing error. Status code: {}, Response: {}",
-                    response.statusCode(), response.body());
-            // Можно добавить отправку сообщения об ошибке пользователю
-            sendErrorMessage(update, "Не удалось обработать голосовое сообщение");
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8000/transcribe"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                String transcribedText = new ObjectMapper()
+                        .readTree(response.body())
+                        .get("text")
+                        .asText();
+
+                SendMessage message = new SendMessage();
+                message.setChatId(update.getMessage().getChatId().toString());
+                message.setText("Расшифровка: " + transcribedText);
+                execute(message);
+            } else {
+                log.error("Ошибка сервера: {}", response.body());
+                sendErrorMessage(update, "Ошибка обработки голоса");
+            }
+        } catch (Exception e) {
+            log.error("Ошибка обработки голосового сообщения", e);
+            sendErrorMessage(update, "Техническая ошибка");
         }
     }
 
@@ -148,17 +158,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         }
     }
 
-    private void handleVerification(Update update, Long userId) throws TelegramApiException {
-        Long chatId = TelegramIdUtils.getChatId(update);
-
-        SendMessage sm = SendMessage.builder()
-                .chatId(chatId.toString())
-                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
-                .replyMarkup(verification.createContactRequestKeyboard())
-                .build();
-
-        sendMessage(sm);
-    }
 
     private void handleCallbackQueryUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String callBackData = update.getCallbackQuery().getData();

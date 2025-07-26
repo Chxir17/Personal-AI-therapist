@@ -24,10 +24,14 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class RegistrationProcess {
+    private final Verification verification;
+    private final ParseUserPrompt parseUserPrompt;
+
     @Autowired
-    public Verification verification;
-    @Autowired
-    private  ParseUserPrompt parseUserPrompt;
+    public RegistrationProcess(Verification verification, ParseUserPrompt parseUserPrompt) {
+        this.verification = verification;
+        this.parseUserPrompt = parseUserPrompt;
+    }
 
     public SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, User patient) {
         String genderDisplay = patient.getGender() ? "♂ Мужской" : "♀ Женский";
@@ -62,7 +66,9 @@ public class RegistrationProcess {
                 initialHealthData.getChronicDiseases().equalsIgnoreCase("false") ? "Нет" : (initialHealthData.getChronicDiseases().equalsIgnoreCase("true") ? "Да" : initialHealthData.getChronicDiseases()),
                 initialHealthData.getHeight(),
                 initialHealthData.getWeight(),
-                initialHealthData.getBadHabits().equalsIgnoreCase("false") ? "Нет" : initialHealthData.getBadHabits());
+                initialHealthData.getBadHabits() == null ? "Нет" :
+                        initialHealthData.getBadHabits().equalsIgnoreCase("false") ? "Нет" :
+                                initialHealthData.getBadHabits());
 
         return SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
@@ -177,7 +183,7 @@ public class RegistrationProcess {
                 } else {
                     jsonWithType = "{\"user_type\":\"BOT_PATIENT\"," + response.substring(1);
                 }
-
+                System.out.println("JSON MAPPER " + jsonWithType);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
                 Patient patient;
 

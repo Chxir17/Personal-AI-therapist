@@ -28,11 +28,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
@@ -40,9 +38,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -50,7 +46,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class MessagesHandler implements IHandler {
-    private final RestTemplate restTemplate = new RestTemplate();
     private RegistrationContext registrationContext;
     @Autowired
     private final Verification verification;
@@ -89,74 +84,59 @@ public class MessagesHandler implements IHandler {
     @Override
     public void handle(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         this.registrationContext = registrationContext;
-        long chatId = update.getMessage().getChatId();
-        String messageText = update.getMessage().getText();
         long userId = getUserId(update);
-        System.out.println(registrationContext.getStatus(userId));
-        if (registrationContext.getStatus(userId) == Status.EDIT_BIRTH_DATE) {
+        Status userStatus = registrationContext.getStatus(userId);
+        if (userStatus == Status.EDIT_BIRTH_DATE) {
             handleEditBirthDate(update);
-        } else if (registrationContext.getStatus(userId) == Status.EDIT_GENDER) {
+        } else if (userStatus == Status.EDIT_GENDER) {
             handleEditGender(update);
-        } else if (registrationContext.getStatus(userId) == Status.EDIT_NAME) {
+        } else if (userStatus == Status.EDIT_NAME) {
             handleEditName(update);
-        }else if(registrationContext.getStatus(userId) == Status.EDIT_ARRHYTHMIA){
+        }else if(userStatus == Status.EDIT_ARRHYTHMIA){
             handleEditArrhythmia(update);
         }
-        else if(registrationContext.getStatus(userId) == Status.EDIT_CHRONIC_DISEASES){
+        else if(userStatus == Status.EDIT_CHRONIC_DISEASES){
             handleEditChronicDiseases(update);
         }
-        else if (registrationContext.getStatus(userId) == Status.WAIT_USER_WRITE_MESSAGE_TO_DOCTOR) {
+        else if (userStatus == Status.WAIT_USER_WRITE_MESSAGE_TO_DOCTOR) {
             handleMessageFromUserToDoctor(update);
         }
-        else if (registrationContext.getStatus(userId) == Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER) {
+        else if (userStatus == Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER) {
             handleMessageFromDoctorToUser(update);
         }
-        else if (registrationContext.getStatus(userId) == Status.WRITE_DAILY_DATA) {
+        else if (userStatus == Status.WRITE_DAILY_DATA) {
             handleWriteDailyData(update);
         }
-        if (registrationContext.getStatus(userId)  == Status.SET_NOTIFICATION_TIME) {
+        if (userStatus  == Status.SET_NOTIFICATION_TIME) {
             handleSetNotificationTime(update);
-        } else if (registrationContext.getStatus(userId) == Status.SET_NOTIFICATION_MESSAGE) {
+        } else if (userStatus == Status.SET_NOTIFICATION_MESSAGE) {
             handleSetNotificationMessage(update);
         }
-        else if(registrationContext.getStatus(userId).isRegistered()){
+        else if(userStatus.isRegistered()){
             commandsHandler.handleUserMessageAfterVerificationToFilter(update, registrationContext);
         }
-        else if(registrationContext.getStatus(userId) == Status.REGISTRATION_CLINIC_PATIENT){
-            commandsHandler.inProgressQuestionnairePatient(update, registrationContext);
+        else if(userStatus == Status.REGISTRATION_CLINIC_PATIENT){
+            commandsHandler.retryCommandExecute(update, registrationContext, "/clinicPatient");
         }
-        else if(registrationContext.getStatus(userId) == Status.EDIT_HEIGHT){
+        else if(userStatus == Status.EDIT_HEIGHT){
             handleEditHeight(update);
         }
-        else if(registrationContext.getStatus(userId) == Status.QAMode){
+        else if(userStatus == Status.QAMode){
             QAModeHandler(update);
         }
-        else if(registrationContext.getStatus(userId) == Status.EDIT_WEIGHT){
+        else if(userStatus == Status.EDIT_WEIGHT){
             handleEditWeight(update);
         }
-        else if(registrationContext.getStatus(userId) == Status.EDIT_BAD_HABITS){
+        else if(userStatus == Status.EDIT_BAD_HABITS){
             handleEditBadHabits(update);
         }
-        else if (registrationContext.getStatus(userId) == Status.GIVING_PATIENT_ID) {
+        else if (userStatus == Status.GIVING_PATIENT_ID) {
             handleGivePatientIdStatus(update);
         }
     }
 
     private void QAModeHandler(Update update) throws TelegramApiException {
         messageSender.sendMessage(commandsHandler.handleQaMode(update, registrationContext));
-//        try {
-//            Long userId = TelegramIdUtils.extractUserId(update);
-//            String message = update.getMessage().getText();
-//            String answer = UserQuestions.answerUserQuestion(patientService.findById(userId), message, null);
-//            InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
-//            messageSender.sendMessage(SendMessage.builder()
-//                    .chatId(TelegramIdUtils.getChatId(update).toString())
-//                    .text(answer)
-//                    .replyMarkup(keyboard)
-//                    .build());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
     }
 
     private void handleSetNotificationTime(Update update) throws TelegramApiException {
@@ -286,7 +266,7 @@ public class MessagesHandler implements IHandler {
                     message.getText()
             );
 
-            messageSender.sendMessage(userId, doctorMessage);
+            messageSender.sendMessage(SendMessage.builder().chatId(userId).text(doctorMessage).replyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard()).build());
         }
     }
 
@@ -299,16 +279,17 @@ public class MessagesHandler implements IHandler {
         for (Long userId : userIds) {
             String doctorMessage = String.format(
                     "✉️ *" +
-                            "Вам пришло сообщение от вашего доктора: %s\n\n" +
-                            "━━━━━━━━━━━━━━━━━━━━\n" +
+                            "Вам пришло сообщение от вашего пациента: %s\n\n" +
+                            "━━━━━━━━━━━━━━━\n" +
                             "%s\n" +
-                            "━━━━━━━━━━━━━━━━━━━━\n\n" +
+                            "━━━━━━━━━━━━━━━\n\n" +
                             "Вы можете ответить доктору, просто написав сообщение в этот чат.",
                     userService.getUser(currentDoctorId).getName(),
                     message.getText()
             );
 
-            messageSender.sendMessage(userId, doctorMessage);
+
+            messageSender.sendMessage(SendMessage.builder().chatId(userId).text(doctorMessage).replyMarkup(InlineKeyboardFactory.createReturnToMenu()).build());
         }
     }
 
@@ -366,9 +347,6 @@ public class MessagesHandler implements IHandler {
      * @return
      * @throws TelegramApiException
      */
-
-
-
     public boolean verify(Update update) throws TelegramApiException {
         Long chatId = getChatId(update);
         if (update.hasMessage() && update.getMessage().hasContact()) {
@@ -492,45 +470,5 @@ public class MessagesHandler implements IHandler {
     }
 
 
-    private DailyHealthData parseHealthData(String messageText) throws JsonProcessingException {
-        String rawJsonResponse = parseUserPrompt.dailyQuestionnaireParser(messageText);
-
-        String cleanJson = cleanJsonResponse(rawJsonResponse);
-        System.out.println(cleanJson);
-        return mapper.readValue(cleanJson, DailyHealthData.class);
-    }
-
-    private String cleanJsonResponse(String jsonResponse) {
-        return jsonResponse.replaceAll("```json|```", "").trim();
-    }
-
-    private String generateMedicalRecommendation(Update update) {
-        User user = userService.getUserByUserId(getUserId(update));
-        if (user instanceof Patient patient) {
-            return makeMedicalRecommendation.giveMedicalRecommendation(patient);
-        } else {
-            return null;
-        }
-    }
-
-    private void sendInitialResponse(long chatId) throws TelegramApiException {
-        messageSender.sendMessage(chatId, Answers.GIVE_ANSWER.getMessage());
-    }
-    private void sendRecommendation(long chatId, String recommendation) throws TelegramApiException {
-        messageSender.sendMessage(chatId, recommendation);
-    }
-
-    private void sendSuccessMessage(long chatId, String message) throws TelegramApiException {
-        messageSender.sendMessage(chatId, message);
-    }
-
-    private void logRegistrationError(long chatId, Exception e) {
-        log.error("Error during registration processing", e);
-        try {
-            messageSender.sendMessage(chatId, Answers.REGISTRATION_ERROR.getMessage());
-        } catch (TelegramApiException ex) {
-            log.error("Failed to send error message", ex);
-        }
-    }
 
 }

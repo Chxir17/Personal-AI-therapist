@@ -26,12 +26,6 @@ public class RegistrationContext {
 
     private final Map<Long, MedicalNormalData>  mapMedicalNormalData = new ConcurrentHashMap<>();
 
-    public void addMedicalNormalData(Long userId, MedicalNormalData medicalNormalData) {
-        if (mapMedicalNormalData.containsKey(userId)) {
-            return;
-        }
-        mapMedicalNormalData.put(userId, medicalNormalData);
-    }
 
     public MedicalNormalData getMedicalNormalData(Long userId) {
         if (!mapMedicalNormalData.containsKey(userId)) {
@@ -61,14 +55,6 @@ public class RegistrationContext {
             mapUserToHistory.put(userId, history);
         }
         history.addData(item);
-//        History history = mapUserToHistory.get(userId);
-//        if (history == null) {
-//            history = new History();
-//            history.addData(item);
-//            history.setRole(role);
-//            mapUserToHistory.put(userId, history);
-//        }
-//        history.addData(item);
     }
 
     public void setTelephone(Long userId, String telephone) {
@@ -103,10 +89,6 @@ public class RegistrationContext {
         doctorRegistrationStates.remove(userId);
     }
 
-    public boolean hasDoctorRegistrationState(Long userId) {
-        return doctorRegistrationStates.containsKey(userId);
-    }
-
 
     public void startRegistration(long chatId) {
         mapOfUserStatus.put(chatId, Status.REGISTRATION.withId(null));
@@ -129,48 +111,12 @@ public class RegistrationContext {
         return getDynamicStatus(id).is(Status.REGISTRATION);
     }
 
-    public void setVerify(Long userId, Status status) {
-        mapOfUserStatus.put(userId, status.withId(null));
-    }
-
     public void setStatus(Long userId, Status status) {
         mapOfUserStatus.put(userId, status.withId(null));
     }
 
     public void setStatusWithId(Long userId, Status status, Long associatedId) {
         mapOfUserStatus.put(userId, status.withId(associatedId));
-    }
-
-    public void completeRegistration(long chatId) {
-        mapOfUserStatus.remove(chatId);
-    }
-
-    public void deleteRegistration(long chatId) {
-        mapOfUserStatus.remove(chatId);
-    }
-
-    public boolean isContain(Long id) {
-        return mapOfUserStatus.containsKey(id);
-    }
-
-    public boolean isStatusWithId(Long userId, Status status) {
-        DynamicStatus ds = getDynamicStatus(userId);
-        return ds.is(status) && ds.getAssociatedId() != null;
-    }
-
-    public Optional<Long> getAssociatedIdForStatus(Long userId, Status status) {
-        DynamicStatus ds = getDynamicStatus(userId);
-        if (ds.is(status)) {
-            return Optional.ofNullable(ds.getAssociatedId());
-        }
-        return Optional.empty();
-    }
-
-    public void clearAssociatedId(Long userId) {
-        DynamicStatus current = getDynamicStatus(userId);
-        if (current.getAssociatedId() != null) {
-            mapOfUserStatus.put(userId, current.getBaseStatus().withId(null));
-        }
     }
 
     public List<Long> findUserIdsWithSendToDoctorStatus(Long doctorId) {

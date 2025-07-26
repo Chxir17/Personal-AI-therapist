@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
+import com.aitherapist.aitherapist.functionality.QAChatBot.UserQuestions;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -12,14 +13,16 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
 public class HistoryPatients implements ICommand {
-    @Autowired
     DoctorServiceImpl doctorService;
 
+    @Autowired
+    public HistoryPatients(DoctorServiceImpl doctorService) {
+        this.doctorService = doctorService;
+    }
 
     @Override
     @Transactional
@@ -64,7 +67,6 @@ public class HistoryPatients implements ICommand {
     }
 
     private String getHealthDataInfo(Patient patient) {
-        List<DailyHealthData> dailyHealthDataList = patient.getDailyHealthDataList();
         InitialHealthData initHealthData = patient.getInitialData();
 
         StringBuilder healthInfo = new StringBuilder("<b>📊 Медицинские данные:</b>\n");

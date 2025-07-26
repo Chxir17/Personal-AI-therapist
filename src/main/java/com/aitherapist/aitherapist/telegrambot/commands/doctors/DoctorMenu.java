@@ -18,7 +18,7 @@ public class DoctorMenu implements ICommand {
     private final ITelegramExecutor telegramExecutor;
 
     @Autowired
-    public DoctorMenu(DoctorServiceImpl doctorService, @Lazy ITelegramExecutor telegramExecutor) {
+    public DoctorMenu(@Lazy ITelegramExecutor telegramExecutor) {
         this.telegramExecutor = telegramExecutor;
     }
 

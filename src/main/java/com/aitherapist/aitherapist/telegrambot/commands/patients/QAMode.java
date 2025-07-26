@@ -20,10 +20,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class QAMode implements ICommand {
+    private final PatientServiceImpl patientService;
+    private final UserQuestions userQuestions;
+
     @Autowired
-    private PatientServiceImpl patientService;
-    @Autowired
-    private UserQuestions userQuestions;
+    public QAMode(PatientServiceImpl patientService, UserQuestions userQuestions) {
+        this.patientService = patientService;
+        this.userQuestions = userQuestions;
+    }
 
     private SendMessage QAModeHandler(Update update, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
         try {

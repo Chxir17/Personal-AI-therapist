@@ -13,5 +13,4 @@ import java.util.Optional;
 public interface IDoctorRepository extends JpaRepository<Doctor, Long> {
     Optional<Doctor> findByTelegramId(Long userTelegramId);
     Doctor getByTelegramId(Long userTelegramId);
-    //List<Patient> findDoctorWithPatientsAndHealthData(Long userTelegramId);
 }

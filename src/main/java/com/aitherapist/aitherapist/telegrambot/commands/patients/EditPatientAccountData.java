@@ -17,12 +17,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class EditPatientAccountData implements ICommand {
 
-    private final IMessageSender messageSender;
     private final ITelegramExecutor telegramExecutor;
 
     @Autowired
-    public EditPatientAccountData(IMessageSender messageSender, @Lazy ITelegramExecutor telegramExecutor) {
-        this.messageSender = messageSender;
+    public EditPatientAccountData(@Lazy ITelegramExecutor telegramExecutor) {
         this.telegramExecutor = telegramExecutor;
     }
 

@@ -33,12 +33,15 @@ public class PatientsSendMessageToDoctor implements ICommand {
         if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {
-                Long patientId = Long.parseLong(parts[1]); //WAIT_DOCTOR_WRITE_MESSAGE_TO_USER
+                Long doctorId = Long.parseLong(parts[1]);
                 registrationContext.setStatus(userId, Status.WAIT_USER_WRITE_MESSAGE_TO_DOCTOR);
-                registrationContext.setStatusWithId(patientId, Status.SEND_TO_THIS_DOCTOR, userId);
+
+                registrationContext.setStatusWithId(doctorId, Status.SEND_TO_THIS_DOCTOR, userId);
+
                 SendMessage message = new SendMessage();
                 message.setChatId(chatId.toString());
                 message.setText("✏️ Введите текст сообщения для доктора:");
+                message.setReplyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard());
                 return message;
             }
         }

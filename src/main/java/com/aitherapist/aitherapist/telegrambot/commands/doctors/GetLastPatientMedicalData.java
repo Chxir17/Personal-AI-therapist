@@ -19,9 +19,12 @@ import java.util.Optional;
 
 @Component
 public class GetLastPatientMedicalData implements ICommand {
+    private final DoctorServiceImpl doctorService;
 
     @Autowired
-    private DoctorServiceImpl doctorService;
+    public GetLastPatientMedicalData(DoctorServiceImpl doctorService){
+        this.doctorService = doctorService;
+    }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {

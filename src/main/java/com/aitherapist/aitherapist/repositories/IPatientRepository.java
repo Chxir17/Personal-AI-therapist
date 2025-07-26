@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IPatientRepository extends JpaRepository<Patient, Long> {
-    Patient findByName(String name);
     Patient findById(long id);
     Patient findByTelegramId(Long telegramId);
-    Patient getByTelegramId(Long telegramId);
 }

@@ -1,4 +1,3 @@
-// ToggleNotifications.java
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings;
 
 import com.aitherapist.aitherapist.domain.model.entities.User;

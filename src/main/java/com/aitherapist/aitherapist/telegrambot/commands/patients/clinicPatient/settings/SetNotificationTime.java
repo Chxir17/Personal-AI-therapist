@@ -1,4 +1,3 @@
-// SetNotificationTime.java
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings;
 
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -17,15 +16,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class SetNotificationTime implements ICommand {
-
-    private final UserServiceImpl userService;
-    private final NotificationServiceImpl notificationService;
-
-    @Autowired
-    public SetNotificationTime(UserServiceImpl userService, NotificationServiceImpl notificationService) {
-        this.userService = userService;
-        this.notificationService = notificationService;
-    }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {

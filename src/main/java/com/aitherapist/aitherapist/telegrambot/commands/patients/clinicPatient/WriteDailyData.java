@@ -8,7 +8,6 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
-import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -26,13 +25,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class WriteDailyData implements ICommand {
-    private UserServiceImpl userService;
-    private PatientServiceImpl patientService;
-    private ParseUserPrompt parseUserPrompt;
-    private MakeMedicalRecommendation makeMedicalRecommendation;
+    private final PatientServiceImpl patientService;
+    private final ParseUserPrompt parseUserPrompt;
+    private final MakeMedicalRecommendation makeMedicalRecommendation;
     @Autowired
-    public WriteDailyData(UserServiceImpl userService, PatientServiceImpl patientService, ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation) {
-        this.userService = userService;
+    public WriteDailyData(PatientServiceImpl patientService, ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation) {
         this.patientService = patientService;
         this.parseUserPrompt = parseUserPrompt;
         this.makeMedicalRecommendation = makeMedicalRecommendation;
@@ -61,17 +58,12 @@ public class WriteDailyData implements ICommand {
             case 2 -> {
                 state.getBase().append(text);
                 String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
-                System.out.println("response - " + response);
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
-                System.out.println("daily healthdata - " + d.toString());
 
                 Patient currentPatient = patientService.getPatientWithData(userId);
-                patientService.addDailyHealthDataToPatient(userId, d);
-                System.out.println("patient created " + currentPatient.toString());
-                currentPatient = patientService.getPatientWithData(userId);
+                patientService.addDailyHealthDataToPatient(userId, d);currentPatient = patientService.getPatientWithData(userId);
                 String response4 =
                         makeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
-                System.out.println("response4 " + response4);
                 registrationContext.setStatus(userId, Status.NONE);
                 return SendMessage.builder()
                         .chatId(chatId.toString())

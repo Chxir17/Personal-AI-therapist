@@ -52,12 +52,8 @@ public class StartCommand implements ICommand {
         }
 
         if (!userRegistrationService.isSignUp(userId)) {
-            Map<String, String> buttons = new HashMap<>();
-            buttons.put("🩺 Доктор", "/startDoctor");
-            buttons.put("💊 Обычный пациент", "/botPatient");
-            buttons.put("🏥 Пациент клиники", "/clinicPatient");
+            InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createRoleSelectionKeyboard();
 
-            InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createInlineKeyboard(buttons, 3);
             registrationContext.startRegistration(chatId);
 
             SendMessage message = new SendMessage(String.valueOf(chatId),
