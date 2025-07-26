@@ -112,7 +112,7 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 2);
     }
 
-    public static InlineKeyboardMarkup createBackToMenuButtonClinic(Long userId, RegistrationContext registrationContext) {
+    public static InlineKeyboardMarkup createBackToMenuButtonClinic() {
         Map<String, String> buttonMap = new LinkedHashMap<>();
 //        registrationContext.setStatus(userId, Status.NONE);
         buttonMap.put("🔙 Вернуться в главное меню", "/clinicPatientMenu");

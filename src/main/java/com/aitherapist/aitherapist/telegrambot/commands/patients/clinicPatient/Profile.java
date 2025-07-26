@@ -1,11 +1,13 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +18,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.time.LocalDate;
-import java.time.Period;
-
 @Component
+@CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT, Roles.BOT_PATIENT}, requiresRegistration = true)
 public class Profile implements ICommand {
 
     private final UserServiceImpl userService;
@@ -109,15 +109,20 @@ public class Profile implements ICommand {
                 """,
                 initialData.getHeight(),
                 initialData.getWeight(),
-                escapeMarkdown(initialData.getChronicDiseases() != null ?
-                        initialData.getChronicDiseases() : "нет"),
-                escapeMarkdown(initialData.getBadHabits() != null ?
-                        initialData.getBadHabits() : "нет"),
-                initialData.getHeartPain() != null ?
-                        (initialData.getHeartPain() ? "да" : "нет") : "не указано",
-                initialData.getArrhythmia() != null ?
-                        (initialData.getArrhythmia() ? "да" : "нет") : "не указано"
+                formatNullable(initialData.getChronicDiseases(), "нет"),
+                formatNullable(initialData.getBadHabits(), "нет"),
+                formatBoolean(initialData.getHeartPain(), "не указано"),
+                formatBoolean(initialData.getArrhythmia(), "не указано")
         );
+    }
+
+    private String formatNullable(String value, String defaultValue) {
+        return value == null || value.isEmpty() || value.equals("false") ? defaultValue : value;
+    }
+
+    private String formatBoolean(Boolean value, String defaultValue) {
+        if (value == null) return defaultValue;
+        return value ? "да" : "нет";
     }
 
     private String escapeMarkdown(String text) {

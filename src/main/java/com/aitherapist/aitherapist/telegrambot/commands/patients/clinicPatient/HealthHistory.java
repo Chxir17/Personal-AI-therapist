@@ -1,11 +1,13 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import org.springframework.context.annotation.Lazy;
@@ -20,6 +22,7 @@ import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Objects;
 
+@CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT, Roles.BOT_PATIENT}, requiresRegistration = true)
 @Component
 public class HealthHistory implements ICommand {
 

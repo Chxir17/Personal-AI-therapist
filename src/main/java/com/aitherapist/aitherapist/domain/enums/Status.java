@@ -3,6 +3,8 @@ package com.aitherapist.aitherapist.domain.enums;
 public enum Status  {
     NONE,
 
+    PATIENT_IN_MAIN_MENU,
+
     WAIT_MESSAGE_FROM_AI,
     SEND_TO_AI,
 
@@ -40,6 +42,10 @@ public enum Status  {
 
     public boolean isRegistered() {
         return this.name().startsWith("REGISTERED_");
+    }
+
+    public boolean isRegistrationProcess() {
+        return this.name().startsWith("REGISTRATION");
     }
 
     public DynamicStatus withId(Long id) {

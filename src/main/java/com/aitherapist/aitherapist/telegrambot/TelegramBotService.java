@@ -14,6 +14,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
@@ -213,4 +214,6 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                 .replyMarkup(verification.createContactRequestKeyboard())
                 .build();
     }
+
+
 }

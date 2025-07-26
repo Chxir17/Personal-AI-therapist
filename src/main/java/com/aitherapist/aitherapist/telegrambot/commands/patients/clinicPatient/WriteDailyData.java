@@ -42,11 +42,12 @@ public class WriteDailyData implements ICommand {
 
     private SendMessage handleQuestionnaire(Update update, Long userId, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
-        ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
         String text = "";
         if (update.hasMessage()) {
+            //registrationContext.resetClientRegistrationState(userId);
             text = update.getMessage().getText();
         }
+        ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
         switch (state.getCurrentStep()) {
             case 1 -> {
                 state.setCurrentStep(2);
@@ -61,10 +62,12 @@ public class WriteDailyData implements ICommand {
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
 
                 Patient currentPatient = patientService.getPatientWithData(userId);
-                patientService.addDailyHealthDataToPatient(userId, d);currentPatient = patientService.getPatientWithData(userId);
+                patientService.addDailyHealthDataToPatient(userId, d);
+                currentPatient = patientService.getPatientWithData(userId);
                 String response4 =
                         makeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
                 registrationContext.setStatus(userId, Status.NONE);
+                registrationContext.clearClientRegistrationState(userId);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(response4 != null ? response4 : "Рекомендации не сгенерированы")

@@ -1,6 +1,8 @@
 package com.aitherapist.aitherapist.telegrambot;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
@@ -11,6 +13,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.nonClinicPatient.StartNonClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -34,6 +38,7 @@ public class CommandsHandler {
     private final Map<String, ICommand> commands;
     private final Verification verification;
     private final TelegramMessageSender messageSender;
+    private final UserServiceImpl userService;
 
     @Autowired
     public CommandsHandler(
@@ -73,11 +78,12 @@ public class CommandsHandler {
             EditDoctorAccountData editDoctorAccountData,
             DoctorMenu doctorMenu,
             Verification verification,
-            TelegramMessageSender messageSender
+            TelegramMessageSender messageSender,
+            UserServiceImpl userService
     ) {
         this.verification = verification;
         this.messageSender = messageSender;
-
+        this.userService = userService;
         this.commands = createCommandsMap(
                 startCommand, settingsDoctorCommand, informationCommand, doctorCommand,
                 botPatientCommand, clinicPatientCommand, getLastMessageFromDoctor,
@@ -171,13 +177,16 @@ public class CommandsHandler {
         try {
             String messageText;
             long chatId;
+            Long userId;
 
             if (update.hasCallbackQuery()) {
                 messageText = update.getCallbackQuery().getData();
                 chatId = update.getCallbackQuery().getMessage().getChatId();
+                userId = update.getCallbackQuery().getFrom().getId();
             } else if (update.hasMessage()) {
                 messageText = update.getMessage().hasText() ? update.getMessage().getText() : "";
                 chatId = update.getMessage().getChatId();
+                userId = update.getMessage().getFrom().getId();
             } else {
                 log.warn("Unsupported update type");
                 return null;
@@ -186,9 +195,24 @@ public class CommandsHandler {
             String command = messageText.contains(" ") ? messageText.split(" ")[0] : messageText;
             ICommand commandHandler = commands.get(command);
 
-            return commandHandler != null
-                    ? commandHandler.apply(update, registrationContext)
-                    : new SendMessage(String.valueOf(chatId), "Неизвестная команда");
+            if (commandHandler != null) {
+//                if (commandHandler.getClass().isAnnotationPresent(CommandAccess.class)) {
+//                    CommandAccess access = commandHandler.getClass().getAnnotation(CommandAccess.class);
+//
+//                    if (access.requiresRegistration() && !registrationContext.getStatus(userId).isRegistrationProcess()) {
+//                        return new SendMessage(String.valueOf(chatId), "🔒 Пожалуйста, завершите регистрацию для доступа к этой команде");
+//                    }
+//                    Roles userRole = userService.getUserRoles(userId);
+//                    if (access.allowedRoles().length > 0 &&
+//                            !Arrays.asList(access.allowedRoles()).contains(userRole)) {
+//                        return new SendMessage(String.valueOf(chatId), "⛔ Эта команда недоступна для вашей роли");
+//                    }
+//                }
+
+                return commandHandler.apply(update, registrationContext);
+            }
+
+            return new SendMessage(String.valueOf(chatId), "Неизвестная команда");
         } catch (Exception e) {
             log.error("Error handling command", e);
             throw e;

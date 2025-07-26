@@ -9,4 +9,6 @@ public class ClientRegistrationState {
     private int currentStep = 1;
     private final StringBuilder additional = new StringBuilder();
     private final StringBuilder base = new StringBuilder();
+
+
 }

@@ -81,6 +81,13 @@ public class RegistrationContext {
         return clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
     }
 
+    public ClientRegistrationState resetClientRegistrationState(Long userId) {
+        clientRegistrationStates.remove(userId);
+        ClientRegistrationState newState = new ClientRegistrationState();
+        clientRegistrationStates.put(userId, newState);
+        return newState;
+    }
+
     public DoctorRegistrationState getDoctorRegistrationState(Long userId) {
         return doctorRegistrationStates.computeIfAbsent(userId, k -> new DoctorRegistrationState());
     }
@@ -93,6 +100,7 @@ public class RegistrationContext {
     public void startRegistration(long chatId) {
         mapOfUserStatus.put(chatId, Status.REGISTRATION.withId(null));
     }
+
 
     public void start(long chatId) {
         mapOfUserStatus.put(chatId, Status.ALREADY_REGISTER.withId(null));

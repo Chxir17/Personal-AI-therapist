@@ -98,14 +98,12 @@ public class GetLastPatientMedicalData implements ICommand {
                         "💊 <b>Давление:</b> %s\n" +
                         "🌡 <b>Температура:</b> %.1f\n" +
                         "💤 <b>Сон:</b> %.1f часов\n" +
-                        "🫁 <b>Кислород в крови:</b> %d%%",
                 patient.getName(),
                 lastData.getId(),
                 lastData.getPulse() != null ? lastData.getPulse() : 0,
                 lastData.getPressure() != null ? lastData.getPressure() : "не измерялось",
                 lastData.getTemperature() != null ? lastData.getTemperature() : 0,
-                lastData.getHoursOfSleepToday() != null ? lastData.getHoursOfSleepToday() : 0,
-                lastData.getBloodOxygenLevel() != null ? lastData.getBloodOxygenLevel() : 0
+                lastData.getHoursOfSleepToday() != null ? lastData.getHoursOfSleepToday() : 0
         );
 
         SendMessage response = new SendMessage(String.valueOf(chatId), message);

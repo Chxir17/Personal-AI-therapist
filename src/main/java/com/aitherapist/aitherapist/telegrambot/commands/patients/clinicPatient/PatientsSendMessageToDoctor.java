@@ -1,11 +1,13 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
 
+@CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT}, requiresRegistration = true)
 @Component
 public class PatientsSendMessageToDoctor implements ICommand {
 

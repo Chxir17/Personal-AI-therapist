@@ -2,6 +2,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
@@ -12,6 +13,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.RegistrationProcess;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Status;
+import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +26,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
+@CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT}, requiresRegistration = true)
 public class StartClinicPatient implements ICommand {
     private final UserServiceImpl userService;
     private final RegistrationProcess registrationProcess;
