@@ -62,7 +62,7 @@ public class MakeMedicalRecommendation {
         }
     }
 
-    public String giveMedicalRecommendationWithScoreBeta(ClinicPatient patient) {
+    public String giveMedicalRecommendationWithScoreBeta(Patient patient) {
         try {
             Map<String, String> metaInfo = patient.makeMetaInformation(patient);
             Map<String, String> parametersHistory = patient.buildMedicalHistory();

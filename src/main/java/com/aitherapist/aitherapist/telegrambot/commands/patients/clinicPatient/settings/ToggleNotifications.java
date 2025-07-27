@@ -16,13 +16,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class ToggleNotifications implements ICommand {
-
     private final UserServiceImpl userService;
     private final NotificationServiceImpl notificationService;
-    private PatientServiceImpl patientService;
+    private final PatientServiceImpl patientService;
 
     @Autowired
-    public ToggleNotifications(PatientServiceImpl patientService, UserServiceImpl userService, NotificationServiceImpl notificationService) {
+    public ToggleNotifications(PatientServiceImpl patientService,
+                               UserServiceImpl userService,
+                               NotificationServiceImpl notificationService) {
         this.patientService = patientService;
         this.userService = userService;
         this.notificationService = notificationService;
@@ -42,11 +43,16 @@ public class ToggleNotifications implements ICommand {
         }
 
         boolean currentStatus = notificationService.getNotificationEnabled(user);
-        notificationService.setNotificationEnabled(user, !currentStatus);
+        boolean newStatus = !currentStatus;
+        notificationService.setNotificationEnabled(user, newStatus);
+
+        String statusMessage = newStatus ?
+                "🔔 Уведомления включены. Вы будете получать напоминания согласно установленному расписанию." :
+                "🔕 Уведомления выключены. Вы не будете получать напоминания.";
 
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text("🔔 Уведомления " + (!currentStatus ? "включены" : "выключены"))
+                .text(statusMessage)
                 .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
                 .build();
     }

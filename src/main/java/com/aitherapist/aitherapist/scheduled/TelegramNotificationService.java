@@ -60,7 +60,8 @@ public class TelegramNotificationService {
                 .usingJobData(new JobDataMap(Map.of(
                         "telegramChatId", notification.getTelegramChatId(),
                         "message", notification.getMessage(),
-                        "notificationId", notification.getId()
+                        "notificationId", notification.getId(),
+                        "userId", notification.getInternalUserId() // Добавляем userId
                 )))
                 .storeDurably()
                 .build();
@@ -74,6 +75,7 @@ public class TelegramNotificationService {
         scheduler.scheduleJob(jobDetail, trigger);
     }
 
+
     @Transactional
     public boolean cancelNotification(Long notificationId) {
         try {
@@ -82,9 +84,9 @@ public class TelegramNotificationService {
 
             if (deleted) {
                 notificationRepository.findById(notificationId).ifPresent(notification -> {
-                    notification.setStatus(NotificationStatus.FAILED);
+                    notification.setStatus(NotificationStatus.CANCELLED); // Изменяем на CANCELLED
                     notificationRepository.save(notification);
-                    logger.info("Notification [{}] cancelled and marked as FAILED", notificationId);
+                    logger.info("Notification [{}] cancelled and marked as CANCELLED", notificationId);
                 });
             } else {
                 logger.warn("Notification [{}] not found in scheduler", notificationId);

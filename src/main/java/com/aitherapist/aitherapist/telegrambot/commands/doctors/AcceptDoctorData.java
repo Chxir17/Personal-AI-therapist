@@ -15,14 +15,17 @@ public class AcceptDoctorData implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         long chatId = TelegramIdUtils.getChatId(update);
-
         InlineKeyboardMarkup replyKeyboardDoctor = InlineKeyboardFactory.createDoctorDefaultKeyboard();
         registrationContext.startRegistration(chatId);
 
+        if (update.hasCallbackQuery()) {
+            return null;
+        }
+
         return SendMessage.builder()
-              .chatId(String.valueOf(chatId))
-              .text("Выберите роль")
-              .replyMarkup(replyKeyboardDoctor)
-              .build();
+                .chatId(String.valueOf(chatId))
+                .text("Выберите роль")
+                .replyMarkup(replyKeyboardDoctor)
+                .build();
     }
 }

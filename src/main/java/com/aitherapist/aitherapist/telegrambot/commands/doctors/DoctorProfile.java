@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
@@ -31,13 +32,7 @@ public class DoctorProfile implements ICommand {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
-        if (update.hasCallbackQuery()) {
-            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-            telegramExecutor.deleteMessage(chatId.toString(), messageId);
-        }
-
         Doctor doctor = doctorService.getDoctor(userId);
-
         if (doctor == null) {
             return SendMessage.builder()
                     .chatId(chatId.toString())
@@ -46,12 +41,29 @@ public class DoctorProfile implements ICommand {
         }
 
         String profileText = buildDoctorProfile(doctor);
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorProfileKeyboard();
+
+        if (update.hasCallbackQuery()) {
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            try {
+                // Редактируем существующее сообщение
+                telegramExecutor.editMessageText(
+                        chatId.toString(),
+                        messageId,
+                        profileText,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
 
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text(profileText)
                 .parseMode("MarkdownV2")
-                .replyMarkup(InlineKeyboardFactory.createDoctorProfileKeyboard())
+                .replyMarkup(keyboard)
                 .build();
     }
 

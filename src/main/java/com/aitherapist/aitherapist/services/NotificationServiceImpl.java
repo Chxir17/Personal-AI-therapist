@@ -1,9 +1,10 @@
-
 package com.aitherapist.aitherapist.services;
 
+import com.aitherapist.aitherapist.domain.enums.NotificationStatus;
 import com.aitherapist.aitherapist.domain.model.entities.NotificationConfig;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.repositories.INotificationRepository;
+import com.aitherapist.aitherapist.scheduled.ScheduledNotification;
 import com.aitherapist.aitherapist.services.interfaces.INotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class NotificationServiceImpl implements INotificationService {
     private final INotificationRepository notificationRepository;
+
+    @Autowired
+    private UserServiceImpl userService;
 
     @Autowired
     public NotificationServiceImpl(INotificationRepository notificationRepository) {
@@ -42,18 +47,30 @@ public class NotificationServiceImpl implements INotificationService {
     public void setMessage(User user, String message) {
         NotificationConfig config = getOrCreateConfig(user);
         config.setCustomMessage(message);
+        notificationRepository.save(config);
     }
 
     @Override
     public void setNotificationTime(User user, LocalTime time) {
         NotificationConfig config = getOrCreateConfig(user);
         config.setNotificationUserTime(time);
+        notificationRepository.save(config);
     }
 
     @Override
     public void setNotificationEnabled(User user, boolean enabled) {
         NotificationConfig config = getOrCreateConfig(user);
         config.setNotificationsEnabled(enabled);
+        notificationRepository.save(config);
+    }
+
+    @Override
+    public Boolean getNotificationEnabled(Long userId) {
+        User user = userService.getUser(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with id: " + userId);
+        }
+        return getNotificationEnabled(user);
     }
 
     @Override

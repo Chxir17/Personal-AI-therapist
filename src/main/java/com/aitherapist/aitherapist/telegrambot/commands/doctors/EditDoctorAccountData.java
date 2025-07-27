@@ -30,32 +30,23 @@ public class EditDoctorAccountData implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
-
         Doctor doctor = doctorService.getDoctor(TelegramIdUtils.extractUserId(update));
-
-        String genderDisplay = doctor.getGender() ? "♂ Мужской" : "♀ Женский";
-
-        String message = String.format("""
-        📝 *Вы ввели данные:*
-        
-        👤 *Имя:* %s
-        🎂 *Возраст:* %d лет
-        🚻 *Пол:* %s
-        """,
-                doctor.getName(),
-                doctor.getAge(),
-                genderDisplay);
+        String messageText = "Что вы хотите изменить?";
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditDoctorData();
 
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-            telegramExecutor.deleteMessage(chatId.toString(), messageId);
+            try {
+                telegramExecutor.editMessageText(chatId.toString(), messageId, messageText, keyboard);
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
         }
-
-        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditDoctorData();
 
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text("Что вы хотите изменить?")
+                .text(messageText)
                 .replyMarkup(keyboard)
                 .build();
     }

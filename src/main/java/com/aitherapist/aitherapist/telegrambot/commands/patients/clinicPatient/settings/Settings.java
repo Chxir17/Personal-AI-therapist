@@ -34,7 +34,8 @@ public class Settings implements ICommand {
     @Autowired
     public Settings(UserServiceImpl userService,
                     NotificationServiceImpl notificationService,
-                    @Lazy ITelegramExecutor telegramExecutor, RegistrationContext registrationContext) {
+                    @Lazy ITelegramExecutor telegramExecutor,
+                    RegistrationContext registrationContext) {
         this.userService = userService;
         this.notificationService = notificationService;
         this.telegramExecutor = telegramExecutor;
@@ -46,11 +47,6 @@ public class Settings implements ICommand {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
-        if (update.hasCallbackQuery()) {
-            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-            telegramExecutor.deleteMessage(chatId.toString(), messageId);
-        }
-
         User user = userService.fetchUserByTelegramId(userId);
         if (user == null) {
             return SendMessage.builder()
@@ -60,38 +56,64 @@ public class Settings implements ICommand {
         }
 
         registrationContext.setStatus(userId, Status.NOTIFICATION_SETTINGS);
-        return showSettingsMenu(chatId, user, userId);
+
+
+        String messageText = buildSettingsMessage(user, userId);
+        InlineKeyboardMarkup keyboard = buildSettingsKeyboard(user);
+
+        if (update.hasCallbackQuery()) {
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            try {
+
+                telegramExecutor.editMessageText(
+                        chatId.toString(),
+                        messageId,
+                        messageText,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text(messageText)
+                        .parseMode("HTML")
+                        .replyMarkup(keyboard)
+                        .build();
+            }
+        }
+
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(messageText)
+                .parseMode("HTML")
+                .replyMarkup(keyboard)
+                .build();
     }
 
-
-    private SendMessage showSettingsMenu(Long chatId, User user, Long userId) {
+    private String buildSettingsMessage(User user, Long userId) {
         boolean notificationsEnabled = notificationService.getNotificationEnabled(user);
         LocalTime notificationTime = notificationService.getNotificationTime(user);
         String customMessage = notificationService.getMessage(user);
         MedicalNormalData medicalData = registrationContext.getMedicalNormalData(userId);
 
-        String messageText = "✨ <b>Ваши персональные настройки и нормативы</b> ✨\n\n";
-
-        messageText += "⚙️ <b><u>Настройки уведомлений</u></b>\n" +
-                "\n" +
-                "🔔  <b>Статус:</b> " + (notificationsEnabled ? "ВКЛ ✅" : "ВЫКЛ ❌") + "\n" +
-                "⏰  <b>Время:</b> " + (notificationTime != null ?
+        return "✨ Ваши персональные настройки и нормативы ✨\n\n" +
+                "⚙️ <u>Настройки уведомлений</u>\n\n" +
+                "🔔  Статус: " + (notificationsEnabled ? "ВКЛ ✅" : "ВЫКЛ ❌") + "\n" +
+                "⏰  Время: " + (notificationTime != null ?
                 notificationTime.format(DateTimeFormatter.ofPattern("HH:mm")) : "не установлено") + "\n" +
-                "📝  <b>Текст:</b> " + (customMessage != null ? customMessage : "не установлен") + "\n" +
-                "\n\n";
+                "📝  Текст: " + (customMessage != null ? customMessage : "не установлен") + "\n\n\n" +
+                "🩺 Ваши медицинские нормативы\n" +
+                "💤  Сон: " + String.format("%.1f", medicalData.getHoursOfSleepToday()) + " ч/сутки\n" +
+                "❤️  Пульс: " + medicalData.getPulse() + " уд/мин\n" +
+                "🩸  Давление: " + medicalData.getPressure() + "\n\n\n" +
+                "⏱ Обновлено: " + medicalData.getLastUpdate() + "<\n\n" +
+                "Эти показатели рассчитаны специально для вас 💙";
+    }
 
-
-        messageText += "🩺 <b><u>Ваши медицинские нормативы</u></b>\n" +
-                "💤  <b>Сон:</b> " + String.format("%.1f", medicalData.getHoursOfSleepToday()) + " ч/сутки\n" +
-                "❤️  <b>Пульс:</b> " + medicalData.getPulse() + " уд/мин\n" +
-                "🩸  <b>Давление:</b> " + medicalData.getPressure() + "\n" +
-                "\n\n" +
-                "⏱ <i>Обновлено: " + medicalData.getLastUpdate() + "</i>\n\n" +
-                "<i>Эти показатели рассчитаны специально для вас</i> 💙";
-
+    private InlineKeyboardMarkup buildSettingsKeyboard(User user) {
+        boolean notificationsEnabled = notificationService.getNotificationEnabled(user);
 
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-
         rows.add(List.of(
                 InlineKeyboardButton.builder()
                         .text("⏰ Изменить время")
@@ -114,15 +136,6 @@ public class Settings implements ICommand {
                         .build()
         ));
 
-        InlineKeyboardMarkup keyboardMarkup = InlineKeyboardMarkup.builder()
-                .keyboard(rows)
-                .build();
-
-        return SendMessage.builder()
-                .chatId(chatId.toString())
-                .text(messageText)
-                .parseMode("HTML")
-                .replyMarkup(keyboardMarkup)
-                .build();
+        return InlineKeyboardMarkup.builder().keyboard(rows).build();
     }
 }

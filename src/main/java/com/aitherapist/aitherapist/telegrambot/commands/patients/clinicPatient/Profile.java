@@ -1,8 +1,8 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
-import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
+import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
@@ -37,17 +38,44 @@ public class Profile implements ICommand {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
-        if (update.hasCallbackQuery()) {
-            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-            telegramExecutor.deleteMessage(chatId.toString(), messageId);
-        }
+        Roles role = userService.getUserRoles(userId);
+        Patient patient = role == Roles.CLINIC_PATIENT
+                ? userService.getClinicPatientById(userId)
+                : userService.getNonClinicPatientById(userId);
 
-        ClinicPatient patient = userService.getClinicPatientById(userId);
         if (patient == null) {
             return buildErrorMessage(chatId);
         }
 
-        return buildProfileMessage(chatId, patient);
+        String messageText = buildProfileMessageText(patient);
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createProfileKeyboard();
+
+        if (update.hasCallbackQuery()) {
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            try {
+                telegramExecutor.editMessageText(
+                        chatId.toString(),
+                        messageId,
+                        messageText,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text(messageText)
+                        .parseMode("HTML")
+                        .replyMarkup(keyboard)
+                        .build();
+            }
+        }
+
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(messageText)
+                .parseMode("HTML")
+                .replyMarkup(keyboard)
+                .build();
     }
 
     private SendMessage buildErrorMessage(Long chatId) {
@@ -57,40 +85,30 @@ public class Profile implements ICommand {
                 .build();
     }
 
-    private SendMessage buildProfileMessage(Long chatId, ClinicPatient patient) {
+    private String buildProfileMessageText(Patient patient) {
         InitialHealthData initialData = patient.getInitialData();
 
-        String message = String.format(
+        return String.format(
                 """
-                🏥 *Ваш медицинский профиль*
+                🏥 Ваш медицинский профиль
                 
-                👤 *Основная информация*
+                👤 Основная информация
                 ├ Имя: %s
                 ├ Возраст: %d лет
                 ├ Номер телефона: %s
-                ├ Пол: %s
-                └ Номер медкарты: %s
+                └ Пол: %s
                 
-                🩺 *Медицинские показатели*
+                🩺 Медицинские показатели
                 %s
                 
                 ✏️ Вы можете изменить данные через меню профиля
                 """,
-                escapeMarkdown(patient.getName()),
+                patient.getName(),
                 patient.getAge(),
-                escapeMarkdown(patient.getPhoneNumber()),
+                patient.getPhoneNumber(),
                 patient.getGender() ? "Мужской ♂" : "Женский ♀",
-                patient.getMedicalCardNumber() != null ?
-                        escapeMarkdown(patient.getMedicalCardNumber()) : "не указан",
                 buildHealthDataSection(initialData)
         );
-
-        return SendMessage.builder()
-                .chatId(chatId.toString())
-                .text(message)
-                .parseMode("MarkdownV2")
-                .replyMarkup(InlineKeyboardFactory.createProfileKeyboard())
-                .build();
     }
 
     private String buildHealthDataSection(InitialHealthData initialData) {
@@ -123,27 +141,5 @@ public class Profile implements ICommand {
     private String formatBoolean(Boolean value, String defaultValue) {
         if (value == null) return defaultValue;
         return value ? "да" : "нет";
-    }
-
-    private String escapeMarkdown(String text) {
-        if (text == null) return "";
-        return text.replace("_", "\\_")
-                .replace("*", "\\*")
-                .replace("[", "\\[")
-                .replace("]", "\\]")
-                .replace("(", "\\(")
-                .replace(")", "\\)")
-                .replace("~", "\\~")
-                .replace("`", "\\`")
-                .replace(">", "\\>")
-                .replace("#", "\\#")
-                .replace("+", "\\+")
-                .replace("-", "\\-")
-                .replace("=", "\\=")
-                .replace("|", "\\|")
-                .replace("{", "\\{")
-                .replace("}", "\\}")
-                .replace(".", "\\.")
-                .replace("!", "\\!");
     }
 }

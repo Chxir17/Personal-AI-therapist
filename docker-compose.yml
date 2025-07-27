@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: medical_app
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Ss3141592653517
+      MYSQL_ROOT_PASSWORD: Ss3141592653517
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/medical_app?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Ss3141592653517
+      DB_PASSWORD: Ss3141592653517
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:

@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.repositories.IPatientRepository;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
@@ -13,19 +14,21 @@ import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 @CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT, Roles.BOT_PATIENT}, requiresRegistration = true)
 public class ClinicMenu implements ICommand {
     private final PatientServiceImpl patientService;
-
+    private final ITelegramExecutor telegramExecutor;
     @Autowired
-    public ClinicMenu(PatientServiceImpl patientService) {
-
+    public ClinicMenu(@Lazy ITelegramExecutor telegramExecutor, PatientServiceImpl patientService) {
+        this.telegramExecutor = telegramExecutor;
         this.patientService = patientService;
 
     }
@@ -36,11 +39,28 @@ public class ClinicMenu implements ICommand {
         registrationContext.setStatus(userId, Status.PATIENT_IN_MAIN_MENU);
         Patient patient = patientService.findById(userId);
 
+        String messageText = "✨ Доступные действия ✨";
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createPatientDefaultKeyboard(patient);
+
+        if (update.hasCallbackQuery()) {
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            try {
+                telegramExecutor.editMessageText(
+                        String.valueOf(TelegramIdUtils.getChatId(update)),
+                        messageId,
+                        messageText,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update))
-                .text("✨ Доступные действия ✨  ")
-                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patient))
+                .text(messageText)
+                .replyMarkup(keyboard)
                 .build();
-
     }
 }

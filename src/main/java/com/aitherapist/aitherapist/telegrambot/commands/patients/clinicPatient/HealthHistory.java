@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Comparator;
 import java.util.DoubleSummaryStatistics;
@@ -37,16 +39,9 @@ public class HealthHistory implements ICommand {
     @Override
     @Transactional(readOnly = true)
     public SendMessage apply(Update update, RegistrationContext registrationContext) {
-
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
-
         Patient patient = patientService.findById(userId);
-
-        if (update.hasCallbackQuery()) {
-            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-            telegramExecutor.deleteMessage(chatId.toString(), messageId);
-        }
 
         List<DailyHealthData> healthData = patientService.getPatientDailyHealthData(userId);
         healthData.sort(Comparator.comparingLong(DailyHealthData::getId).reversed());
@@ -64,11 +59,28 @@ public class HealthHistory implements ICommand {
             message.append(calculateStatistics(healthData));
         }
 
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createPatientDefaultKeyboard(patient);
+
+        if (update.hasCallbackQuery()) {
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            try {
+                telegramExecutor.editMessageText(
+                        chatId.toString(),
+                        messageId,
+                        message.toString(),
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+               e.printStackTrace();
+            }
+        }
+
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text(message.toString())
                 .parseMode("MarkdownV2")
-                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patient))
+                .replyMarkup(keyboard)
                 .build();
     }
 

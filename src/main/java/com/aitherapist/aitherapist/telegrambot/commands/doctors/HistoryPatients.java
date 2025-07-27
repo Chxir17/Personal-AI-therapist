@@ -1,18 +1,22 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
 import com.aitherapist.aitherapist.domain.model.entities.*;
-import com.aitherapist.aitherapist.functionality.QAChatBot.UserQuestions;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
+import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -50,7 +54,30 @@ public class HistoryPatients implements ICommand {
 
         SendMessage response = new SendMessage(chatId.toString(), message.toString());
         response.enableHtml(true);
+        response.setReplyMarkup(createPatientsKeyboardWithDailyData(patients));
         return response;
+    }
+
+    private InlineKeyboardMarkup createPatientsKeyboardWithDailyData(List<Patient> patients) {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        for (Patient patient : patients) {
+            InlineKeyboardButton dailyDataButton = new InlineKeyboardButton();
+            dailyDataButton.setText("📊 " + patient.getName() + " - ежедневные показатели");
+            dailyDataButton.setCallbackData("/patientDailyData " + patient.getTelegramId());
+
+            keyboard.add(Collections.singletonList(dailyDataButton));
+        }
+
+        // Кнопка возврата в меню
+        InlineKeyboardButton backButton = new InlineKeyboardButton();
+        backButton.setText("🔙 Назад");
+        backButton.setCallbackData("/acceptInitData");
+        keyboard.add(Collections.singletonList(backButton));
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        return markup;
     }
 
     private String getPatientInfo(Patient patient) {
@@ -98,7 +125,4 @@ public class HistoryPatients implements ICommand {
         }
         return healthInfo.toString();
     }
-
-
-
 }
