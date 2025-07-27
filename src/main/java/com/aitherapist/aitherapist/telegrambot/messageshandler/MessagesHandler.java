@@ -14,7 +14,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.patients.RegistrationPro
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
-import com.aitherapist.aitherapist.telegrambot.scheduled.TelegramNotificationService;
+import com.aitherapist.aitherapist.scheduled.TelegramNotificationService;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
