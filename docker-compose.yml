@@ -5,8 +5,8 @@ services:
     environment:
       MYSQL_DATABASE: medical_app
       MYSQL_USER: root
-      MYSQL_PASSWORD: Ss3141592653517
-      MYSQL_ROOT_PASSWORD: Ss3141592653517
+      MYSQL_PASSWORD: pass
+      MYSQL_ROOT_PASSWORD: pass
     ports:
       - "3306:3306"
     volumes:
@@ -19,8 +19,8 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/medical_app?useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Ss3141592653517
-      DB_PASSWORD: Ss3141592653517
+      SPRING_DATASOURCE_PASSWORD: pass
+      DB_PASSWORD: pass
     ports:
       - "8080:8080"
 
