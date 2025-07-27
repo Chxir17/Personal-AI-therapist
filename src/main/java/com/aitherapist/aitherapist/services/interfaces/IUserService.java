@@ -8,6 +8,7 @@ import com.aitherapist.aitherapist.domain.model.entities.*;
  */
 public interface IUserService {
     void saveUser(User user);
+    NonClinicPatient getNonClinicPatientById(Long telegramId);
     User fetchUserByTelegramId(Long id);
     void updateUser(User user, Long id);
     User getUser(Long id);

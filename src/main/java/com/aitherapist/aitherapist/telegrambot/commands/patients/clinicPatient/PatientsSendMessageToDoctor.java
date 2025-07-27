@@ -4,13 +4,16 @@ import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
+import com.aitherapist.aitherapist.functionality.QAChatBot.UserQuestions;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -24,28 +27,41 @@ import java.util.List;
 @Component
 public class PatientsSendMessageToDoctor implements ICommand {
 
-    @Autowired
-    private PatientServiceImpl patientService;
+    private final ITelegramExecutor telegramExecutor;
+    private final PatientServiceImpl patientService;
 
+    @Autowired
+    public PatientsSendMessageToDoctor(PatientServiceImpl patientService, @Lazy ITelegramExecutor telegramExecutor) {
+        this.patientService = patientService;
+        this.telegramExecutor = telegramExecutor;
+    }
 
     @Override
     @Transactional
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
+
         if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {
                 Long doctorId = Long.parseLong(parts[1]);
                 registrationContext.setStatus(userId, Status.WAIT_USER_WRITE_MESSAGE_TO_DOCTOR);
-
                 registrationContext.setStatusWithId(doctorId, Status.SEND_TO_THIS_DOCTOR, userId);
 
-                SendMessage message = new SendMessage();
-                message.setChatId(chatId.toString());
-                message.setText("✏️ Введите текст сообщения для доктора:");
-                message.setReplyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard());
-                return message;
+                InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createBackToMainMenuKeyboard();
+
+                try {
+                    telegramExecutor.editMessageText(
+                            chatId.toString(),
+                            update.getCallbackQuery().getMessage().getMessageId(),
+                            "✏️ Введите текст сообщения для доктора:",
+                            keyboard
+                    );
+                    return null;
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
             }
         }
 

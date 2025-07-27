@@ -79,7 +79,8 @@ public class CommandsHandler {
             DoctorMenu doctorMenu,
             Verification verification,
             TelegramMessageSender messageSender,
-            UserServiceImpl userService
+            UserServiceImpl userService,
+            GetPatientDailyData getPatientDailyData
     ) {
         this.verification = verification;
         this.messageSender = messageSender;
@@ -93,7 +94,7 @@ public class CommandsHandler {
                 editHeightCommand, editWeightCommand, editBadHabitsCommand, writeDailyData,
                 healthHistory, profile, setNotificationMessage, setNotificationTime,
                 toggleNotifications, doctorProfile, editMedicalDataCommand, clinicMenu,
-                lastRecords, qaMode, help, privacy, editDoctorAccountData, doctorMenu
+                lastRecords, qaMode, help, privacy, editDoctorAccountData, doctorMenu, getPatientDailyData
         );
     }
 
@@ -132,10 +133,13 @@ public class CommandsHandler {
             Help help,
             Privacy privacy,
             EditDoctorAccountData editDoctorAccountData,
-            DoctorMenu doctorMenu
+            DoctorMenu doctorMenu,
+            GetPatientDailyData getPatientDailyData
+
     ) {
         return Map.ofEntries(
                 Map.entry("/start", startCommand),
+                Map.entry("/patientDailyData", getPatientDailyData),
                 Map.entry("/help", help),
                 Map.entry("/privacy", privacy),
                 Map.entry("/settingsDoctor", settingsDoctorCommand),

@@ -23,18 +23,23 @@ public class SettingsDoctorCommand implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         long chatId = TelegramIdUtils.getChatId(update);
+        String messageText = "✨ Доступные действия ✨";
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorSettingsKeyboard();
 
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-            telegramExecutor.deleteMessage(String.valueOf(chatId), messageId);
+            try {
+                telegramExecutor.editMessageText(String.valueOf(chatId), messageId, messageText, keyboard);
+                return null;
+            } catch (TelegramApiException e) {
+               e.printStackTrace();
+            }
         }
-
-        InlineKeyboardMarkup commands = InlineKeyboardFactory.createDoctorSettingsKeyboard();
 
         return SendMessage.builder()
                 .chatId(String.valueOf(chatId))
-                .text("✨ Доступные действия ✨")
-                .replyMarkup(commands)
+                .text(messageText)
+                .replyMarkup(keyboard)
                 .build();
     }
 }

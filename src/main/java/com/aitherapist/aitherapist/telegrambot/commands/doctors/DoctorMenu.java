@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
@@ -25,18 +26,24 @@ public class DoctorMenu implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
+        String messageText = "Выберите команду:";
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorDefaultKeyboard();
 
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            try {
 
-            telegramExecutor.deleteMessage(chatId.toString(), messageId);
+                telegramExecutor.editMessageText(chatId.toString(), messageId, messageText, keyboard);
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
         }
 
         return SendMessage.builder()
-                .chatId(TelegramIdUtils.getChatId(update))
-                .text("Выберите команду:")
-                .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
+                .chatId(chatId.toString())
+                .text(messageText)
+                .replyMarkup(keyboard)
                 .build();
-
     }
 }

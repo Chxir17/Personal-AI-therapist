@@ -16,8 +16,10 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
@@ -206,6 +208,17 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void editMessageText(String chatId, Integer messageId, String newText, InlineKeyboardMarkup keyboard) throws TelegramApiException {
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setChatId(chatId);
+        editMessage.setMessageId(messageId);
+        editMessage.setText(newText);
+        editMessage.setReplyMarkup(keyboard);
+        execute(editMessage);
+    }
+
 
     private SendMessage requestPhoneNumber(Long chatId) {
         return SendMessage.builder()

@@ -12,21 +12,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
-#  quartz:
-#    datasource:
-#      url: jdbc:mysql://localhost:3306/quartz?useSSL=false&serverTimezone=UTC
-#      username: root
-#      password: ${DB_PASSWORD}
-#      driver-class-name: com.mysql.cj.jdbc.Driver
-#    job-store-type: jdbc
-#    jdbc:
-#      initialize-schema: never
-#    properties:
-#      org:
-#        quartz:
-#          jobStore:
-#            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
 bot:
   name: "aitherapist_bot"
   token: "8038842126:AAFlDr1ivAbzlRnr_uUgZ8m4qkm6zOiYFlY"
-

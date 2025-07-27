@@ -258,10 +258,7 @@ public class MessagesHandler implements IHandler {
             String doctorMessage = String.format(
                     "✉️ *" +
                             "Вам пришло сообщение от вашего доктора: %s\n\n" +
-                            "━━━━━━━━━━━━━━━━━━━━\n" +
-                            "%s\n" +
-                            "━━━━━━━━━━━━━━━━━━━━\n\n" +
-                            "Вы можете ответить доктору, просто написав сообщение в этот чат.",
+                            "%s\n",
                     userService.getUser(currentDoctorId).getName(),
                     message.getText()
             );
@@ -280,10 +277,7 @@ public class MessagesHandler implements IHandler {
             String doctorMessage = String.format(
                     "✉️ *" +
                             "Вам пришло сообщение от вашего пациента: %s\n\n" +
-                            "━━━━━━━━━━━━━━━\n" +
-                            "%s\n" +
-                            "━━━━━━━━━━━━━━━\n\n" +
-                            "Вы можете ответить доктору, просто написав сообщение в этот чат.",
+                            "%s\n",
                     userService.getUser(currentDoctorId).getName(),
                     message.getText()
             );

@@ -42,6 +42,13 @@ public abstract class Patient extends User {
         dailyHealthDataList.add(dailyHealthData);
     }
 
+    public Map<String, String> buildGoalsInformation(){
+        Map<String, String> goals = new HashMap<>();
+        goals.put("pressure", "120");
+        goals.put("pulse", "70");
+        return goals;
+    }
+
     public void removeHealthData(Long healthDataId) {
         dailyHealthDataList.removeIf(hd -> Objects.equals(hd.getId(), healthDataId));
     }

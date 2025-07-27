@@ -36,7 +36,6 @@ public class RegistrationProcess {
     public SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, User patient) {
         String genderDisplay = patient.getGender() ? "♂ Мужской" : "♀ Женский";
 
-
         String birthDateAndAge;
         if (patient.getBirthDate() != null) {
             String formattedDate = patient.getBirthDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
@@ -46,29 +45,47 @@ public class RegistrationProcess {
             birthDateAndAge = "Не указана";
         }
 
+        String chronicDiseasesDisplay;
+        if (initialHealthData.getChronicDiseases() == null) {
+            chronicDiseasesDisplay = "Нет";
+        } else if (initialHealthData.getChronicDiseases().equalsIgnoreCase("false")) {
+            chronicDiseasesDisplay = "Нет";
+        } else if (initialHealthData.getChronicDiseases().equalsIgnoreCase("true")) {
+            chronicDiseasesDisplay = "Да";
+        } else {
+            chronicDiseasesDisplay = initialHealthData.getChronicDiseases();
+        }
+
+        String badHabitsDisplay = "Нет";
+        if (initialHealthData.getBadHabits() != null) {
+            if (initialHealthData.getBadHabits().equalsIgnoreCase("false")) {
+                badHabitsDisplay = "Нет";
+            } else if (!initialHealthData.getBadHabits().equalsIgnoreCase("true")) {
+                badHabitsDisplay = initialHealthData.getBadHabits();
+            }
+        }
+
         String message = String.format("""
-        📝 *Вы ввели данные:*
-        
-        👤 *Имя:* %s
-        🎂 *Дата рождения (возраст):* %s
-        🚻 *Пол:* %s
-        
-        💓 *Аритмия:* %s
-        🏥 *Хронические заболевания:* %s
-        📏 *Рост:* %s
-        ⚖️ *Вес:* %s
-        🚬 *Вредные привычки:* %s
-        """,
+    📝 *Вы ввели данные:*
+    
+    👤 *Имя:* %s
+    🎂 *Дата рождения (возраст):* %s
+    🚻 *Пол:* %s
+    
+    💓 *Аритмия:* %s
+    🏥 *Хронические заболевания:* %s
+    📏 *Рост:* %s
+    ⚖️ *Вес:* %s
+    🚬 *Вредные привычки:* %s
+    """,
                 patient.getName(),
                 birthDateAndAge,
                 genderDisplay,
                 initialHealthData.getArrhythmia() ? "Да" : "Нет",
-                initialHealthData.getChronicDiseases().equalsIgnoreCase("false") ? "Нет" : (initialHealthData.getChronicDiseases().equalsIgnoreCase("true") ? "Да" : initialHealthData.getChronicDiseases()),
+                chronicDiseasesDisplay,
                 initialHealthData.getHeight(),
                 initialHealthData.getWeight(),
-                initialHealthData.getBadHabits() == null ? "Нет" :
-                        initialHealthData.getBadHabits().equalsIgnoreCase("false") ? "Нет" :
-                                initialHealthData.getBadHabits());
+                badHabitsDisplay);
 
         return SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
@@ -76,7 +93,6 @@ public class RegistrationProcess {
                 .parseMode("Markdown")
                 .replyMarkup(InlineKeyboardFactory.createAcceptOrEditKeyboardPatient())
                 .build();
-
     }
 
     public SendMessage requestPhoneNumber(Long chatId) {

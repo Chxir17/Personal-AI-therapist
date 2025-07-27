@@ -37,6 +37,16 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
+    public NonClinicPatient getNonClinicPatientById(Long telegramId) {
+        User user = userRepository.findByTelegramId(telegramId);
+        if (user instanceof NonClinicPatient) {
+            return (NonClinicPatient) user;
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional
     public Boolean isSignUp(Long userId){
         return fetchUserByTelegramId(userId) != null;
     }

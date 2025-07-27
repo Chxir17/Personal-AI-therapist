@@ -27,17 +27,31 @@ public class EditPatientAccountData implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditClinicPatientData();
+        String messageText = "Что вы хотите изменить в медицинских данных?";
 
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-            telegramExecutor.deleteMessage(chatId.toString(), messageId);
+            try {
+                telegramExecutor.editMessageText(
+                        chatId.toString(),
+                        messageId,
+                        messageText,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                return SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text(messageText)
+                        .replyMarkup(keyboard)
+                        .build();
+            }
         }
-
-        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditClinicPatientData();
 
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text("Что вы хотите изменить в медицинских данных?")
+                .text(messageText)
                 .replyMarkup(keyboard)
                 .build();
     }

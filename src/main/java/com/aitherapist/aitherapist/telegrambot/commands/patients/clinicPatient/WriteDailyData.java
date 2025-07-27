@@ -65,7 +65,7 @@ public class WriteDailyData implements ICommand {
                 patientService.addDailyHealthDataToPatient(userId, d);
                 currentPatient = patientService.getPatientWithData(userId);
                 String response4 =
-                        makeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta((ClinicPatient) currentPatient);
+                        makeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta(currentPatient);
                 registrationContext.setStatus(userId, Status.NONE);
                 registrationContext.clearClientRegistrationState(userId);
                 return SendMessage.builder()
