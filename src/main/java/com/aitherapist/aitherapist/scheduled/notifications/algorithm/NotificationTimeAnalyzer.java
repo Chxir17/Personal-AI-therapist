@@ -1,6 +1,6 @@
 package com.aitherapist.aitherapist.scheduled.notifications.algorithm;
 
-import com.aitherapist.aitherapist.db.entities.UserActivityLog;
+import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
@@ -8,7 +8,36 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class NotificationTimeAnalyzer {
-    static public Map<DayOfWeek, LocalTime> getBestNotificationTimesForUser(List<UserActivityLog> userLogs) {
+
+//2
+    public static Map<DayOfWeek, LocalTime> getBestNotificationTimes(List<UserActivityLog> logs) {
+        Map<DayOfWeek, Map<Integer, Integer>> hourFrequency = new HashMap<>();
+        for (UserActivityLog log : logs) {
+            LocalDateTime time = log.getActionTime();
+            DayOfWeek day = time.getDayOfWeek();
+            int hour = time.getHour();
+
+            hourFrequency
+                    .computeIfAbsent(day, d -> new HashMap<>())
+                    .merge(hour, getWeight(log), Integer::sum);
+        }
+
+        Map<DayOfWeek, LocalTime> bestTimes = new HashMap<>();
+        for (var entry : hourFrequency.entrySet()) {
+            DayOfWeek day = entry.getKey();
+            var hourMap = entry.getValue();
+            int bestHour = hourMap.entrySet()
+                    .stream()
+                    .max(Comparator.comparingInt(Map.Entry::getValue))
+                    .map(Map.Entry::getKey)
+                    .orElse(11);
+            bestTimes.put(day, LocalTime.of(bestHour, 0));
+        }
+
+        return bestTimes;
+    }
+//1
+    public static Map<DayOfWeek, LocalTime> getBestNotificationTimesForUser(List<UserActivityLog> userLogs) {
         List<UserActivityLog> sortedLogs = userLogs.stream().sorted(Comparator.comparing(UserActivityLog::getActionTime)).toList();
         Map<DayOfWeek, List<LocalTime>> timeByDay = new HashMap<>();
         for (int i = 0; i < sortedLogs.size(); i++) {
@@ -70,12 +99,19 @@ public class NotificationTimeAnalyzer {
         }
     }
 
-    static private LocalTime averageTime(List<LocalTime> times) {
+    private static LocalTime averageTime(List<LocalTime> times) {
         int totalMinutes = times.stream().mapToInt(time -> time.getHour() * 60 + time.getMinute()).sum();
         int avgMinutes = totalMinutes / times.size();
         int avgHour = avgMinutes / 60;
         int avgMinute = avgMinutes % 60;
         return LocalTime.of(avgHour, avgMinute);
+    }
+
+    private static int getWeight(UserActivityLog log) {
+        if ("write".equalsIgnoreCase(log.getActionType())){
+            return 2;
+        }
+        return 1;
     }
 
 }

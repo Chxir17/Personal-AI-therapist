@@ -1,13 +1,12 @@
 package com.aitherapist.aitherapist.telegrambot.commands;
 
-import com.aitherapist.aitherapist.telegrambot.utils.Answers;
+import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 /**
  * FIXME: to implement
@@ -19,11 +18,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class InformationCommand implements ICommand {
     @Override
-    public SendMessage apply(Update update) {
+    public SendMessage apply(Update update, RegistrationContext registrationContext) {
         long chatId = update.getMessage().getChatId();
         return new SendMessage(String.valueOf(chatId), Answers.INFORMATION_MESSAGE.getMessage());
     }
-
-
 
 }
