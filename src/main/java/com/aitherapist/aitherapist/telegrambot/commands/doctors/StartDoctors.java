@@ -140,13 +140,13 @@ public class StartDoctors implements ICommand {
                         .build();
             }
         } else {
-            if (registrationContext.isVerify(userId)) {
+            if (registrationContext.isVerify(userId) && !(registrationContext.getStatus(userId) == Status.GIVING_PHONE_NUMBER)) {
                 registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
                 return requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
 
-        if (update.hasCallbackQuery()) {
+        if (update.hasCallbackQuery() ) {
             try {
                 telegramExecutor.editMessageText(
                         TelegramIdUtils.getChatId(update).toString(),

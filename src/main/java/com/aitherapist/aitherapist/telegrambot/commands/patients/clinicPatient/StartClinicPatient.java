@@ -75,10 +75,12 @@ public class StartClinicPatient implements ICommand {
                 return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
-
+        String messageText = "Вы уже верифицированы. Выберите действие:";
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createPatientDefaultKeyboard(patient);
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
                 .text(messageText)
                 .replyMarkup(keyboard)
                 .build();
-    }}
+    }
+}
