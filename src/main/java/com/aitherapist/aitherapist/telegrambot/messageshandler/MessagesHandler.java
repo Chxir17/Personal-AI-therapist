@@ -176,15 +176,11 @@ public class MessagesHandler implements IHandler {
                 .build();
 
             messageSender.sendMessage(sm);
-            if (role == Roles.CLINIC_PATIENT) {
-                registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
-            }
-            else if(role == Roles.DOCTOR){
-                registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
-            }
-            else{
-                registrationContext.setStatus(userId, Status.REGISTRATION_NO_CLINIC_PATIENT);
-            }
+        registrationContext.setStatus(userId,
+                role == Roles.CLINIC_PATIENT ? Status.REGISTRATION_CLINIC_PATIENT :
+                        role == Roles.DOCTOR ? Status.REGISTRATION_DOCTOR :
+                                Status.REGISTRATION_NO_CLINIC_PATIENT
+        );
             commandsHandler.mapStatusToHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
     }
 

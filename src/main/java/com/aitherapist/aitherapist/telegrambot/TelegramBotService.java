@@ -152,7 +152,12 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                 .build();
 
         execute(sm);
-        registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+        Status status = registrationContext.getStatus(userId);
+        registrationContext.setStatus(userId,
+                status == Status.GIVING_PHONE_NUMBER_CLINIC_PATIENT ? Status.REGISTRATION_CLINIC_PATIENT :
+                        status == Status.GIVING_PHONE_NUMBER_DOCTOR ? Status.REGISTRATION_DOCTOR :
+                                Status.REGISTRATION_NO_CLINIC_PATIENT
+        );
         commandsHandler.mapStatusToHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
 
     }
