@@ -154,7 +154,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
 
     private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String messageText = update.getMessage().getText();
-        if (messageText.startsWith("/")) {
+        if (messageText.startsWith("/start") || messageText.startsWith("/help") || messageText.startsWith("/privacy")) {
             sendMessage(commandsHandler.handleCommand(update, registrationContext));
         } else {
             messagesHandler.handle(update, registrationContext);

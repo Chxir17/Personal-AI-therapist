@@ -1,6 +1,5 @@
 package com.aitherapist.aitherapist.telegrambot;
 
-import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
@@ -25,14 +24,10 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.Arrays;
 import java.util.Map;
 
 /**
  * CommandsHandler - class keep Map with all command, that implement interface ICommand;
- *
- *
  */
 @Getter
 @Slf4j
