@@ -40,10 +40,8 @@ public class DoctorSendMessageToPatient implements ICommand {
             if (parts.length == 2) {
                 Long patientId = Long.parseLong(parts[1]);
                 registrationContext.setStatus(doctorId, Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER);
-                //registrationContext.setStatus(patientId, Status.WAIT_USER_WRITE_MESSAGE_TO_DOCTOR);
 
                 registrationContext.setStatusWithId(patientId, Status.SEND_TO_THIS_USER, doctorId);
-//                registrationContext.setStatusWithId(doctorId, Status.SEND_TO_THIS_DOCTOR, patientId);
                 SendMessage message = new SendMessage();
                 message.setChatId(chatId.toString());
                 message.setText("✏️ Введите текст сообщения для пациента:");

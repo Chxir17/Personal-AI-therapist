@@ -13,4 +13,5 @@ public interface IDoctorService {
     Patient getPatientById(Long doctorId, Long userId);
     Doctor createDoctor(Long doctorId, Doctor doctor);
     String getDoctorName(Long doctorId);
+    List<Doctor> getAllDoctors();
 }

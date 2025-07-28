@@ -1,6 +1,5 @@
 package com.aitherapist.aitherapist.telegrambot;
 
-import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
@@ -13,7 +12,6 @@ import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.nonClinicPatient.StartNonClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
-import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +21,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -74,6 +71,7 @@ public class CommandsHandler {
             GetLastPatientMedicalData lastRecords,
             QAMode qaMode,
             Help help,
+            Invite invite,
             Privacy privacy,
             EditDoctorAccountData editDoctorAccountData,
             DoctorMenu doctorMenu,
@@ -94,7 +92,7 @@ public class CommandsHandler {
                 editHeightCommand, editWeightCommand, editBadHabitsCommand, writeDailyData,
                 healthHistory, profile, setNotificationMessage, setNotificationTime,
                 toggleNotifications, doctorProfile, editMedicalDataCommand, clinicMenu,
-                lastRecords, qaMode, help, privacy, editDoctorAccountData, doctorMenu, getPatientDailyData
+                lastRecords, qaMode, help, privacy, editDoctorAccountData, doctorMenu, getPatientDailyData, invite
         );
     }
 
@@ -134,9 +132,8 @@ public class CommandsHandler {
             Privacy privacy,
             EditDoctorAccountData editDoctorAccountData,
             DoctorMenu doctorMenu,
-            GetPatientDailyData getPatientDailyData
-
-    ) {
+            GetPatientDailyData getPatientDailyData,
+            Invite invite) {
         return Map.ofEntries(
                 Map.entry("/start", startCommand),
                 Map.entry("/patientDailyData", getPatientDailyData),
@@ -173,7 +170,8 @@ public class CommandsHandler {
                 Map.entry("/editWeight", editWeightCommand),
                 Map.entry("/editBadHabits", editBadHabitsCommand),
                 Map.entry("/editDoctorAccountData", editDoctorAccountData),
-                Map.entry("/editPatientMedicalData", editMedicalDataCommand)
+                Map.entry("/editPatientMedicalData", editMedicalDataCommand),
+                Map.entry("/inviteDoctor", invite)
         );
     }
 

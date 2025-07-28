@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.services;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.repositories.IDoctorRepository;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
@@ -21,6 +22,12 @@ public class DoctorServiceImpl implements IDoctorService {
     @Autowired
     public DoctorServiceImpl(IDoctorRepository doctorRepository) {
         this.doctorRepository = doctorRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Doctor> getAllDoctors() {
+        return doctorRepository.findAllByRole(Roles.DOCTOR);
     }
 
     @Override
