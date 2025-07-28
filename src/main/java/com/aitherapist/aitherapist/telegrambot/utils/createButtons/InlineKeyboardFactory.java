@@ -18,17 +18,39 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 1);
     }
 
+    public static InlineKeyboardMarkup createDoctorInviteResponseKeyboard(Long patientId) {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        InlineKeyboardButton acceptButton = new InlineKeyboardButton();
+        acceptButton.setText("✅ Принять");
+        acceptButton.setCallbackData("/acceptInvite " + patientId);
+
+        InlineKeyboardButton rejectButton = new InlineKeyboardButton();
+        rejectButton.setText("❌ Отклонить");
+        rejectButton.setCallbackData("/rejectInvite " + patientId);
+
+        row.add(acceptButton);
+        row.add(rejectButton);
+        keyboard.add(row);
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        return markup;
+    }
+
     public static InlineKeyboardMarkup createDoctorsInvitationKeyboard(List<Doctor> doctors) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
         for (Doctor doctor : doctors) {
             InlineKeyboardButton inviteButton = new InlineKeyboardButton();
             inviteButton.setText("Отправить приглашение " + doctor.getName());
-            inviteButton.setCallbackData("/inviteFromPatient " + doctor.getId() + " send");
+            inviteButton.setCallbackData("/inviteDoctor " + doctor.getTelegramId());
 
             InlineKeyboardButton cancelButton = new InlineKeyboardButton();
             cancelButton.setText("Отмена");
-            cancelButton.setCallbackData("invite " + doctor.getId() + " cancel");
+            cancelButton.setCallbackData("/clinicPatientMenu");
 
             keyboard.add(Arrays.asList(inviteButton, cancelButton));
         }

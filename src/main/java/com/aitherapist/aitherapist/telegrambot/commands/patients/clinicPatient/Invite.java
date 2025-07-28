@@ -1,11 +1,14 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
+import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
+import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,10 +22,16 @@ import java.util.List;
 public class Invite implements ICommand {
 
     private final DoctorServiceImpl doctorService;
+    private final TelegramMessageSender telegramMessageSender;
+    private final UserServiceImpl userService;
 
     @Autowired
-    public Invite(DoctorServiceImpl doctorService) {
+    public Invite(DoctorServiceImpl doctorService,
+                  TelegramMessageSender telegramMessageSender,
+                  UserServiceImpl userService) {
         this.doctorService = doctorService;
+        this.telegramMessageSender = telegramMessageSender;
+        this.userService = userService;
     }
 
     @Override
@@ -32,15 +41,10 @@ public class Invite implements ICommand {
 
         if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
-            if (parts.length == 3 && "invite".equals(parts[0])) {
+            if ("/inviteDoctor".equals(parts[0]) && parts.length == 2) {
                 Long doctorId = Long.parseLong(parts[1]);
-                String action = parts[2];
-
-                if ("send".equals(action)) {
-                    return createSuccessMessage(chatId, "✅ Приглашение отправлено врачу");
-                } else if ("cancel".equals(action)) {
-                    return createProfileMessage(chatId);
-                }
+                sendInviteToDoctor(patientId, doctorId);
+                return createSuccessMessage(chatId, "✅ Приглашение отправлено врачу");
             }
         }
 
@@ -53,11 +57,35 @@ public class Invite implements ICommand {
         return createDoctorsListMessage(chatId, doctors);
     }
 
+    private void sendInviteToDoctor(Long patientId, Long doctorId) throws TelegramApiException {
+        User patient = userService.getUserByUserId(patientId);
+        Doctor doctor = doctorService.getDoctor(doctorId);
+
+        if (patient == null || doctor == null) {
+            return;
+        }
+
+        String messageText = String.format(
+                "👋 <b>Новое приглашение</b>\n\n" +
+                        "Пациент <b>%s</b> хочет стать вашим подопечным.\n\n" +
+                        "Вы хотите принять это приглашение?",
+                patient.getName()
+        );
+
+        SendMessage inviteMessage = new SendMessage();
+        inviteMessage.setChatId(doctor.getTelegramId().toString());
+        inviteMessage.setText(messageText);
+        inviteMessage.enableHtml(true);
+        inviteMessage.setReplyMarkup(InlineKeyboardFactory.createDoctorInviteResponseKeyboard(patientId));
+
+        telegramMessageSender.sendMessage(inviteMessage);
+    }
+
     private SendMessage createErrorMessage(Long chatId, String errorMessage) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(errorMessage);
-        message.setReplyMarkup(InlineKeyboardFactory.createReturnToMenu());
+        message.setReplyMarkup(InlineKeyboardFactory.createBackToMenuButtonClinic());
         return message;
     }
 
@@ -88,7 +116,7 @@ public class Invite implements ICommand {
                     "%d. <b>%s</b> (%s)\n",
                     i + 1,
                     doctor.getName(),
-                    doctor.getLicenseNumber()
+                    doctor.getId()
             ));
         }
 

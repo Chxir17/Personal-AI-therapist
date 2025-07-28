@@ -4,6 +4,8 @@ import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.*;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.invite.AcceptInvite;
+import com.aitherapist.aitherapist.telegrambot.commands.doctors.invite.RejectInvite;
 import com.aitherapist.aitherapist.telegrambot.commands.doctors.settings.SettingsDoctorCommand;
 import com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.EditPatientAccountData;
@@ -71,14 +73,16 @@ public class CommandsHandler {
             GetLastPatientMedicalData lastRecords,
             QAMode qaMode,
             Help help,
-            Invite invite,
             Privacy privacy,
             EditDoctorAccountData editDoctorAccountData,
             DoctorMenu doctorMenu,
             Verification verification,
             TelegramMessageSender messageSender,
             UserServiceImpl userService,
-            GetPatientDailyData getPatientDailyData
+            GetPatientDailyData getPatientDailyData,
+            Invite invite,
+            AcceptInvite acceptInvite,
+            RejectInvite rejectInvite
     ) {
         this.verification = verification;
         this.messageSender = messageSender;
@@ -92,7 +96,7 @@ public class CommandsHandler {
                 editHeightCommand, editWeightCommand, editBadHabitsCommand, writeDailyData,
                 healthHistory, profile, setNotificationMessage, setNotificationTime,
                 toggleNotifications, doctorProfile, editMedicalDataCommand, clinicMenu,
-                lastRecords, qaMode, help, privacy, editDoctorAccountData, doctorMenu, getPatientDailyData, invite
+                lastRecords, qaMode, help, privacy, editDoctorAccountData, doctorMenu, getPatientDailyData, invite, acceptInvite, rejectInvite
         );
     }
 
@@ -133,7 +137,10 @@ public class CommandsHandler {
             EditDoctorAccountData editDoctorAccountData,
             DoctorMenu doctorMenu,
             GetPatientDailyData getPatientDailyData,
-            Invite invite) {
+            Invite invite,
+            AcceptInvite acceptInvite,
+            RejectInvite rejectInvite
+            ) {
         return Map.ofEntries(
                 Map.entry("/start", startCommand),
                 Map.entry("/patientDailyData", getPatientDailyData),
@@ -171,7 +178,10 @@ public class CommandsHandler {
                 Map.entry("/editBadHabits", editBadHabitsCommand),
                 Map.entry("/editDoctorAccountData", editDoctorAccountData),
                 Map.entry("/editPatientMedicalData", editMedicalDataCommand),
-                Map.entry("/inviteDoctor", invite)
+                Map.entry("/inviteDoctor", invite),
+                Map.entry("/acceptInvite", acceptInvite),
+                Map.entry("/rejectInvite", rejectInvite)
+
         );
     }
 
