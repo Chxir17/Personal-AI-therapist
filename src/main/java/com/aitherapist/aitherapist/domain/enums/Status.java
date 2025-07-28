@@ -45,7 +45,7 @@ public enum Status  {
     }
 
     public boolean isRegistrationProcess() {
-        return this.name().startsWith("REGISTRATION");
+        return this.name().startsWith("REGISTRATION") || this.name().startsWith("REGISTRATION_CLINIC_PATIENT");
     }
 
     public DynamicStatus withId(Long id) {

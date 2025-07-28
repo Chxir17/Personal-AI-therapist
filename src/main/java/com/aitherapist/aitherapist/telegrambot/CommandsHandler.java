@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.telegrambot.commands.*;
@@ -14,6 +15,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.*
 import com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient.settings.*;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.nonClinicPatient.StartNonClinicPatient;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -208,18 +211,19 @@ public class CommandsHandler {
             ICommand commandHandler = commands.get(command);
 
             if (commandHandler != null) {
-//                if (commandHandler.getClass().isAnnotationPresent(CommandAccess.class)) {
-//                    CommandAccess access = commandHandler.getClass().getAnnotation(CommandAccess.class);
-//
-//                    if (access.requiresRegistration() && !registrationContext.getStatus(userId).isRegistrationProcess()) {
-//                        return new SendMessage(String.valueOf(chatId), "🔒 Пожалуйста, завершите регистрацию для доступа к этой команде");
-//                    }
-//                    Roles userRole = userService.getUserRoles(userId);
-//                    if (access.allowedRoles().length > 0 &&
-//                            !Arrays.asList(access.allowedRoles()).contains(userRole)) {
-//                        return new SendMessage(String.valueOf(chatId), "⛔ Эта команда недоступна для вашей роли");
-//                    }
-//                }
+                if (commandHandler.getClass().isAnnotationPresent(CommandAccess.class)) {
+                    CommandAccess access = commandHandler.getClass().getAnnotation(CommandAccess.class);
+
+                    if (access.requiresRegistration() && registrationContext.getStatus(userId).isRegistrationProcess()) {
+                        return new SendMessage(String.valueOf(chatId), "🔒 Пожалуйста, завершите регистрацию для доступа к этой команде");
+                    }
+                    Roles userRole = userService.getUserRoles(userId);
+                    if (access.allowedRoles().length > 0 &&
+                            !Arrays.asList(access.allowedRoles()).contains(userRole)) {
+                        return new SendMessage(String.valueOf(chatId), "⛔ Эта команда недоступна для вашей роли");
+                    }
+                    return commandHandler.apply(update, registrationContext);
+                }
 
                 return commandHandler.apply(update, registrationContext);
             }

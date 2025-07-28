@@ -26,7 +26,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
-@CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT}, requiresRegistration = true)
 public class StartClinicPatient implements ICommand {
     private final UserServiceImpl userService;
     private final RegistrationProcess registrationProcess;
