@@ -120,7 +120,7 @@ public class RegistrationProcess {
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
-                .replyMarkup(verification.createContactRequestKeyboard())
+                .replyMarkup(Verification.createContactRequestKeyboard())
                 .build();
     }
 

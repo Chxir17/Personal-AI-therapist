@@ -144,26 +144,9 @@ public class StartDoctors implements ICommand {
                         .text("Ошибка обработки данных")
                         .build();
             }
-        } else {
-            if (registrationContext.isVerify(userId) && !(registrationContext.getStatus(userId) == Status.GIVING_PHONE_NUMBER_CLINIC_PATIENT)) {
+        } else if (registrationContext.isVerify(userId) ) {
                 registrationContext.setStatus(userId, Status.GIVING_PHONE_NUMBER_DOCTOR);
                 return requestPhoneNumber(TelegramIdUtils.getChatId(update));
-            }
-        }
-
-
-        if (update.hasCallbackQuery()) {
-            try {
-                telegramExecutor.editMessageText(
-                        TelegramIdUtils.getChatId(update).toString(),
-                        update.getCallbackQuery().getMessage().getMessageId(),
-                        "Вы уже верифицированы. Выберите действие:",
-                        InlineKeyboardFactory.createDoctorDefaultKeyboard()
-                );
-                return null;
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
         }
 
         return SendMessage.builder()
