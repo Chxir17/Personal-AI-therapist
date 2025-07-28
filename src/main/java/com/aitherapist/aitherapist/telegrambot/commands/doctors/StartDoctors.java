@@ -103,7 +103,6 @@ public class StartDoctors implements ICommand {
                 state.getUserInput().append("gender: ").append(text).append("\n");
                 String response = parseUserPrompt.doctorRegistrationParser(state.getUserInput().toString());
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
-                System.out.println("JSONNNNNNNN" + jsonWithType);
                 try {
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
