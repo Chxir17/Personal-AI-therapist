@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
@@ -163,6 +164,7 @@ public class MessagesHandler implements IHandler {
                 messageSender.sendMessage(errorMessage);
                 return;
             }
+            update.getMessage().setContact(new Contact(messageText, update.getMessage().getChat().getFirstName(), update.getMessage().getChat().getLastName(), userId, ""));
 
             SendMessage sm = SendMessage.builder()
                 .chatId(chatId.toString())
@@ -171,7 +173,6 @@ public class MessagesHandler implements IHandler {
                 .build();
 
             messageSender.sendMessage(sm);
-
             registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
             commandsHandler.mapStatusToHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
     }
