@@ -13,6 +13,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -38,7 +39,8 @@ public class RegistrationProcess {
     }
 
     public SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, User patient) {
-        String genderDisplay = patient.getGender() ? "♂ Мужской" : "♀ Женский";
+        String genderDisplay = patient.getGender() == null ? "Не указан" :
+                (patient.getGender() ? "♂ Мужской" : "♀ Женский");
 
         String birthDateAndAge;
         if (patient.getBirthDate() != null) {
@@ -49,15 +51,15 @@ public class RegistrationProcess {
             birthDateAndAge = "Не указана";
         }
 
-        String chronicDiseasesDisplay;
-        if (initialHealthData.getChronicDiseases() == null) {
-            chronicDiseasesDisplay = "Нет";
-        } else if (initialHealthData.getChronicDiseases().equalsIgnoreCase("false")) {
-            chronicDiseasesDisplay = "Нет";
-        } else if (initialHealthData.getChronicDiseases().equalsIgnoreCase("true")) {
-            chronicDiseasesDisplay = "Да";
-        } else {
-            chronicDiseasesDisplay = initialHealthData.getChronicDiseases();
+        String chronicDiseasesDisplay = "Нет";
+        if (initialHealthData.getChronicDiseases() != null) {
+            if (initialHealthData.getChronicDiseases().equalsIgnoreCase("false")) {
+                chronicDiseasesDisplay = "Нет";
+            } else if (initialHealthData.getChronicDiseases().equalsIgnoreCase("true")) {
+                chronicDiseasesDisplay = "Да";
+            } else {
+                chronicDiseasesDisplay = initialHealthData.getChronicDiseases();
+            }
         }
 
         String badHabitsDisplay = "Нет";
@@ -69,26 +71,35 @@ public class RegistrationProcess {
             }
         }
 
+        String arrhythmiaDisplay = initialHealthData.getArrhythmia() != null ?
+                (initialHealthData.getArrhythmia() ? "Да" : "Нет") : "Не указано";
+
+        String heightDisplay = initialHealthData.getHeight() != null ?
+                String.valueOf(initialHealthData.getHeight()) : "Не указан";
+
+        String weightDisplay = initialHealthData.getWeight() != null ?
+                String.valueOf(initialHealthData.getWeight()) : "Не указан";
+
         String message = String.format("""
-    📝 *Вы ввели данные:*
-    
-    👤 *Имя:* %s
-    🎂 *Дата рождения (возраст):* %s
-    🚻 *Пол:* %s
-    
-    💓 *Аритмия:* %s
-    🏥 *Хронические заболевания:* %s
-    📏 *Рост:* %s
-    ⚖️ *Вес:* %s
-    🚬 *Вредные привычки:* %s
-    """,
+📝 *Вы ввели данные:*
+
+👤 *Имя:* %s
+🎂 *Дата рождения (возраст):* %s
+🚻 *Пол:* %s
+
+💓 *Аритмия:* %s
+🏥 *Хронические заболевания:* %s
+📏 *Рост:* %s
+⚖️ *Вес:* %s
+🚬 *Вредные привычки:* %s
+""",
                 patient.getName(),
                 birthDateAndAge,
                 genderDisplay,
-                initialHealthData.getArrhythmia() ? "Да" : "Нет",
+                arrhythmiaDisplay,
                 chronicDiseasesDisplay,
-                initialHealthData.getHeight(),
-                initialHealthData.getWeight(),
+                heightDisplay,
+                weightDisplay,
                 badHabitsDisplay);
 
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createAcceptOrEditKeyboardPatient();
@@ -132,16 +143,15 @@ public class RegistrationProcess {
         patient.setTelegramId(userId);
 
         InitialHealthData healthData = new InitialHealthData();
-        healthData.setArrhythmia(dto.getArrhythmia());
+        healthData.setArrhythmia(dto.getArrhythmia() != null ? dto.getArrhythmia() : false);
         healthData.setHeight(dto.getHeight());
         healthData.setWeight(dto.getWeight());
-        healthData.setChronicDiseases(dto.getChronicDiseases());
+        healthData.setChronicDiseases(dto.getChronicDiseases() != null ? dto.getChronicDiseases() : "false");
         healthData.setBadHabits(dto.getBadHabits());
         healthData.setPatient(patient);
 
         patient.setInitialData(healthData);
     }
-
     public SendMessage handleQuestionnaire(Update update, RegistrationContext registrationContext, Long userId, UserServiceImpl userService, ObjectMapper mapper, boolean isClinicPatient) throws TelegramApiException, InterruptedException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
         ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
@@ -213,7 +223,7 @@ public class RegistrationProcess {
             case 8 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
                 System.out.println("STATE " + state.getBase().toString());
-                String response = parseUserPrompt.patientRegistrationParser(state.getBase().toString() );
+                String response = parseUserPrompt.patientRegistrationParser(state.getBase().toString());
                 String jsonWithType;
                 if (isClinicPatient) {
                     jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
@@ -221,6 +231,9 @@ public class RegistrationProcess {
                     jsonWithType = "{\"user_type\":\"BOT_PATIENT\"," + response.substring(1);
                 }
                 System.out.println("JSON MAPPER " + jsonWithType);
+
+
+                mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
                 Patient patient;
 
@@ -255,7 +268,5 @@ public class RegistrationProcess {
                         .build();
             }
         }
-
-
     }
 }
