@@ -5,6 +5,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -156,7 +157,14 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         String messageText = update.getMessage().getText();
         if (messageText.startsWith("/start") || messageText.startsWith("/help") || messageText.startsWith("/privacy")) {
             sendMessage(commandsHandler.handleCommand(update, registrationContext));
-        } else {
+        } else if (messageText.startsWith("/")) {
+            SendMessage sm = SendMessage.builder()
+                    .chatId(TelegramIdUtils.getChatId(update).toString())
+                    .text("Неизвестная команда")
+                    .build();
+            execute(sm);
+        }
+        else {
             messagesHandler.handle(update, registrationContext);
         }
     }
