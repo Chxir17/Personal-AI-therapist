@@ -69,25 +69,10 @@ public class StartClinicPatient implements ICommand {
                         .text("Ошибка обработки данных" + e.getMessage())
                         .build();
             }
-        } else if (registrationContext.isVerify(userId)) {
-            registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
-            return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
-        }
-
-        String messageText = "Вы уже верифицированы. Выберите действие:";
-        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createPatientDefaultKeyboard(patient);
-
-        if (update.hasCallbackQuery()) {
-            try {
-                telegramExecutor.editMessageText(
-                        TelegramIdUtils.getChatId(update).toString(),
-                        update.getCallbackQuery().getMessage().getMessageId(),
-                        messageText,
-                        keyboard
-                );
-                return null;
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
+        } else {
+            if (registrationContext.isVerify(userId)) {
+                registrationContext.setStatus(userId, Status.GIVING_PHONE_NUMBER);
+                return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
 

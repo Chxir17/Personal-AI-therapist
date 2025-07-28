@@ -37,6 +37,7 @@ public enum Status  {
     SET_NOTIFICATION_MESSAGE,
     SEND_TO_THIS_USER,
     SEND_TO_THIS_DOCTOR,
+    GIVING_PHONE_NUMBER,
     QAMode;
 
 
