@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Role;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Contact;
@@ -173,7 +174,16 @@ public class MessagesHandler implements IHandler {
                 .build();
 
             messageSender.sendMessage(sm);
-            registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+            Roles role = userService.getUserRoles(userId);
+            if (role == Roles.CLINIC_PATIENT) {
+                registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+            }
+            else if(role == Roles.DOCTOR){
+                registrationContext.setStatus(userId, Status.REGISTRATION_DOCTOR);
+            }
+            else{
+                registrationContext.setStatus(userId, Status.REGISTRATION_NO_CLINIC_PATIENT);
+            }
             commandsHandler.mapStatusToHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
     }
 
