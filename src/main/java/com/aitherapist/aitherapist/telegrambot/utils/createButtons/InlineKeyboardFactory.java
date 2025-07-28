@@ -18,6 +18,54 @@ public class InlineKeyboardFactory {
         return createInlineKeyboard(buttonMap, 1);
     }
 
+    public static InlineKeyboardMarkup createDoctorInviteResponseKeyboard(Long patientId) {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        InlineKeyboardButton acceptButton = new InlineKeyboardButton();
+        acceptButton.setText("✅ Принять");
+        acceptButton.setCallbackData("/acceptInvite " + patientId);
+
+        InlineKeyboardButton rejectButton = new InlineKeyboardButton();
+        rejectButton.setText("❌ Отклонить");
+        rejectButton.setCallbackData("/rejectInvite " + patientId);
+
+        row.add(acceptButton);
+        row.add(rejectButton);
+        keyboard.add(row);
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        return markup;
+    }
+
+    public static InlineKeyboardMarkup createDoctorsInvitationKeyboard(List<Doctor> doctors) {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        for (Doctor doctor : doctors) {
+            InlineKeyboardButton inviteButton = new InlineKeyboardButton();
+            inviteButton.setText("Отправить приглашение " + doctor.getName());
+            inviteButton.setCallbackData("/inviteDoctor " + doctor.getTelegramId());
+
+            InlineKeyboardButton cancelButton = new InlineKeyboardButton();
+            cancelButton.setText("Отмена");
+            cancelButton.setCallbackData("/clinicPatientMenu");
+
+            keyboard.add(Arrays.asList(inviteButton, cancelButton));
+        }
+
+
+        InlineKeyboardButton backButton = new InlineKeyboardButton();
+        backButton.setText("🔙 Вернуться в главное меню");
+        backButton.setCallbackData("/clinicPatientMenu");
+        keyboard.add(Collections.singletonList(backButton));
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        return markup;
+    }
+
     public static InlineKeyboardMarkup createInlineKeyboard(Map<String, String> buttonMap, int buttonsPerRow) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
@@ -130,14 +178,14 @@ public class InlineKeyboardFactory {
     public static InlineKeyboardMarkup createPatientDefaultKeyboard(Patient patient) {
         Map<String, String> buttonMap = new LinkedHashMap<>();
         buttonMap.put("📊 Ввести ежедневные данные", "/inputDailyData");
-        if(patient.getRole() == Roles.CLINIC_PATIENT){
-            buttonMap.put("💬 Написать доктору", "/sendMessageDoctor");
-        }
         buttonMap.put("👤 Мой профиль", "/myProfile");
         buttonMap.put("⚙️ Настройки", "/patientSettings");
         buttonMap.put("📈 История показателей", "/myHealthHistory");
         buttonMap.put("❓ Задать вопрос", "/QAMode");
-
+        if(patient.getRole() == Roles.CLINIC_PATIENT){
+            buttonMap.put("💬 Написать доктору", "/sendMessageDoctor");
+            buttonMap.put("📅 Найти доктора ", "/inviteDoctor");
+        }
         return createInlineKeyboard(buttonMap, 2);
     }
 

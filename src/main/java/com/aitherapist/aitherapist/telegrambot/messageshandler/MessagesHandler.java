@@ -29,8 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
@@ -107,6 +109,12 @@ public class MessagesHandler implements IHandler {
         else if (userStatus == Status.WRITE_DAILY_DATA) {
             handleWriteDailyData(update);
         }
+        else if (userStatus == Status.GIVING_PHONE_NUMBER_CLINIC_PATIENT){
+            handleGivingPhoneNumber(update, Roles.CLINIC_PATIENT);
+        }
+        else if(userStatus == Status.GIVING_PHONE_NUMBER_DOCTOR){
+            handleGivingPhoneNumber(update, Roles.DOCTOR);
+        }
         if (userStatus  == Status.SET_NOTIFICATION_TIME) {
             handleSetNotificationTime(update);
         } else if (userStatus == Status.SET_NOTIFICATION_MESSAGE) {
@@ -133,6 +141,47 @@ public class MessagesHandler implements IHandler {
         else if (userStatus == Status.GIVING_PATIENT_ID) {
             handleGivePatientIdStatus(update);
         }
+    }
+
+    private void handleGivingPhoneNumber(Update update, Roles role) throws TelegramApiException {
+            String messageText = update.getMessage().getText().trim();
+            Long chatId = update.getMessage().getChatId();
+            Long userId = update.getMessage().getFrom().getId();
+
+            String cleaned = messageText.replaceAll("[^\\d+]", "");
+
+            boolean isValid = false;
+
+            if (cleaned.startsWith("+7") && cleaned.length() == 12 && cleaned.substring(1).matches("\\d{11}")) {
+                isValid = true;
+            } else if (cleaned.startsWith("8") && cleaned.length() == 11 && cleaned.matches("\\d{11}")) {
+                isValid = true;
+            }
+
+            if (!isValid) {
+                SendMessage errorMessage = SendMessage.builder()
+                        .chatId(chatId.toString())
+                        .text("❌ Неверный формат номера телефона.\n" +
+                                "Пожалуйста, введите корректный номер, начинающийся с +7 или 8 и содержащий 11 цифр.")
+                        .build();
+                messageSender.sendMessage(errorMessage);
+                return;
+            }
+            update.getMessage().setContact(new Contact(messageText, update.getMessage().getChat().getFirstName(), update.getMessage().getChat().getLastName(), userId, ""));
+
+            SendMessage sm = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text("✅ Верификация успешна.\nПожалуйста заполните анкету:")
+                .replyMarkup(new ReplyKeyboardRemove(true)) // Удаляем клавиатуру
+                .build();
+
+            messageSender.sendMessage(sm);
+        registrationContext.setStatus(userId,
+                role == Roles.CLINIC_PATIENT ? Status.REGISTRATION_CLINIC_PATIENT :
+                        role == Roles.DOCTOR ? Status.REGISTRATION_DOCTOR :
+                                Status.REGISTRATION_NO_CLINIC_PATIENT
+        );
+            commandsHandler.mapStatusToHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
     }
 
     private void QAModeHandler(Update update) throws TelegramApiException {

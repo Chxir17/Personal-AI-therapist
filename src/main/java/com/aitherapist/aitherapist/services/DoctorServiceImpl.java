@@ -1,9 +1,12 @@
 package com.aitherapist.aitherapist.services;
 
+import com.aitherapist.aitherapist.domain.enums.Roles;
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.repositories.IDoctorRepository;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
+import com.aitherapist.aitherapist.services.interfaces.IUserService;
 import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +20,34 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class DoctorServiceImpl implements IDoctorService {
     private final IDoctorRepository doctorRepository;
+    private final IUserService userService;
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Doctor> getAllDoctorsWithPatients() {
+        List<Doctor> doctors = doctorRepository.findAllByRole(Roles.DOCTOR);
+        doctors.forEach(doctor -> Hibernate.initialize(doctor.getPatients()));
+        return doctors;
+    }
 
     @Autowired
-    public DoctorServiceImpl(IDoctorRepository doctorRepository) {
+    public DoctorServiceImpl(IDoctorRepository doctorRepository, IUserService userService) {
         this.doctorRepository = doctorRepository;
+        this.userService = userService;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Doctor> getAllDoctors() {
+        return doctorRepository.findAllByRole(Roles.DOCTOR);
+    }
+
+    @Override
+    @Transactional
+    public void addPatientToDoctor(Long doctorId, Long patientId) {
+
+        doctorRepository.addPatientToDoctor(doctorId, patientId);
     }
 
     @Override

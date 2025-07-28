@@ -6,35 +6,41 @@ import com.aitherapist.aitherapist.domain.model.PatientRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import java.time.format.DateTimeFormatter;
-
 
 @Component
 public class RegistrationProcess {
     private final Verification verification;
     private final ParseUserPrompt parseUserPrompt;
+    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
-    public RegistrationProcess(Verification verification, ParseUserPrompt parseUserPrompt) {
+    public RegistrationProcess(Verification verification, ParseUserPrompt parseUserPrompt,
+                               @Lazy ITelegramExecutor telegramExecutor) {
         this.verification = verification;
         this.parseUserPrompt = parseUserPrompt;
+        this.telegramExecutor = telegramExecutor;
     }
 
     public SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, User patient) {
-        String genderDisplay = patient.getGender() ? "♂ Мужской" : "♀ Женский";
+        String genderDisplay = patient.getGender() == null ? "Не указан" :
+                (patient.getGender() ? "♂ Мужской" : "♀ Женский");
 
         String birthDateAndAge;
         if (patient.getBirthDate() != null) {
@@ -45,15 +51,15 @@ public class RegistrationProcess {
             birthDateAndAge = "Не указана";
         }
 
-        String chronicDiseasesDisplay;
-        if (initialHealthData.getChronicDiseases() == null) {
-            chronicDiseasesDisplay = "Нет";
-        } else if (initialHealthData.getChronicDiseases().equalsIgnoreCase("false")) {
-            chronicDiseasesDisplay = "Нет";
-        } else if (initialHealthData.getChronicDiseases().equalsIgnoreCase("true")) {
-            chronicDiseasesDisplay = "Да";
-        } else {
-            chronicDiseasesDisplay = initialHealthData.getChronicDiseases();
+        String chronicDiseasesDisplay = "Нет";
+        if (initialHealthData.getChronicDiseases() != null) {
+            if (initialHealthData.getChronicDiseases().equalsIgnoreCase("false")) {
+                chronicDiseasesDisplay = "Нет";
+            } else if (initialHealthData.getChronicDiseases().equalsIgnoreCase("true")) {
+                chronicDiseasesDisplay = "Да";
+            } else {
+                chronicDiseasesDisplay = initialHealthData.getChronicDiseases();
+            }
         }
 
         String badHabitsDisplay = "Нет";
@@ -65,33 +71,59 @@ public class RegistrationProcess {
             }
         }
 
+        String arrhythmiaDisplay = initialHealthData.getArrhythmia() != null ?
+                (initialHealthData.getArrhythmia() ? "Да" : "Нет") : "Не указано";
+
+        String heightDisplay = initialHealthData.getHeight() != null ?
+                String.valueOf(initialHealthData.getHeight()) : "Не указан";
+
+        String weightDisplay = initialHealthData.getWeight() != null ?
+                String.valueOf(initialHealthData.getWeight()) : "Не указан";
+
         String message = String.format("""
-    📝 *Вы ввели данные:*
-    
-    👤 *Имя:* %s
-    🎂 *Дата рождения (возраст):* %s
-    🚻 *Пол:* %s
-    
-    💓 *Аритмия:* %s
-    🏥 *Хронические заболевания:* %s
-    📏 *Рост:* %s
-    ⚖️ *Вес:* %s
-    🚬 *Вредные привычки:* %s
-    """,
+📝 *Вы ввели данные:*
+
+👤 *Имя:* %s
+🎂 *Дата рождения (возраст):* %s
+🚻 *Пол:* %s
+
+💓 *Аритмия:* %s
+🏥 *Хронические заболевания:* %s
+📏 *Рост:* %s
+⚖️ *Вес:* %s
+🚬 *Вредные привычки:* %s
+""",
                 patient.getName(),
                 birthDateAndAge,
                 genderDisplay,
-                initialHealthData.getArrhythmia() ? "Да" : "Нет",
+                arrhythmiaDisplay,
                 chronicDiseasesDisplay,
-                initialHealthData.getHeight(),
-                initialHealthData.getWeight(),
+                heightDisplay,
+                weightDisplay,
                 badHabitsDisplay);
+
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createAcceptOrEditKeyboardPatient();
+        String fullMessage = message + "\n\nВыберите действие:";
+
+        if (update.hasCallbackQuery()) {
+            try {
+                telegramExecutor.editMessageText(
+                        String.valueOf(update.getCallbackQuery().getMessage().getChatId()),
+                        update.getCallbackQuery().getMessage().getMessageId(),
+                        fullMessage,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
 
         return SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text(message + "\n\nВыберите действие:")
+                .text(fullMessage)
                 .parseMode("Markdown")
-                .replyMarkup(InlineKeyboardFactory.createAcceptOrEditKeyboardPatient())
+                .replyMarkup(keyboard)
                 .build();
     }
 
@@ -99,7 +131,7 @@ public class RegistrationProcess {
         return SendMessage.builder()
                 .chatId(chatId.toString())
                 .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
-                .replyMarkup(verification.createContactRequestKeyboard())
+                .replyMarkup(Verification.createContactRequestKeyboard())
                 .build();
     }
 
@@ -111,16 +143,15 @@ public class RegistrationProcess {
         patient.setTelegramId(userId);
 
         InitialHealthData healthData = new InitialHealthData();
-        healthData.setArrhythmia(dto.getArrhythmia());
+        healthData.setArrhythmia(dto.getArrhythmia() != null ? dto.getArrhythmia() : false);
         healthData.setHeight(dto.getHeight());
         healthData.setWeight(dto.getWeight());
-        healthData.setChronicDiseases(dto.getChronicDiseases());
+        healthData.setChronicDiseases(dto.getChronicDiseases() != null ? dto.getChronicDiseases() : "false");
         healthData.setBadHabits(dto.getBadHabits());
         healthData.setPatient(patient);
 
         patient.setInitialData(healthData);
     }
-
     public SendMessage handleQuestionnaire(Update update, RegistrationContext registrationContext, Long userId, UserServiceImpl userService, ObjectMapper mapper, boolean isClinicPatient) throws TelegramApiException, InterruptedException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
         ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
@@ -192,7 +223,7 @@ public class RegistrationProcess {
             case 8 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
                 System.out.println("STATE " + state.getBase().toString());
-                String response = parseUserPrompt.patientRegistrationParser(state.getBase().toString() );
+                String response = parseUserPrompt.patientRegistrationParser(state.getBase().toString());
                 String jsonWithType;
                 if (isClinicPatient) {
                     jsonWithType = "{\"user_type\":\"CLINIC_PATIENT\"," + response.substring(1);
@@ -200,6 +231,9 @@ public class RegistrationProcess {
                     jsonWithType = "{\"user_type\":\"BOT_PATIENT\"," + response.substring(1);
                 }
                 System.out.println("JSON MAPPER " + jsonWithType);
+
+
+                mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
                 Patient patient;
 
@@ -233,10 +267,6 @@ public class RegistrationProcess {
                         .text("Неизвестный шаг регистрации")
                         .build();
             }
-
-
         }
-
-
     }
 }

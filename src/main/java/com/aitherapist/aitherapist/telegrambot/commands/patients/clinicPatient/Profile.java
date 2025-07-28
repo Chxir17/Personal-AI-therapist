@@ -1,6 +1,8 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
 import com.aitherapist.aitherapist.domain.enums.Roles;
+import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
+import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.InitialHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
@@ -24,17 +26,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class Profile implements ICommand {
 
     private final UserServiceImpl userService;
-    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
-    public Profile(UserServiceImpl userService, @Lazy ITelegramExecutor telegramExecutor) {
+    public Profile(UserServiceImpl userService) {
         this.userService = userService;
-        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
@@ -87,6 +87,23 @@ public class Profile implements ICommand {
 
     private String buildProfileMessageText(Patient patient) {
         InitialHealthData initialData = patient.getInitialData();
+        String doctorInfo = "";
+
+        if (patient instanceof ClinicPatient clinicPatient) {
+            if (!clinicPatient.getDoctors().isEmpty()) {
+                StringBuilder doctorsBuilder = new StringBuilder("\n👨⚕️ Ваши врачи:\n");
+                for (Doctor doctor : clinicPatient.getDoctors()) {
+                    doctorsBuilder.append(String.format(
+                            "├ %s (%s)\n",
+                            doctor.getName(),
+                            doctor.getLicenseNumber() != null ? "лиц. " + doctor.getLicenseNumber() : "лицензия не указана"
+                    ));
+                }
+                doctorInfo = doctorsBuilder.toString();
+            } else {
+                doctorInfo = "\n👨⚕️ У вас нет прикрепленных врачей";
+            }
+        }
 
         return String.format(
                 """
@@ -100,6 +117,7 @@ public class Profile implements ICommand {
                 
                 🩺 Медицинские показатели
                 %s
+                %s
                 
                 ✏️ Вы можете изменить данные через меню профиля
                 """,
@@ -107,7 +125,8 @@ public class Profile implements ICommand {
                 patient.getAge(),
                 patient.getPhoneNumber(),
                 patient.getGender() ? "Мужской ♂" : "Женский ♀",
-                buildHealthDataSection(initialData)
+                buildHealthDataSection(initialData),
+                doctorInfo
         );
     }
 

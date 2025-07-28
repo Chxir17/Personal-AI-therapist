@@ -8,6 +8,7 @@ import com.aitherapist.aitherapist.domain.model.entities.Patient;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -28,6 +29,7 @@ public class WriteDailyData implements ICommand {
     private final PatientServiceImpl patientService;
     private final ParseUserPrompt parseUserPrompt;
     private final MakeMedicalRecommendation makeMedicalRecommendation;
+
     @Autowired
     public WriteDailyData(PatientServiceImpl patientService, ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation) {
         this.patientService = patientService;
@@ -86,7 +88,7 @@ public class WriteDailyData implements ICommand {
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         registrationContext.setStatus(userId, Status.WRITE_DAILY_DATA);
         try {

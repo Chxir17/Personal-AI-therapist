@@ -18,17 +18,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class EditDoctorAccountData implements ICommand {
 
-    private final ITelegramExecutor telegramExecutor;
     private DoctorServiceImpl doctorService;
 
     @Autowired
-    public EditDoctorAccountData(@Lazy ITelegramExecutor telegramExecutor, DoctorServiceImpl doctorService){
-        this.telegramExecutor = telegramExecutor;
+    public EditDoctorAccountData(DoctorServiceImpl doctorService){
         this.doctorService = doctorService;
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
         Doctor doctor = doctorService.getDoctor(TelegramIdUtils.extractUserId(update));
         String messageText = "Что вы хотите изменить?";

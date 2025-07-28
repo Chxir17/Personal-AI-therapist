@@ -116,7 +116,7 @@ public abstract class User {
 
     public Map<String, String> makeMetaInformation(User user) {
         var result = new LinkedHashMap<String, String>();
-        result.put("name", makeDataList(List.of(user.getName())));
+        result.put("name", makeDataList(List.of(user.getName() != null ? user.getName() : "null")));
         result.put("age", makeDataList(List.of(user.getAge() != null ? String.valueOf(user.getAge()) : "null")));
         result.put("male", makeDataList(List.of(user.getGender() != null ? (user.getGender() ? "муж" : "жен") : "null")));
         if (user instanceof Patient patient){

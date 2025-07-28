@@ -31,13 +31,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class QAMode implements ICommand {
     private final PatientServiceImpl patientService;
     private final UserQuestions userQuestions;
-    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
-    public QAMode(PatientServiceImpl patientService, UserQuestions userQuestions, @Lazy ITelegramExecutor telegramExecutor) {
+    public QAMode(PatientServiceImpl patientService, UserQuestions userQuestions) {
         this.patientService = patientService;
         this.userQuestions = userQuestions;
-        this.telegramExecutor = telegramExecutor;
     }
 
     private SendMessage QAModeHandler(Update update, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
@@ -62,7 +60,7 @@ public class QAMode implements ICommand {
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         if (registrationContext.getStatus(userId) == Status.QAMode) {
             return QAModeHandler(update, userId, registrationContext);

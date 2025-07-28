@@ -28,22 +28,19 @@ public class Settings implements ICommand {
 
     private final UserServiceImpl userService;
     private final NotificationServiceImpl notificationService;
-    private final ITelegramExecutor telegramExecutor;
     private final RegistrationContext registrationContext;
 
     @Autowired
     public Settings(UserServiceImpl userService,
                     NotificationServiceImpl notificationService,
-                    @Lazy ITelegramExecutor telegramExecutor,
                     RegistrationContext registrationContext) {
         this.userService = userService;
         this.notificationService = notificationService;
-        this.telegramExecutor = telegramExecutor;
         this.registrationContext = registrationContext;
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
@@ -97,7 +94,7 @@ public class Settings implements ICommand {
         MedicalNormalData medicalData = registrationContext.getMedicalNormalData(userId);
 
         return "✨ Ваши персональные настройки и нормативы ✨\n\n" +
-                "⚙️ <u>Настройки уведомлений</u>\n\n" +
+                "⚙️ Настройки уведомлений\n\n" +
                 "🔔  Статус: " + (notificationsEnabled ? "ВКЛ ✅" : "ВЫКЛ ❌") + "\n" +
                 "⏰  Время: " + (notificationTime != null ?
                 notificationTime.format(DateTimeFormatter.ofPattern("HH:mm")) : "не установлено") + "\n" +
@@ -106,7 +103,6 @@ public class Settings implements ICommand {
                 "💤  Сон: " + String.format("%.1f", medicalData.getHoursOfSleepToday()) + " ч/сутки\n" +
                 "❤️  Пульс: " + medicalData.getPulse() + " уд/мин\n" +
                 "🩸  Давление: " + medicalData.getPressure() + "\n\n\n" +
-                "⏱ Обновлено: " + medicalData.getLastUpdate() + "<\n\n" +
                 "Эти показатели рассчитаны специально для вас 💙";
     }
 

@@ -37,7 +37,9 @@ public enum Status  {
     SET_NOTIFICATION_MESSAGE,
     SEND_TO_THIS_USER,
     SEND_TO_THIS_DOCTOR,
-    QAMode;
+    GIVING_PHONE_NUMBER_CLINIC_PATIENT,
+    QAMode,
+    GIVING_PHONE_NUMBER_DOCTOR;
 
 
     public boolean isRegistered() {
@@ -45,7 +47,7 @@ public enum Status  {
     }
 
     public boolean isRegistrationProcess() {
-        return this.name().startsWith("REGISTRATION");
+        return this.name().startsWith("REGISTRATION") || this.name().startsWith("REGISTRATION_CLINIC_PATIENT") || this.name().startsWith("REGISTRATION_NO_CLINIC_PATIENT") || this.name().startsWith("REGISTERED_CLINIC_PATIENT");
     }
 
     public DynamicStatus withId(Long id) {

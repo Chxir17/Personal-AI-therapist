@@ -26,20 +26,17 @@ public class StartCommand implements ICommand {
     private final IMessageSender messageSender;
     private final UserServiceImpl userRegistrationService;
     private final PatientServiceImpl patientService;
-    private final ITelegramExecutor telegramExecutor;
     @Autowired
     public StartCommand(IMessageSender messageSender,
                         UserServiceImpl userRegistrationService,
-                        PatientServiceImpl patientService, @Lazy ITelegramExecutor telegramExecutor) {
+                        PatientServiceImpl patientService) {
         this.messageSender = messageSender;
         this.userRegistrationService = userRegistrationService;
-        this.telegramExecutor = telegramExecutor;
         this.patientService = patientService;
-
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = extractUserId(update);
         Patient patient = patientService.findById(userId);
 
@@ -59,7 +56,7 @@ public class StartCommand implements ICommand {
                             String.valueOf(chatId),
                             update.getCallbackQuery().getMessage().getMessageId(),
                             Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage(),
-                            keyboard
+                            null
                     );
                     return null;
                 } catch (TelegramApiException e) {

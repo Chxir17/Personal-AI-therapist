@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -32,7 +33,7 @@ public class DoctorSendMessageToPatient implements ICommand {
 
     @Override
     @Transactional
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long doctorId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
         if (update.hasCallbackQuery()) {
@@ -40,10 +41,8 @@ public class DoctorSendMessageToPatient implements ICommand {
             if (parts.length == 2) {
                 Long patientId = Long.parseLong(parts[1]);
                 registrationContext.setStatus(doctorId, Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER);
-                //registrationContext.setStatus(patientId, Status.WAIT_USER_WRITE_MESSAGE_TO_DOCTOR);
 
                 registrationContext.setStatusWithId(patientId, Status.SEND_TO_THIS_USER, doctorId);
-//                registrationContext.setStatusWithId(doctorId, Status.SEND_TO_THIS_DOCTOR, patientId);
                 SendMessage message = new SendMessage();
                 message.setChatId(chatId.toString());
                 message.setText("✏️ Введите текст сообщения для пациента:");
