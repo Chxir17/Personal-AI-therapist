@@ -8,6 +8,7 @@ import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserP
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.RegistrationProcess;
@@ -48,7 +49,7 @@ public class StartClinicPatient implements ICommand {
 
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Patient patient = patientService.findById(userId);
         if (userId == null) {

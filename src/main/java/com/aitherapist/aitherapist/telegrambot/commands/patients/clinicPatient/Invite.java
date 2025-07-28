@@ -27,21 +27,18 @@ public class Invite implements ICommand {
     private final DoctorServiceImpl doctorService;
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
-    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
     public Invite(DoctorServiceImpl doctorService,
                   TelegramMessageSender telegramMessageSender,
-                  UserServiceImpl userService,
-                  @Lazy ITelegramExecutor telegramExecutor) {
+                  UserServiceImpl userService) {
         this.doctorService = doctorService;
         this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
-        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long patientId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 

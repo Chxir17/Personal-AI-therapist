@@ -29,16 +29,14 @@ import java.util.Objects;
 public class HealthHistory implements ICommand {
 
     private final PatientServiceImpl patientService;
-    private final ITelegramExecutor telegramExecutor;
 
-    public HealthHistory(PatientServiceImpl patientService, @Lazy ITelegramExecutor telegramExecutor) {
+    public HealthHistory(PatientServiceImpl patientService) {
         this.patientService = patientService;
-        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public SendMessage apply(Update update, RegistrationContext registrationContext) {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
         Patient patient = patientService.findById(userId);

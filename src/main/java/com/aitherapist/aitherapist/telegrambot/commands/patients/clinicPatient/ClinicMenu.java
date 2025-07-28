@@ -25,16 +25,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT, Roles.BOT_PATIENT}, requiresRegistration = true)
 public class ClinicMenu implements ICommand {
     private final PatientServiceImpl patientService;
-    private final ITelegramExecutor telegramExecutor;
     @Autowired
-    public ClinicMenu(@Lazy ITelegramExecutor telegramExecutor, PatientServiceImpl patientService) {
-        this.telegramExecutor = telegramExecutor;
+    public ClinicMenu(PatientServiceImpl patientService) {
         this.patientService = patientService;
 
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         registrationContext.setStatus(userId, Status.PATIENT_IN_MAIN_MENU);
         Patient patient = patientService.findById(userId);

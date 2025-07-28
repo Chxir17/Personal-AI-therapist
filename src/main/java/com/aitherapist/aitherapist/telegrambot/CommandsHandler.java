@@ -18,6 +18,7 @@ import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSende
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -38,6 +39,7 @@ public class CommandsHandler {
     private final Verification verification;
     private final TelegramMessageSender messageSender;
     private final UserServiceImpl userService;
+    private ITelegramExecutor telegramExecutor;
 
     @Autowired
     public CommandsHandler(
@@ -47,7 +49,6 @@ public class CommandsHandler {
             StartDoctors doctorCommand,
             StartNonClinicPatient botPatientCommand,
             StartClinicPatient clinicPatientCommand,
-            GetLastMessageFromDoctor getLastMessageFromDoctor,
             DoctorSendMessageToPatient sendMessagePatient,
             HistoryPatients getHistoryPatients,
             PatientsSendMessageToDoctor patientsSendMessageToDoctor,
@@ -82,14 +83,15 @@ public class CommandsHandler {
             GetPatientDailyData getPatientDailyData,
             Invite invite,
             AcceptInvite acceptInvite,
-            RejectInvite rejectInvite
+            RejectInvite rejectInvite,
+            @Lazy ITelegramExecutor telegramExecutor
     ) {
         this.verification = verification;
         this.messageSender = messageSender;
         this.userService = userService;
         this.commands = createCommandsMap(
                 startCommand, settingsDoctorCommand, informationCommand, doctorCommand,
-                botPatientCommand, clinicPatientCommand, getLastMessageFromDoctor,
+                botPatientCommand, clinicPatientCommand,
                 sendMessagePatient, getHistoryPatients, patientsSendMessageToDoctor,
                 changeRoleCommand, patientSettings, editNameCommand, editBirthDateCommand,
                 editGenderCommand, editArrhythmiaCommand, editChronicDiseasesCommand,
@@ -107,7 +109,6 @@ public class CommandsHandler {
             StartDoctors doctorCommand,
             StartNonClinicPatient botPatientCommand,
             StartClinicPatient clinicPatientCommand,
-            GetLastMessageFromDoctor getLastMessageFromDoctor,
             DoctorSendMessageToPatient sendMessagePatient,
             HistoryPatients getHistoryPatients,
             PatientsSendMessageToDoctor patientsSendMessageToDoctor,
@@ -161,7 +162,6 @@ public class CommandsHandler {
                 Map.entry("/botPatient", botPatientCommand),
                 Map.entry("/clinicPatient", clinicPatientCommand),
                 Map.entry("/patientSettings", patientSettings),
-                Map.entry("/getLastMessageDoctor", getLastMessageFromDoctor),
                 Map.entry("/sendMessageDoctor", patientsSendMessageToDoctor),
                 Map.entry("/sendMessageToPatient", sendMessagePatient),
                 Map.entry("/patientHistory", getHistoryPatients),
@@ -221,7 +221,7 @@ public class CommandsHandler {
 //                    }
 //                }
 
-                return commandHandler.apply(update, registrationContext);
+                return commandHandler.apply(update, registrationContext, telegramExecutor);
             }
 
             return new SendMessage(String.valueOf(chatId), "Неизвестная команда");
@@ -232,11 +232,11 @@ public class CommandsHandler {
     }
 
     public SendMessage handleCustomCommand(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        return commands.get("/inputDailyData").apply(update, registrationContext);
+        return commands.get("/inputDailyData").apply(update, registrationContext, telegramExecutor);
     }
 
     public SendMessage handleQaMode(Update update, RegistrationContext registrationContext) throws TelegramApiException {
-        return commands.get("/QAMode").apply(update, registrationContext);
+        return commands.get("/QAMode").apply(update, registrationContext, telegramExecutor);
     }
 
     public void mapStatusToHandler(Update update, Status status, Long userId, RegistrationContext registrationContext) throws TelegramApiException {
@@ -277,6 +277,6 @@ public class CommandsHandler {
 
     public void retryCommandExecute(Update update, RegistrationContext registrationContext, String command) throws TelegramApiException {
         ICommand commandHandler = commands.get(command);
-        messageSender.sendMessage(commandHandler.apply(update, registrationContext));
+        messageSender.sendMessage(commandHandler.apply(update, registrationContext, telegramExecutor));
     }
 }

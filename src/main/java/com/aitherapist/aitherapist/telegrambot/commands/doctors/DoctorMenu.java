@@ -16,15 +16,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class DoctorMenu implements ICommand {
-    private final ITelegramExecutor telegramExecutor;
-
-    @Autowired
-    public DoctorMenu(@Lazy ITelegramExecutor telegramExecutor) {
-        this.telegramExecutor = telegramExecutor;
-    }
-
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
         String messageText = "Выберите команду:";
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorDefaultKeyboard();

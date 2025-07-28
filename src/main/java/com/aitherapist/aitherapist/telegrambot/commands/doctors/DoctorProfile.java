@@ -19,16 +19,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class DoctorProfile implements ICommand {
 
     private final DoctorServiceImpl doctorService;
-    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
-    public DoctorProfile(DoctorServiceImpl doctorService, @Lazy ITelegramExecutor telegramExecutor) {
+    public DoctorProfile(DoctorServiceImpl doctorService) {
         this.doctorService = doctorService;
-        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext context) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext context, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 

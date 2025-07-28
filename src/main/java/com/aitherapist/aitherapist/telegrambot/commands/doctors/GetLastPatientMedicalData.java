@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
@@ -27,7 +28,7 @@ public class GetLastPatientMedicalData implements ICommand {
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         long chatId = TelegramIdUtils.getChatId(update);
         long doctorId = update.getMessage().getFrom().getId();
 
