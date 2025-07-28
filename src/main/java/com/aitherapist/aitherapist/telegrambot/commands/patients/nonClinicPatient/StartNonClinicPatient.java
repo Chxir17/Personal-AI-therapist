@@ -40,7 +40,8 @@ public class StartNonClinicPatient implements ICommand {
             UserServiceImpl userService, RegistrationProcess registrationProcess) {
         this.patientService = patientService;
         this.userService = userService;
-        this.registrationProcess = registrationProcess;}
+        this.registrationProcess = registrationProcess;
+    }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
@@ -89,5 +90,4 @@ public class StartNonClinicPatient implements ICommand {
                 .replyMarkup(keyboard)
                 .build();
     }
-
 }

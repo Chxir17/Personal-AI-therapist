@@ -46,15 +46,16 @@ public class StartDoctors implements ICommand {
     }
 
     public SendMessage acceptOrEditDoctorInfo(User doctor, Update update) {
-        String genderDisplay = doctor.getGender() ? "♂ Мужской" : "♀ Женский";
+        String genderDisplay = doctor.getGender() == null ? "Не указан" :
+                (doctor.getGender() ? "♂ Мужской" : "♀ Женский");
 
         String message = String.format("""
-        📝 *Вы ввели данные:*
-        
-        👤 *Имя:* %s
-        🎂 *Возраст:* %d лет
-        🚻 *Пол:* %s
-        """,
+    📝 *Вы ввели данные:*
+    
+    👤 *Имя:* %s
+    🎂 *Возраст:* %d лет
+    🚻 *Пол:* %s
+    """,
                 doctor.getName(),
                 doctor.getAge(),
                 genderDisplay);
@@ -102,6 +103,7 @@ public class StartDoctors implements ICommand {
                 state.getUserInput().append("gender: ").append(text).append("\n");
                 String response = parseUserPrompt.doctorRegistrationParser(state.getUserInput().toString());
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
+                System.out.println("JSONNNNNNNN" + jsonWithType);
                 try {
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
@@ -110,6 +112,7 @@ public class StartDoctors implements ICommand {
                     registrationContext.clearDoctorRegistrationState(userId);
                     return acceptOrEditDoctorInfo(savedDoctor, update);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     return SendMessage.builder()
                             .chatId(chatId.toString())
                             .text("Произошла ошибка при сохранении данных:  Попробуйте еще раз.")
