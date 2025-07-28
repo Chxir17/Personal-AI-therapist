@@ -37,8 +37,9 @@ public enum Status  {
     SET_NOTIFICATION_MESSAGE,
     SEND_TO_THIS_USER,
     SEND_TO_THIS_DOCTOR,
-    GIVING_PHONE_NUMBER,
-    QAMode;
+    GIVING_PHONE_NUMBER_CLINIC_PATIENT,
+    QAMode,
+    GIVING_PHONE_NUMBER_DOCTOR;
 
 
     public boolean isRegistered() {

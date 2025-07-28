@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Role;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Contact;
@@ -110,8 +109,11 @@ public class MessagesHandler implements IHandler {
         else if (userStatus == Status.WRITE_DAILY_DATA) {
             handleWriteDailyData(update);
         }
-        else if (userStatus == Status.GIVING_PHONE_NUMBER){
-            handleGivingPhoneNumber(update);
+        else if (userStatus == Status.GIVING_PHONE_NUMBER_CLINIC_PATIENT){
+            handleGivingPhoneNumber(update, Roles.CLINIC_PATIENT);
+        }
+        else if(userStatus == Status.GIVING_PHONE_NUMBER_DOCTOR){
+            handleGivingPhoneNumber(update, Roles.DOCTOR);
         }
         if (userStatus  == Status.SET_NOTIFICATION_TIME) {
             handleSetNotificationTime(update);
@@ -141,7 +143,7 @@ public class MessagesHandler implements IHandler {
         }
     }
 
-    private void handleGivingPhoneNumber(Update update) throws TelegramApiException {
+    private void handleGivingPhoneNumber(Update update, Roles role) throws TelegramApiException {
             String messageText = update.getMessage().getText().trim();
             Long chatId = update.getMessage().getChatId();
             Long userId = update.getMessage().getFrom().getId();
@@ -174,7 +176,6 @@ public class MessagesHandler implements IHandler {
                 .build();
 
             messageSender.sendMessage(sm);
-            Roles role = userService.getUserRoles(userId);
             if (role == Roles.CLINIC_PATIENT) {
                 registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
             }
