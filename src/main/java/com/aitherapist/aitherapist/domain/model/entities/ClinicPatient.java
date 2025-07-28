@@ -15,7 +15,7 @@ import java.util.Map;
 @DiscriminatorValue("CLINIC_PATIENT")
 public class ClinicPatient extends Patient {
 
-    @Column(name = "clinic_id", nullable = false)
+    @Column(name = "clinic_id"  )
     private Long clinicId;
 
     @Column(name = "medical_card_number")

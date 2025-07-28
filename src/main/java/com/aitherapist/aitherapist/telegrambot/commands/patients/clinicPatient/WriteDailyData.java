@@ -28,6 +28,7 @@ public class WriteDailyData implements ICommand {
     private final PatientServiceImpl patientService;
     private final ParseUserPrompt parseUserPrompt;
     private final MakeMedicalRecommendation makeMedicalRecommendation;
+
     @Autowired
     public WriteDailyData(PatientServiceImpl patientService, ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation) {
         this.patientService = patientService;
