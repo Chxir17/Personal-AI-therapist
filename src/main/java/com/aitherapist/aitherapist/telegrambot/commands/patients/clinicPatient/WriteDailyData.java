@@ -46,7 +46,6 @@ public class WriteDailyData implements ICommand {
         Long chatId = TelegramIdUtils.getChatId(update);
         String text = "";
         if (update.hasMessage()) {
-            //registrationContext.resetClientRegistrationState(userId);
             text = update.getMessage().getText();
         }
         ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);

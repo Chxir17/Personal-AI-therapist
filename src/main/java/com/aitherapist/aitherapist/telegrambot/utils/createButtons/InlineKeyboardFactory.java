@@ -98,7 +98,7 @@ public class InlineKeyboardFactory {
         buttons.put("🩺 Доктор", "/startDoctor");
         buttons.put("💊 Обычный пациент", "/botPatient");
         buttons.put("🏥 Пациент клиники", "/clinicPatient");
-        return createInlineKeyboard(buttons, 3);
+        return createInlineKeyboard(buttons, 2);
     }
 
     public static InlineKeyboardMarkup createDoctorDefaultKeyboard() {
