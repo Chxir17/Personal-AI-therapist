@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 @RequiredArgsConstructor
@@ -129,7 +130,6 @@ public class StartDoctors implements ICommand {
                     .build();
         }
 
-
         if (registrationContext.getStatus(userId) == Status.REGISTERED_DOCTOR) {
             try {
                 return handleQuestionnaire(update, userId, registrationContext);
@@ -146,13 +146,26 @@ public class StartDoctors implements ICommand {
             }
         }
 
+        if (update.hasCallbackQuery()) {
+            try {
+                telegramExecutor.editMessageText(
+                        TelegramIdUtils.getChatId(update).toString(),
+                        update.getCallbackQuery().getMessage().getMessageId(),
+                        "Вы уже верифицированы. Выберите действие:",
+                        InlineKeyboardFactory.createDoctorDefaultKeyboard()
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
                 .text("Вы уже верифицированы. Выберите действие:")
                 .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
                 .build();
     }
-
     private SendMessage requestPhoneNumber(Long chatId) {
         return SendMessage.builder()
                 .chatId(chatId.toString())

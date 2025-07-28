@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
@@ -51,33 +52,48 @@ public class StartClinicPatient implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Patient patient = patientService.findById(userId);
+
         if (userId == null) {
             return SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
                     .text("Не удалось определить пользователя")
                     .build();
         }
+
         if (registrationContext.getStatus(userId) == Status.REGISTERED_CLINIC_PATIENT) {
             try {
                 return registrationProcess.handleQuestionnaire(update, registrationContext, userId, userService, mapper, true);
             } catch (Exception e) {
-                e.printStackTrace();
                 return SendMessage.builder()
                         .chatId(TelegramIdUtils.getChatId(update).toString())
                         .text("Ошибка обработки данных" + e.getMessage())
                         .build();
             }
-        } else {
-            if (registrationContext.isVerify(userId)) {
-                registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
-                return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        } else if (registrationContext.isVerify(userId)) {
+            registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+            return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        }
+
+        String messageText = "Вы уже верифицированы. Выберите действие:";
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createPatientDefaultKeyboard(patient);
+
+        if (update.hasCallbackQuery()) {
+            try {
+                telegramExecutor.editMessageText(
+                        TelegramIdUtils.getChatId(update).toString(),
+                        update.getCallbackQuery().getMessage().getMessageId(),
+                        messageText,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
             }
         }
+
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
-                .text("Вы уже верифицированы. Выберите действие:")
-                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patient))
+                .text(messageText)
+                .replyMarkup(keyboard)
                 .build();
-    }
-
-}
+    }}

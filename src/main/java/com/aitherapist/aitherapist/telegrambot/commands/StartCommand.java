@@ -33,7 +33,6 @@ public class StartCommand implements ICommand {
         this.messageSender = messageSender;
         this.userRegistrationService = userRegistrationService;
         this.patientService = patientService;
-
     }
 
     @Override

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
@@ -47,6 +48,7 @@ public class StartNonClinicPatient implements ICommand {
                     .text("Не удалось определить пользователя")
                     .build();
         }
+
         if (registrationContext.getStatus(userId) == Status.REGISTERED_NO_CLINIC_PATIENT) {
             try {
                 return registrationProcess.handleQuestionnaire(update, registrationContext, userId, userService, mapper, false);
@@ -56,18 +58,33 @@ public class StartNonClinicPatient implements ICommand {
                         .text("Ошибка обработки данных")
                         .build();
             }
-        } else {
-            if (registrationContext.isVerify(userId)) {
-                registrationContext.setStatus(userId, Status.REGISTRATION_NO_CLINIC_PATIENT);
-                return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        } else if (registrationContext.isVerify(userId)) {
+            registrationContext.setStatus(userId, Status.REGISTRATION_NO_CLINIC_PATIENT);
+            return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        }
+
+        String messageText = "Выберите действие:";
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId));
+
+        if (update.hasCallbackQuery()) {
+            try {
+                telegramExecutor.editMessageText(
+                        TelegramIdUtils.getChatId(update).toString(),
+                        update.getCallbackQuery().getMessage().getMessageId(),
+                        messageText,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
             }
         }
+
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
-                .text("Выберите действие:")
-                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
+                .text(messageText)
+                .replyMarkup(keyboard)
                 .build();
     }
-
 
 }
