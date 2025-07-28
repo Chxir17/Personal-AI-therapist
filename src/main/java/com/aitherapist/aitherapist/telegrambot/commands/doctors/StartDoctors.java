@@ -13,7 +13,9 @@ import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -32,7 +34,9 @@ public class StartDoctors implements ICommand {
     private final DoctorServiceImpl doctorService;
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     @Autowired
     public StartDoctors(Verification verification, ParseUserPrompt parseUserPrompt, DoctorServiceImpl doctorService) {
@@ -99,6 +103,7 @@ public class StartDoctors implements ICommand {
                 String response = parseUserPrompt.doctorRegistrationParser(state.getUserInput().toString());
                 String jsonWithType = "{\"user_type\":\"DOCTOR\",\"role\":\"DOCTOR\"," + response.substring(1);
                 try {
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
                     doctorInput.setPhoneNumber(registrationContext.getTelephone(userId));
                     Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
@@ -107,7 +112,7 @@ public class StartDoctors implements ICommand {
                 } catch (Exception e) {
                     return SendMessage.builder()
                             .chatId(chatId.toString())
-                            .text("Произошла ошибка при сохранении данных: " + e.getMessage() + ". Попробуйте еще раз.")
+                            .text("Произошла ошибка при сохранении данных:  Попробуйте еще раз.")
                             .build();
                 }
 

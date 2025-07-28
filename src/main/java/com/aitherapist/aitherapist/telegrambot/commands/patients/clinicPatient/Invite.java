@@ -100,7 +100,6 @@ public class Invite implements ICommand {
 
         List<Doctor> connectedDoctors = userService.getClinicPatientById(patientId).getDoctors();
 
-        // Фильтруем только тех врачей, которые еще не связаны с пациентом
         return allDoctors.stream()
                 .filter(doctor -> connectedDoctors.stream()
                         .noneMatch(connectedDoctor -> connectedDoctor.getId().equals(doctor.getId())))
