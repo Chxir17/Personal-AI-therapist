@@ -20,6 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class Invite implements ICommand {
@@ -27,14 +28,17 @@ public class Invite implements ICommand {
     private final DoctorServiceImpl doctorService;
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
+    private final PatientServiceImpl patientService;
 
     @Autowired
     public Invite(DoctorServiceImpl doctorService,
                   TelegramMessageSender telegramMessageSender,
-                  UserServiceImpl userService) {
+                  UserServiceImpl userService,
+                  PatientServiceImpl patientService) {
         this.doctorService = doctorService;
         this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
+        this.patientService = patientService;
     }
 
     @Override
@@ -58,13 +62,13 @@ public class Invite implements ICommand {
                     );
                     return null;
                 } else {
-                    List<Doctor> doctors = doctorService.getAllDoctors();
-                    if (doctors.isEmpty()) {
+                    List<Doctor> availableDoctors = getAvailableDoctors(patientId);
+                    if (availableDoctors.isEmpty()) {
                         Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
                         telegramExecutor.editMessageText(
                                 chatId.toString(),
                                 messageId,
-                                "👨⚕️ В системе пока нет зарегистрированных врачей",
+                                "👨⚕️ Нет доступных врачей для приглашения",
                                 InlineKeyboardFactory.createBackToMenuButtonClinic()
                         );
                         return null;
@@ -74,31 +78,44 @@ public class Invite implements ICommand {
                     telegramExecutor.editMessageText(
                             chatId.toString(),
                             messageId,
-                            createDoctorsListMessageText(doctors),
-                            InlineKeyboardFactory.createDoctorsInvitationKeyboard(doctors)
+                            createDoctorsListMessageText(availableDoctors),
+                            InlineKeyboardFactory.createDoctorsInvitationKeyboard(availableDoctors)
                     );
                     return null;
                 }
             }
         }
 
-        List<Doctor> doctors = doctorService.getAllDoctors();
-        if (doctors.isEmpty()) {
-            return createErrorMessage(chatId, "👨⚕️ В системе пока нет зарегистрированных врачей");
+        List<Doctor> availableDoctors = getAvailableDoctors(patientId);
+        if (availableDoctors.isEmpty()) {
+            return createErrorMessage(chatId, "👨⚕️ Нет доступных врачей для приглашения");
         }
 
-        return createDoctorsListMessage(chatId, doctors);
+        return createDoctorsListMessage(chatId, availableDoctors);
+    }
+
+    private List<Doctor> getAvailableDoctors(Long patientId) {
+
+        List<Doctor> allDoctors = doctorService.getAllDoctors();
+
+        List<Doctor> connectedDoctors = userService.getClinicPatientById(patientId).getDoctors();
+
+        // Фильтруем только тех врачей, которые еще не связаны с пациентом
+        return allDoctors.stream()
+                .filter(doctor -> connectedDoctors.stream()
+                        .noneMatch(connectedDoctor -> connectedDoctor.getId().equals(doctor.getId())))
+                .collect(Collectors.toList());
     }
 
     private String createDoctorsListMessageText(List<Doctor> doctors) {
         StringBuilder messageText = new StringBuilder();
-        messageText.append("👨⚕️ <b>Список врачей</b>\n\n");
+        messageText.append("👨⚕️ Список доступных врачей\n\n");
         messageText.append("👇 Выберите врача для отправки приглашения:\n\n");
 
         for (int i = 0; i < doctors.size(); i++) {
             Doctor doctor = doctors.get(i);
             messageText.append(String.format(
-                    "%d. <b>%s</b> (%s)\n",
+                    "%d. %s (%s)\n",
                     i + 1,
                     doctor.getName(),
                     doctor.getId()
@@ -139,25 +156,9 @@ public class Invite implements ICommand {
         return message;
     }
 
-    private SendMessage createSuccessMessage(Long chatId, String successMessage) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId.toString());
-        message.setText(successMessage);
-        message.setReplyMarkup(InlineKeyboardFactory.createProfileKeyboard());
-        return message;
-    }
-
-    private SendMessage createProfileMessage(Long chatId) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId.toString());
-        message.setText("🔙 Возврат в профиль");
-        message.setReplyMarkup(InlineKeyboardFactory.createProfileKeyboard());
-        return message;
-    }
-
     private SendMessage createDoctorsListMessage(Long chatId, List<Doctor> doctors) {
         StringBuilder messageText = new StringBuilder();
-        messageText.append("👨⚕️ Список врачей\n\n");
+        messageText.append("👨⚕️ Список доступных врачей\n\n");
         messageText.append("👇 Выберите врача для отправки приглашения:\n\n");
 
         for (int i = 0; i < doctors.size(); i++) {

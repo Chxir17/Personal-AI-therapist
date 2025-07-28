@@ -21,6 +21,8 @@ public class DoctorServiceImpl implements IDoctorService {
     private final IDoctorRepository doctorRepository;
     private final IUserService userService;
 
+
+
     @Autowired
     public DoctorServiceImpl(IDoctorRepository doctorRepository, IUserService userService) {
         this.doctorRepository = doctorRepository;
