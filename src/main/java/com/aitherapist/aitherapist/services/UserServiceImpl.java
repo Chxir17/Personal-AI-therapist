@@ -4,6 +4,7 @@ import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.repositories.IUserRepository;
 
 import com.aitherapist.aitherapist.services.interfaces.IUserService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,9 @@ public class UserServiceImpl implements IUserService {
     public ClinicPatient getClinicPatientById(Long telegramId) {
         User user = userRepository.findByTelegramId(telegramId);
         if (user instanceof ClinicPatient) {
-            return  (ClinicPatient) user;
+            ClinicPatient patient = (ClinicPatient) user;
+            Hibernate.initialize(patient.getDoctors());
+            return patient;
         }
         return null;
     }

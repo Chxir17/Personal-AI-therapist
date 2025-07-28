@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 
+import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
@@ -19,6 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,14 +97,19 @@ public class Invite implements ICommand {
     }
 
     private List<Doctor> getAvailableDoctors(Long patientId) {
+        ClinicPatient patient = userService.getClinicPatientById(patientId);
+        if (patient == null) {
+            return new ArrayList<>();
+        }
 
-        List<Doctor> allDoctors = doctorService.getAllDoctors();
-
-        List<Doctor> connectedDoctors = userService.getClinicPatientById(patientId).getDoctors();
+        List<Long> connectedDoctorIds = patient.getDoctors().stream()
+                .map(Doctor::getId)
+                .collect(Collectors.toList());
+        
+        List<Doctor> allDoctors = doctorService.getAllDoctorsWithPatients();
 
         return allDoctors.stream()
-                .filter(doctor -> connectedDoctors.stream()
-                        .noneMatch(connectedDoctor -> connectedDoctor.getId().equals(doctor.getId())))
+                .filter(doctor -> !connectedDoctorIds.contains(doctor.getId()))
                 .collect(Collectors.toList());
     }
 

@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.repositories.IDoctorRepository;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
 import com.aitherapist.aitherapist.services.interfaces.IUserService;
 import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,13 @@ public class DoctorServiceImpl implements IDoctorService {
     private final IUserService userService;
 
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Doctor> getAllDoctorsWithPatients() {
+        List<Doctor> doctors = doctorRepository.findAllByRole(Roles.DOCTOR);
+        doctors.forEach(doctor -> Hibernate.initialize(doctor.getPatients()));
+        return doctors;
+    }
 
     @Autowired
     public DoctorServiceImpl(IDoctorRepository doctorRepository, IUserService userService) {
