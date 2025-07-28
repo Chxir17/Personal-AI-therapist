@@ -46,6 +46,7 @@ public class CommandsHandler {
 
     @Autowired
     public CommandsHandler(
+            @Lazy ITelegramExecutor telegramExecutor,
             StartCommand startCommand,
             SettingsDoctorCommand settingsDoctorCommand,
             InformationCommand informationCommand,
@@ -86,12 +87,12 @@ public class CommandsHandler {
             GetPatientDailyData getPatientDailyData,
             Invite invite,
             AcceptInvite acceptInvite,
-            RejectInvite rejectInvite,
-            @Lazy ITelegramExecutor telegramExecutor
+            RejectInvite rejectInvite
     ) {
         this.verification = verification;
         this.messageSender = messageSender;
         this.userService = userService;
+        this.telegramExecutor = telegramExecutor;
         this.commands = createCommandsMap(
                 startCommand, settingsDoctorCommand, informationCommand, doctorCommand,
                 botPatientCommand, clinicPatientCommand,
@@ -212,17 +213,17 @@ public class CommandsHandler {
 
             if (commandHandler != null) {
                 if (commandHandler.getClass().isAnnotationPresent(CommandAccess.class)) {
-                    CommandAccess access = commandHandler.getClass().getAnnotation(CommandAccess.class);
-
-                    if (access.requiresRegistration() && registrationContext.getStatus(userId).isRegistrationProcess()) {
-                        return new SendMessage(String.valueOf(chatId), "🔒 Пожалуйста, завершите регистрацию для доступа к этой команде");
-                    }
-                    Roles userRole = userService.getUserRoles(userId);
-                    if (access.allowedRoles().length > 0 &&
-                            !Arrays.asList(access.allowedRoles()).contains(userRole)) {
-                        return new SendMessage(String.valueOf(chatId), "⛔ Эта команда недоступна для вашей роли");
-                    }
-                    return commandHandler.apply(update, registrationContext);
+//                    CommandAccess access = commandHandler.getClass().getAnnotation(CommandAccess.class);
+//                    System.out.println("!!!!!!!" + registrationContext.getStatus(userId));
+//                    if (access.requiresRegistration() && registrationContext.getStatus(userId).isRegistrationProcess()) {
+//                        return new SendMessage(String.valueOf(chatId), "🔒 Пожалуйста, завершите регистрацию для доступа к этой команде");
+//                    }
+//                    Roles userRole = userService.getUserRoles(userId);
+//                    if (access.allowedRoles().length > 0 &&
+//                            !Arrays.asList(access.allowedRoles()).contains(userRole)) {
+//                        return new SendMessage(String.valueOf(chatId), "⛔ Эта команда недоступна для вашей роли");
+//                    }
+                    return commandHandler.apply(update, registrationContext, telegramExecutor);
                 }
 
                 return commandHandler.apply(update, registrationContext, telegramExecutor);
