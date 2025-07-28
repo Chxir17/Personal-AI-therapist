@@ -222,7 +222,7 @@ public class CommandsHandler {
                             !Arrays.asList(access.allowedRoles()).contains(userRole)) {
                         return new SendMessage(String.valueOf(chatId), "⛔ Эта команда недоступна для вашей роли");
                     }
-                    return commandHandler.apply(update, registrationContext);
+                    return commandHandler.apply(update, registrationContext, telegramExecutor);
                 }
 
                 return commandHandler.apply(update, registrationContext, telegramExecutor);
