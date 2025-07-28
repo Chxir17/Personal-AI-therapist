@@ -4,6 +4,7 @@ import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.DoctorRegistrationState;
@@ -119,7 +120,7 @@ public class StartDoctors implements ICommand {
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) {
         Long userId = TelegramIdUtils.extractUserId(update);
         if (userId == null) {
             return SendMessage.builder()

@@ -28,22 +28,19 @@ public class Settings implements ICommand {
 
     private final UserServiceImpl userService;
     private final NotificationServiceImpl notificationService;
-    private final ITelegramExecutor telegramExecutor;
     private final RegistrationContext registrationContext;
 
     @Autowired
     public Settings(UserServiceImpl userService,
                     NotificationServiceImpl notificationService,
-                    @Lazy ITelegramExecutor telegramExecutor,
                     RegistrationContext registrationContext) {
         this.userService = userService;
         this.notificationService = notificationService;
-        this.telegramExecutor = telegramExecutor;
         this.registrationContext = registrationContext;
     }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 

@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.patients.nonClinicPatie
 import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.commands.patients.RegistrationProcess;
@@ -38,7 +39,7 @@ public class StartNonClinicPatient implements ICommand {
         this.registrationProcess = registrationProcess;}
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         if (userId == null) {
             return SendMessage.builder()

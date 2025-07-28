@@ -17,15 +17,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class EditPatientAccountData implements ICommand {
 
-    private final ITelegramExecutor telegramExecutor;
-
-    @Autowired
-    public EditPatientAccountData(@Lazy ITelegramExecutor telegramExecutor) {
-        this.telegramExecutor = telegramExecutor;
-    }
-
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditClinicPatientData();
         String messageText = "Что вы хотите изменить в медицинских данных?";

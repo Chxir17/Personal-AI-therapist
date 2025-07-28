@@ -14,14 +14,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class SettingsDoctorCommand implements ICommand {
-    private final ITelegramExecutor telegramExecutor;
-
-    public SettingsDoctorCommand(@Lazy ITelegramExecutor telegramExecutor) {
-        this.telegramExecutor = telegramExecutor;
-    }
 
     @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         long chatId = TelegramIdUtils.getChatId(update);
         String messageText = "✨ Доступные действия ✨";
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorSettingsKeyboard();

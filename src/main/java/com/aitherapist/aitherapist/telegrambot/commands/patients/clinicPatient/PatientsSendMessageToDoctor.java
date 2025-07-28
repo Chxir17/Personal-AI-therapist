@@ -27,18 +27,16 @@ import java.util.List;
 @Component
 public class PatientsSendMessageToDoctor implements ICommand {
 
-    private final ITelegramExecutor telegramExecutor;
     private final PatientServiceImpl patientService;
 
     @Autowired
-    public PatientsSendMessageToDoctor(PatientServiceImpl patientService, @Lazy ITelegramExecutor telegramExecutor) {
+    public PatientsSendMessageToDoctor(PatientServiceImpl patientService) {
         this.patientService = patientService;
-        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
     @Transactional
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 

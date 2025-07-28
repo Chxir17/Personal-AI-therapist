@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.domain.enums.Status;
@@ -32,7 +33,7 @@ public class DoctorSendMessageToPatient implements ICommand {
 
     @Override
     @Transactional
-    public SendMessage apply(Update update, RegistrationContext registrationContext) throws TelegramApiException {
+    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long doctorId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
         if (update.hasCallbackQuery()) {
