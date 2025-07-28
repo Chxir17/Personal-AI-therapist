@@ -6,11 +6,13 @@ import com.aitherapist.aitherapist.services.DoctorServiceImpl;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
 import com.aitherapist.aitherapist.services.interfaces.IDoctorService;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -23,16 +25,19 @@ public class AcceptInvite implements ICommand {
     private final PatientServiceImpl patientService;
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
-
+    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
     public AcceptInvite(DoctorServiceImpl doctorService,
                         PatientServiceImpl patientService,
-                        TelegramMessageSender telegramMessageSender, UserServiceImpl userService) {
+                        TelegramMessageSender telegramMessageSender,
+                        UserServiceImpl userService,
+                        @Lazy ITelegramExecutor telegramExecutor) {
         this.doctorService = doctorService;
         this.patientService = patientService;
         this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
+        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
@@ -58,8 +63,14 @@ public class AcceptInvite implements ICommand {
                     patientMessage.setText("✅ Врач принял ваше приглашение!");
                     telegramMessageSender.sendMessage(patientMessage);
 
-                    return new SendMessage(chatId.toString(),
-                            "✅ Вы приняли приглашение пациента " + patient.getName());
+                    Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+                    telegramExecutor.editMessageText(
+                            chatId.toString(),
+                            messageId,
+                            "✅ Вы приняли приглашение пациента " + patient.getName(),
+                            null
+                    );
+                    return null;
                 }
             }
         }

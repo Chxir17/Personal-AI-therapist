@@ -3,13 +3,16 @@ package com.aitherapist.aitherapist.telegrambot.commands.patients.clinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.services.DoctorServiceImpl;
+import com.aitherapist.aitherapist.services.PatientServiceImpl;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -24,14 +27,17 @@ public class Invite implements ICommand {
     private final DoctorServiceImpl doctorService;
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
+    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
     public Invite(DoctorServiceImpl doctorService,
                   TelegramMessageSender telegramMessageSender,
-                  UserServiceImpl userService) {
+                  UserServiceImpl userService,
+                  @Lazy ITelegramExecutor telegramExecutor) {
         this.doctorService = doctorService;
         this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
+        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
@@ -41,20 +47,67 @@ public class Invite implements ICommand {
 
         if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
-            if ("/inviteDoctor".equals(parts[0]) && parts.length == 2) {
-                Long doctorId = Long.parseLong(parts[1]);
-                sendInviteToDoctor(patientId, doctorId);
-                return createSuccessMessage(chatId, "✅ Приглашение отправлено врачу");
+            if ("/inviteDoctor".equals(parts[0])) {
+                if (parts.length == 2) {
+                    Long doctorId = Long.parseLong(parts[1]);
+                    sendInviteToDoctor(patientId, doctorId);
+
+                    Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+                    telegramExecutor.editMessageText(
+                            chatId.toString(),
+                            messageId,
+                            "✅ Приглашение отправлено врачу",
+                            InlineKeyboardFactory.createProfileKeyboard()
+                    );
+                    return null;
+                } else {
+                    List<Doctor> doctors = doctorService.getAllDoctors();
+                    if (doctors.isEmpty()) {
+                        Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+                        telegramExecutor.editMessageText(
+                                chatId.toString(),
+                                messageId,
+                                "👨⚕️ В системе пока нет зарегистрированных врачей",
+                                InlineKeyboardFactory.createBackToMenuButtonClinic()
+                        );
+                        return null;
+                    }
+
+                    Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+                    telegramExecutor.editMessageText(
+                            chatId.toString(),
+                            messageId,
+                            createDoctorsListMessageText(doctors),
+                            InlineKeyboardFactory.createDoctorsInvitationKeyboard(doctors)
+                    );
+                    return null;
+                }
             }
         }
 
         List<Doctor> doctors = doctorService.getAllDoctors();
-
         if (doctors.isEmpty()) {
             return createErrorMessage(chatId, "👨⚕️ В системе пока нет зарегистрированных врачей");
         }
 
         return createDoctorsListMessage(chatId, doctors);
+    }
+
+    private String createDoctorsListMessageText(List<Doctor> doctors) {
+        StringBuilder messageText = new StringBuilder();
+        messageText.append("👨⚕️ <b>Список врачей</b>\n\n");
+        messageText.append("👇 Выберите врача для отправки приглашения:\n\n");
+
+        for (int i = 0; i < doctors.size(); i++) {
+            Doctor doctor = doctors.get(i);
+            messageText.append(String.format(
+                    "%d. <b>%s</b> (%s)\n",
+                    i + 1,
+                    doctor.getName(),
+                    doctor.getId()
+            ));
+        }
+        return messageText.toString();
     }
 
     private void sendInviteToDoctor(Long patientId, Long doctorId) throws TelegramApiException {
@@ -67,7 +120,7 @@ public class Invite implements ICommand {
 
         String messageText = String.format(
                 "👋 <b>Новое приглашение</b>\n\n" +
-                        "Пациент <b>%s</b> хочет стать вашим подопечным.\n\n" +
+                        "Пациент %s хочет стать вашим подопечным.\n\n" +
                         "Вы хотите принять это приглашение?",
                 patient.getName()
         );
@@ -107,13 +160,13 @@ public class Invite implements ICommand {
 
     private SendMessage createDoctorsListMessage(Long chatId, List<Doctor> doctors) {
         StringBuilder messageText = new StringBuilder();
-        messageText.append("👨⚕️ <b>Список врачей</b>\n\n");
-        messageText.append("👇 <i>Выберите врача для отправки приглашения:</i>\n\n");
+        messageText.append("👨⚕️ Список врачей\n\n");
+        messageText.append("👇 Выберите врача для отправки приглашения:\n\n");
 
         for (int i = 0; i < doctors.size(); i++) {
             Doctor doctor = doctors.get(i);
             messageText.append(String.format(
-                    "%d. <b>%s</b> (%s)\n",
+                    "%d. %s (%s)\n",
                     i + 1,
                     doctor.getName(),
                     doctor.getId()

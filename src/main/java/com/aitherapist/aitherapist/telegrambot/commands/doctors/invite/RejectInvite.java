@@ -2,11 +2,13 @@ package com.aitherapist.aitherapist.telegrambot.commands.doctors.invite;
 
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -17,12 +19,15 @@ public class RejectInvite implements ICommand {
 
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
+    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
     public RejectInvite(TelegramMessageSender telegramMessageSender,
-                        UserServiceImpl userService) {
+                        UserServiceImpl userService,
+                        @Lazy ITelegramExecutor telegramExecutor) {
         this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
+        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
@@ -43,10 +48,16 @@ public class RejectInvite implements ICommand {
                     telegramMessageSender.sendMessage(patientMessage);
                 }
 
-                return new SendMessage(chatId.toString(), "❌ Вы отклонили приглашение пациента");
+                Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+                telegramExecutor.editMessageText(
+                        chatId.toString(),
+                        messageId,
+                        "❌ Вы отклонили приглашение пациента",
+                        null
+                );
+                return null;
             }
         }
 
         return new SendMessage(chatId.toString(), "❌ Не удалось обработать запрос");
-    }
-}
+    }}
