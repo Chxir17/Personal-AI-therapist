@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.domain.model.PatientRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.entities.*;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.UserServiceImpl;
+import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
@@ -14,23 +15,26 @@ import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboar
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import java.time.format.DateTimeFormatter;
-
 
 @Component
 public class RegistrationProcess {
     private final Verification verification;
     private final ParseUserPrompt parseUserPrompt;
+    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
-    public RegistrationProcess(Verification verification, ParseUserPrompt parseUserPrompt) {
+    public RegistrationProcess(Verification verification, ParseUserPrompt parseUserPrompt,
+                               @Lazy ITelegramExecutor telegramExecutor) {
         this.verification = verification;
         this.parseUserPrompt = parseUserPrompt;
+        this.telegramExecutor = telegramExecutor;
     }
 
     public SendMessage acceptOrEditMedicalInitData(InitialHealthData initialHealthData, Update update, User patient) {
@@ -87,11 +91,28 @@ public class RegistrationProcess {
                 initialHealthData.getWeight(),
                 badHabitsDisplay);
 
+        InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createAcceptOrEditKeyboardPatient();
+        String fullMessage = message + "\n\nВыберите действие:";
+
+        if (update.hasCallbackQuery()) {
+            try {
+                telegramExecutor.editMessageText(
+                        String.valueOf(update.getCallbackQuery().getMessage().getChatId()),
+                        update.getCallbackQuery().getMessage().getMessageId(),
+                        fullMessage,
+                        keyboard
+                );
+                return null;
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+
         return SendMessage.builder()
                 .chatId(String.valueOf(update.getMessage().getChatId()))
-                .text(message + "\n\nВыберите действие:")
+                .text(fullMessage)
                 .parseMode("Markdown")
-                .replyMarkup(InlineKeyboardFactory.createAcceptOrEditKeyboardPatient())
+                .replyMarkup(keyboard)
                 .build();
     }
 
@@ -233,8 +254,6 @@ public class RegistrationProcess {
                         .text("Неизвестный шаг регистрации")
                         .build();
             }
-
-
         }
 
 
