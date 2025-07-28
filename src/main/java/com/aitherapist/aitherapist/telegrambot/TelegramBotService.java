@@ -1,6 +1,7 @@
 package com.aitherapist.aitherapist.telegrambot;
 
 import com.aitherapist.aitherapist.domain.enums.Answers;
+import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.commands.Verification;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.config.BotProperties;
@@ -20,6 +21,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.context.annotation.Lazy;
@@ -144,11 +146,14 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
 
         SendMessage sm = SendMessage.builder()
                 .chatId(chatId.toString())
-                .text("✅ Верификация успешна.\n" +
-                        "Пожалуйста заполните анкету:")
+                .text("✅ Верификация успешна.\nПожалуйста заполните анкету:")
+                .replyMarkup(new ReplyKeyboardRemove(true))
                 .build();
+
         execute(sm);
+        registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
         commandsHandler.mapStatusToHandler(update, registrationContext.getStatus(userId), userId, registrationContext);
+
     }
 
 

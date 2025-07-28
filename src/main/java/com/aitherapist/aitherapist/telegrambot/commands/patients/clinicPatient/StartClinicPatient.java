@@ -69,7 +69,7 @@ public class StartClinicPatient implements ICommand {
             }
         } else {
             if (registrationContext.isVerify(userId)) {
-                registrationContext.setStatus(userId, Status.REGISTRATION_CLINIC_PATIENT);
+                registrationContext.setStatus(userId, Status.GIVING_PHONE_NUMBER);
                 return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
             }
         }
