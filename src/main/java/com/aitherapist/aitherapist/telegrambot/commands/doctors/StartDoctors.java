@@ -146,7 +146,8 @@ public class StartDoctors implements ICommand {
             }
         }
 
-        if (update.hasCallbackQuery() ) {
+
+        if (update.hasCallbackQuery()) {
             try {
                 telegramExecutor.editMessageText(
                         TelegramIdUtils.getChatId(update).toString(),
