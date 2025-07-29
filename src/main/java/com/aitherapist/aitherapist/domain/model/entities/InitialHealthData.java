@@ -49,7 +49,6 @@ public class InitialHealthData implements Serializable{
         return "InitialHealthData{" +
                 "id=" + id +
                 ", heartPain=" + heartPain +
-                ", arrhythmia=" + arrhythmia +
                 ", chronicDiseases='" + chronicDiseases + '\'' +
                 ", height=" + height +
                 ", weight=" + weight +

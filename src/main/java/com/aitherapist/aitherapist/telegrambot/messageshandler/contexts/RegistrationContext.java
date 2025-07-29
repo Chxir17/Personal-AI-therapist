@@ -27,6 +27,14 @@ public class RegistrationContext {
     private final Map<Long, MedicalNormalData>  mapMedicalNormalData = new ConcurrentHashMap<>();
 
 
+    public void deleteAllDataOfUser(Long userId) {
+        mapOfUserStatus.remove(userId);
+        doctorRegistrationStates.remove(userId);
+        clientRegistrationStates.remove(userId);
+        mapUserToHistory.remove(userId);
+        mapQaToHistory.remove(userId);
+    }
+
     public MedicalNormalData getMedicalNormalData(Long userId) {
         if (!mapMedicalNormalData.containsKey(userId)) {
             mapMedicalNormalData.put(userId, new MedicalNormalData(userId, 8.5, 80L, "120/80"));

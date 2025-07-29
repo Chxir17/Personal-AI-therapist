@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 
 @Component
@@ -24,45 +25,14 @@ public class MakeMedicalRecommendation {
         this.llm = llm;
     }
 
-    public String giveMedicalRecommendation(Patient patient){
-        Map<String,String> metaInfo = patient.makeMetaInformation(patient);
-        Map<String,String> parametersHistory = patient.buildMedicalHistory();
-        Prompts prompt = Prompts.valueOf("RECOMMENDATION_PROMPT");
-        String systemPrompt = prompt.getMessage();
-        String userMessage = metaInfo.toString() + parametersHistory;
-        List<ChatMessage> requestMessage = Arrays.asList(
-                ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
-                ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
-        );
-        return llm.talkToChat(requestMessage);
+    public static String removeForbiddenTags(String input) {
+        String[] forbiddenTags = {"br", "p", "div", "span"};
+        String pattern = "</?(" + String.join("|", forbiddenTags) + ")(\\s[^>]*)?>";
+        return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(input).replaceAll("");
     }
 
-    public String giveMedicalRecommendationBeta(Patient patient) {
-        try {
-            Map<String, String> metaInfo = patient.makeMetaInformation(patient);
-            Map<String, String> parametersHistory = patient.buildMedicalHistory();
-            ObjectMapper mapper = new ObjectMapper();
 
-            Map<String, Object> userPrompt = new HashMap<>();
-            userPrompt.put("metaInfo", metaInfo);
-            userPrompt.put("parametersHistory", parametersHistory);
-
-            String userMessage = mapper.writeValueAsString(userPrompt);
-            Prompts prompt = Prompts.valueOf("RECOMMENDATION_BETA_PROMPT");
-            String systemPrompt = prompt.getMessage();
-
-            List<ChatMessage> requestMessage = Arrays.asList(
-                    ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
-                    ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
-            );
-            return llm.talkToChat(requestMessage, 3);
-        }
-        catch (Exception e) {
-            return null;
-        }
-    }
-
-    public String giveMedicalRecommendationWithScoreBeta(Patient patient) {
+    public String giveMedicalRecommendationWithScore(Patient patient) {
         try {
             Map<String, String> metaInfo = patient.makeMetaInformation(patient);
             Map<String, String> parametersHistory = patient.buildMedicalHistory();
@@ -73,13 +43,13 @@ public class MakeMedicalRecommendation {
             userPrompt.put("parametersHistory", parametersHistory);
             userPrompt.put("heath_goals", goals);
             String userMessage = mapper.writeValueAsString(userPrompt);
-            Prompts prompt = Prompts.valueOf("RECOMMENDATION_SCORE_BETA_PROMPT");
+            Prompts prompt = Prompts.valueOf("RECOMMENDATION_SCORE_PROMPT");
             String systemPrompt = prompt.getMessage();
             List<ChatMessage> requestMessage = Arrays.asList(
                     ChatMessage.builder().content(systemPrompt).role(ChatMessage.Role.SYSTEM).build(),
                     ChatMessage.builder().content(userMessage).role(ChatMessage.Role.USER).build()
             );
-            return llm.talkToChat(requestMessage, 3);
+            return removeForbiddenTags(llm.talkToChat(requestMessage, 3));
         }
         catch (Exception e) {
             return null;

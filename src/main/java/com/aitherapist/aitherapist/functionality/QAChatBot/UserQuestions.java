@@ -98,7 +98,7 @@ public class UserQuestions {
         );
 
         try {
-            return llm.talkToChat(request, 1).trim();
+            return llm.talkToChat(request, 2).trim();
         } catch (Exception e) {
             return "no";
         }

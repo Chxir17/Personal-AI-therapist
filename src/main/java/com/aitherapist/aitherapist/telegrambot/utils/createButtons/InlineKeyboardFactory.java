@@ -98,7 +98,7 @@ public class InlineKeyboardFactory {
         buttons.put("🩺 Доктор", "/startDoctor");
         buttons.put("💊 Обычный пациент", "/botPatient");
         buttons.put("🏥 Пациент клиники", "/clinicPatient");
-        return createInlineKeyboard(buttons, 3);
+        return createInlineKeyboard(buttons, 2);
     }
 
     public static InlineKeyboardMarkup createDoctorDefaultKeyboard() {
@@ -136,7 +136,6 @@ public class InlineKeyboardFactory {
         buttons.put("✏️ Изменить имя", "/editName");
         buttons.put("🎂 Изменить дату рождения", "/editBirthDate");
         buttons.put("⚧️ Изменить пол", "/editGender");
-        buttons.put("❤️ Аритмия", "/editArrhythmia");
         buttons.put("🏥 Хронические заболевания", "/editChronicDiseases");
         buttons.put("📏 Рост", "/editHeight");
         buttons.put("⚖️ Вес", "/editWeight");

@@ -47,6 +47,7 @@ public class StartCommand implements ICommand {
         long chatId = TelegramIdUtils.getChatId(update);
 
         if (!userRegistrationService.isSignUp(userId)) {
+            registrationContext.deleteAllDataOfUser(userId);
             InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createRoleSelectionKeyboard();
             registrationContext.startRegistration(chatId);
 
@@ -55,10 +56,9 @@ public class StartCommand implements ICommand {
                     telegramExecutor.editMessageText(
                             String.valueOf(chatId),
                             update.getCallbackQuery().getMessage().getMessageId(),
-                            Answers.INITIAL_MESSAGE_ABOUT_USER.getMessage(),
+                            "Вы выбрали роль. Продолжаем регистрацию...",
                             null
                     );
-                    return null;
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
