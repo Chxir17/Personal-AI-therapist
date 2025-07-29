@@ -2,17 +2,17 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
 
 import com.aitherapist.aitherapist.domain.enums.DynamicStatus;
 import com.aitherapist.aitherapist.domain.enums.Status;
-import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.History;
 import com.aitherapist.aitherapist.domain.model.entities.MedicalNormalData;
+import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.DoctorRegistrationState;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -20,12 +20,32 @@ public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
     private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
-
+    private final Map<Long, Integer> MessageToDelete= new ConcurrentHashMap<>();
     private final Map<Long, History> mapUserToHistory = new ConcurrentHashMap<>();
     private final Map<Long, History> mapQaToHistory = new ConcurrentHashMap<>();
-
+    private final Map<Long, List<UserActivityLog>> userActivityLogsList = new ConcurrentHashMap<>();
     private final Map<Long, MedicalNormalData>  mapMedicalNormalData = new ConcurrentHashMap<>();
 
+    public void setMessageToDelete(Long userId, Integer messageId){
+        MessageToDelete.put(userId, messageId);
+    }
+
+
+    public Integer getMessageToDelete(Long userId){
+        return MessageToDelete.get(userId);
+    }
+
+    public Boolean hasMessageToDelete(Long userId){
+        return MessageToDelete.isEmpty();
+    }
+
+    public void deleteMessage(Long userId){
+        MessageToDelete.remove(userId);
+    }
+
+    public void removeClientRegistrationStates(Long userId){
+        clientRegistrationStates.remove(userId);
+    }
 
     public void deleteAllDataOfUser(Long userId) {
         mapOfUserStatus.remove(userId);
@@ -33,6 +53,15 @@ public class RegistrationContext {
         clientRegistrationStates.remove(userId);
         mapUserToHistory.remove(userId);
         mapQaToHistory.remove(userId);
+        userActivityLogsList.remove(userId);
+    }
+
+    public void addNewUserActivityLog(Long userId, UserActivityLog userActivityLog) throws TelegramApiException {
+        userActivityLogsList.get(userId).add(userActivityLog);
+    }
+
+    public List<UserActivityLog> getUserActivityLogs(Long userId) {
+        return userActivityLogsList.get(userId);
     }
 
     public MedicalNormalData getMedicalNormalData(Long userId) {

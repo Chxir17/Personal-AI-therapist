@@ -19,7 +19,10 @@ public abstract class Patient extends User {
     private List<DailyHealthData> dailyHealthDataList = new ArrayList<>();
     @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL)
     private InitialHealthData initialData;
+
     public void editInitialData(DailyHealthData dailyHealthData, Long healthDataId) {}
+
+
 
     public void editDailyHealthData(DailyHealthData dailyHealthData, Long healthDataId) {
         dailyHealthDataList.stream()
@@ -77,6 +80,10 @@ public abstract class Patient extends User {
 
         result.put("pressure", makeDataList(
                 history.stream().map(DailyHealthData::getPressure).toList()
+        ));
+
+        result.put("userFeels", makeDataList(
+                history.stream().map(DailyHealthData::getFeels).toList()
         ));
         return result;
     }

@@ -2,18 +2,16 @@ package com.aitherapist.aitherapist.domain.model.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Entity
 @Table(name = "user_activity_logs")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserActivityLog {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,7 +25,4 @@ public class UserActivityLog {
 
     @Column(name = "action_type", nullable = false)
     private String actionType;
-
-    @Column(name = "message_id")
-    private Long messageId;
 }

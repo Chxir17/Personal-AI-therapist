@@ -125,7 +125,12 @@ public abstract class User {
             result.put("height", makeDataList(List.of(data.getHeight() != null ? String.valueOf(data.getHeight()) : "null")));
             result.put("chronicDiseases", makeDataList(List.of(data.getChronicDiseases() != null ? data.getChronicDiseases() : "null")));
             result.put("badHabits", makeDataList(List.of(data.getBadHabits() != null ? data.getBadHabits() : "null")));
+
         }
         return result;
+    }
+
+    public void addActivityLog(UserActivityLog userActivityLog) {
+        this.activityLogs.add(userActivityLog);
     }
 }

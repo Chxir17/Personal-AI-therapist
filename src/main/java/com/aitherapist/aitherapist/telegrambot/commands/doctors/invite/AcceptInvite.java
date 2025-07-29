@@ -25,7 +25,6 @@ public class AcceptInvite implements ICommand {
     private final PatientServiceImpl patientService;
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
-
     @Autowired
     public AcceptInvite(DoctorServiceImpl doctorService,
                         PatientServiceImpl patientService,
@@ -41,8 +40,10 @@ public class AcceptInvite implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long doctorId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
-
-        if (update.hasCallbackQuery()) {
+        Long userId = TelegramIdUtils.extractUserId(update);
+        if(registrationContext.getMessageToDelete(userId) != null) {
+            telegramExecutor.deleteMessage(chatId.toString(), update.getMessage().getMessageId());
+        }        if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {
                 Long patientId = Long.parseLong(parts[1]);
@@ -59,6 +60,7 @@ public class AcceptInvite implements ICommand {
                     patientMessage.setChatId(patient.getTelegramId().toString());
                     patientMessage.setText("✅ Врач принял ваше приглашение!");
                     telegramMessageSender.sendMessage(patientMessage);
+
 
                     Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
                     telegramExecutor.editMessageText(

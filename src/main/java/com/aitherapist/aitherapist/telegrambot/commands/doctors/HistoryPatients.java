@@ -70,7 +70,7 @@ public class HistoryPatients implements ICommand {
             keyboard.add(Collections.singletonList(dailyDataButton));
         }
 
-        // Кнопка возврата в меню
+
         InlineKeyboardButton backButton = new InlineKeyboardButton();
         backButton.setText("🔙 Назад");
         backButton.setCallbackData("/acceptInitData");

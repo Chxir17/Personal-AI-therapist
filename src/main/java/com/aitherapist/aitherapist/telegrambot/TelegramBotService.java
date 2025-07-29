@@ -16,9 +16,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -64,10 +64,15 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         return "chat_" + chatId + "_" + System.currentTimeMillis();
     }
 
+    private void deleteRegisterContext(Long userId) {
+        registrationContext.deleteMessage(userId);
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
         try {
             if (update.hasMessage()) {
+                deleteRegisterContext(TelegramIdUtils.extractUserId(update));
                 if (update.getMessage().hasText()) {
                     handleMessageUpdate(update, registrationContext);
                 } else if(update.getMessage().hasVoice()) {
@@ -208,13 +213,14 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     }
 
     @Override
-    public void execute(SendMessage sendMessage) throws TelegramApiException {
+    public Message execute(SendMessage sendMessage) throws TelegramApiException {
         try {
             super.execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Send message error", e);
             throw e;
         }
+        return null;
     }
 
     @Override
@@ -237,6 +243,14 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         execute(editMessage);
     }
 
+    @Override
+    public void editMessageText(String chatId, Integer messageId, String newText) throws TelegramApiException {
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setChatId(chatId);
+        editMessage.setMessageId(messageId);
+        editMessage.setText(newText);
+        execute(editMessage);
+    }
 
     private SendMessage requestPhoneNumber(Long chatId) {
         return SendMessage.builder()

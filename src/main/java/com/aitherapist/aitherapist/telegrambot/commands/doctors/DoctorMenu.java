@@ -16,12 +16,17 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class DoctorMenu implements ICommand {
+
+
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
         String messageText = "Выберите команду:";
+        Long userId = TelegramIdUtils.extractUserId(update);
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorDefaultKeyboard();
-
+        if(registrationContext.getMessageToDelete(userId) != null) {
+            telegramExecutor.deleteMessage(chatId.toString(), update.getMessage().getMessageId());
+        }
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
             try {
