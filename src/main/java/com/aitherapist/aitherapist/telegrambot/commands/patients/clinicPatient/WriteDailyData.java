@@ -63,23 +63,29 @@ public class WriteDailyData implements ICommand {
             }
             case 2 -> {
                 state.getBase().append(text);
+                //FIXME одно и тоже дейстиве 2 раза
                 String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
 
                 if (!areHealthParametersNormal(d)) {
                     state.setCurrentStep(3);
+                    validateAndCleanHealthParameters(d);
                     return SendMessage.builder()
                             .chatId(chatId.toString())
                             .text(" Как вы себя чувствуете сегодня?")
                             .build();
+
                 } else {
+                    validateAndCleanHealthParameters(d);
                     return processFinalResponse(chatId, userId, registrationContext, d, null);
                 }
             }
             case 3 -> {
                 String wellbeing = text;
+                //FIXME одно и тоже дейстиве 2 раза
                 String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
+                validateAndCleanHealthParameters(d);
                 d.setFeels(wellbeing);
 
                 registrationContext.clearClientRegistrationState(userId);
@@ -160,6 +166,31 @@ public class WriteDailyData implements ICommand {
             return handleQuestionnaire(update, userId, registrationContext);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void validateAndCleanHealthParameters(DailyHealthData data) {
+        if (data.getTemperature() == null || data.getTemperature() < 13.0 || data.getTemperature() > 48.0) {
+            data.setTemperature(null);
+        }
+        if (data.getHoursOfSleepToday() == null || data.getHoursOfSleepToday() < 0 || data.getHoursOfSleepToday() > 50) {
+            data.setHoursOfSleepToday(null);
+        }
+        if (data.getPulse() == null || data.getPulse() < 20 || data.getPulse() > 350) {
+            data.setPulse(null);
+        }
+        if (data.getPressure() != null) {
+            try {
+                String[] parts = data.getPressure().split("/");
+                int systolic = Integer.parseInt(parts[0]);
+                int diastolic = Integer.parseInt(parts[1]);
+
+                if (systolic < 30 || systolic > 370 || diastolic < 40 || diastolic > 380) {
+                    data.setPressure(null);
+                }
+            } catch (Exception e) {
+                data.setPressure(null);
+            }
         }
     }
 }

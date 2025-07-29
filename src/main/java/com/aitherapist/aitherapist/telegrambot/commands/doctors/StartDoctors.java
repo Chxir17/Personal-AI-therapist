@@ -118,6 +118,16 @@ public class StartDoctors implements ICommand {
                 try {
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
+
+                    if (doctorInput.getBirthDate() != null) {
+                        int age = java.time.Period.between(doctorInput.getBirthDate(), java.time.LocalDate.now()).getYears();
+                        if (age < 18 || age > 120) {
+                            doctorInput.setBirthDate(null);
+                        }
+                    } else {
+                        doctorInput.setBirthDate(null);
+                    }
+
                     doctorInput.setPhoneNumber(registrationContext.getTelephone(userId));
                     Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
                     registrationContext.clearDoctorRegistrationState(userId);
