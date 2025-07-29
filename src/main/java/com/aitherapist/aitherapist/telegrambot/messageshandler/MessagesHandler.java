@@ -94,8 +94,6 @@ public class MessagesHandler implements IHandler {
             handleEditGender(update);
         } else if (userStatus == Status.EDIT_NAME) {
             handleEditName(update);
-        }else if(userStatus == Status.EDIT_ARRHYTHMIA){
-            handleEditArrhythmia(update);
         }
         else if(userStatus == Status.EDIT_CHRONIC_DISEASES){
             handleEditChronicDiseases(update);
@@ -422,26 +420,6 @@ public class MessagesHandler implements IHandler {
     }
 
 
-
-
-
-    public void handleEditArrhythmia(Update update) {
-        try {
-            String message = update.getMessage().getText();
-            Long userId = update.getMessage().getFrom().getId();
-
-            String cleanJson = parseUserPrompt.parameterEditorParser("Аритмия" + message);
-            InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
-            PatientRegistrationDto parsedData = mapper.readValue(cleanJson, PatientRegistrationDto.class);
-            initialHealthData.setArrhythmia(parsedData.getArrhythmia());
-            registrationContext.setStatus(userId, Status.NONE);
-            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
-            messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
-        } catch (Exception e) {
-            e.printStackTrace(); // лучше логировать
-        }
-    }
-
     public void handleEditChronicDiseases(Update update) {
         try {
             String message = update.getMessage().getText();
@@ -504,7 +482,7 @@ public class MessagesHandler implements IHandler {
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
-            e.printStackTrace(); // TODO: заменить на логгер
+            e.printStackTrace();
         }
     }
 
