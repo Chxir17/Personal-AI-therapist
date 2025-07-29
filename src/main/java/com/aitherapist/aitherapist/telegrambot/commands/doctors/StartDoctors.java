@@ -146,10 +146,11 @@ public class StartDoctors implements ICommand {
                         .text("Ошибка обработки данных")
                         .build();
             }
-        } else if (registrationContext.isVerify(userId) ) {
-                registrationContext.setStatus(userId, Status.GIVING_PHONE_NUMBER_DOCTOR);
-                return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        } else if (registrationContext.isVerify(userId)) {
+            registrationContext.setStatus(userId, Status.GIVING_PHONE_NUMBER_DOCTOR);
+            return requestPhoneNumber(TelegramIdUtils.getChatId(update));
         }
+
 
         return SendMessage.builder()
                 .chatId(TelegramIdUtils.getChatId(update).toString())
