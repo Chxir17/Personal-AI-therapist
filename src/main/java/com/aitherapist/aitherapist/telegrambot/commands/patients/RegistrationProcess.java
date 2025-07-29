@@ -180,17 +180,10 @@ public class RegistrationProcess {
                 state.setCurrentStep(4);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text(Answers.ARHYTHMIA_QUESTION.getMessage())
+                        .text(Answers.CHRONIC_DISEASES_QUESTION.getMessage())
                         .build();
             }
-//            case 4 -> {
-//                state.getBase().append("arrhythmia: ").append(text).append("\n");
-//                state.setCurrentStep(5);
-//                return SendMessage.builder()
-//                        .chatId(chatId.toString())
-//                        .text(Answers.CHRONIC_DISEASES_QUESTION.getMessage())
-//                        .build();
-//            }
+
             case 4 -> {
                 state.getBase().append("chronicDiseases: ").append(text).append("\n");
                 state.setCurrentStep(5);
