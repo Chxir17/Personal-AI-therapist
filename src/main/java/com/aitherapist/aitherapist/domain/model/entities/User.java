@@ -128,4 +128,8 @@ public abstract class User {
         }
         return result;
     }
+
+    public void addActivityLog(UserActivityLog userActivityLog) {
+        this.activityLogs.add(userActivityLog);
+    }
 }

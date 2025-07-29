@@ -19,4 +19,5 @@ public interface IUserService {
     Boolean isSignUp(Long userId);
     User getUserByUserId(Long userId);
     ClinicPatient getClinicPatientById(Long clinicPatientId);
+    void saveUserActivityLog(Long userId, UserActivityLog userActivityLog);
 }

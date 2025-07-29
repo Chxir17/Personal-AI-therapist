@@ -268,6 +268,13 @@ public class MessagesHandler implements IHandler {
     }
 
     private void handleWriteDailyData(Update update) throws TelegramApiException {
+        Long userId = getUserId(update);
+        userService.saveUserActivityLog(userId, UserActivityLog.builder()
+                .user(userService.getUser(userId))
+                .actionTime(LocalDateTime.now())
+                .actionType("ENTER_WRITE_DAILY_DATA")
+                .build());
+
         messageSender.sendMessage(commandsHandler.handleCustomCommand(update, registrationContext));
     }
 
