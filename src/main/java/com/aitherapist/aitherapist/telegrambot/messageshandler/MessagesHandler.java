@@ -286,7 +286,7 @@ public class MessagesHandler implements IHandler {
             UserRegistrationDto parsedUser = mapper.readValue(cleanJson, UserRegistrationDto.class);
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
-            if (parsedUser.getBirthDate().isAfter(LocalDate.now().minusYears(5)) || parsedUser.getBirthDate().isBefore(LocalDate.now().minusYears(120))) {
+            if (parsedUser.getBirthDate().isBefore(LocalDate.now().minusYears(5)) && parsedUser.getBirthDate().isAfter(LocalDate.now().minusYears(120))) {
                 existingUser.setBirthDate(parsedUser.getBirthDate());
                 userService.updateUser(existingUser, userId);
             }
