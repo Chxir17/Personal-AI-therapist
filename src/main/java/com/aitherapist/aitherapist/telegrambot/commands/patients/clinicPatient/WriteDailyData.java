@@ -46,6 +46,7 @@ public class WriteDailyData implements ICommand {
         Long chatId = TelegramIdUtils.getChatId(update);
         String text = "";
         if (update.hasMessage()) {
+            //registrationContext.resetClientRegistrationState(userId);
             text = update.getMessage().getText();
         }
         ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
@@ -66,7 +67,7 @@ public class WriteDailyData implements ICommand {
                 patientService.addDailyHealthDataToPatient(userId, d);
                 currentPatient = patientService.getPatientWithData(userId);
                 String response4 =
-                        makeMedicalRecommendation.giveMedicalRecommendationWithScoreBeta(currentPatient) .replaceAll("<br>", "\n").replaceAll("<br/>", "\n");
+                        makeMedicalRecommendation.giveMedicalRecommendationWithScore(currentPatient);
                 registrationContext.setStatus(userId, Status.NONE);
                 registrationContext.clearClientRegistrationState(userId);
                 return SendMessage.builder()
