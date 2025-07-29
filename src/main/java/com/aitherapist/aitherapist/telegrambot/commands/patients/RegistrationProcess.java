@@ -237,11 +237,11 @@ public class RegistrationProcess {
                     dto.setBirthDate(null);
                 }
 
-                if (dto.getHeight() != null && (dto.getHeight() < 50 || dto.getHeight() > 250)) {
+                if (dto.getHeight() != null && (dto.getHeight() < 50 || dto.getHeight() > 280)) {
                     dto.setHeight(null);
                 }
 
-                if (dto.getWeight() != null && (dto.getWeight() < 20 || dto.getWeight() > 300)) {
+                if (dto.getWeight() != null && (dto.getWeight() < 15 || dto.getWeight() > 300)) {
                     dto.setWeight(null);
                 }
 
