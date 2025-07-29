@@ -52,17 +52,6 @@ public class WriteDailyData implements ICommand {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    @Transactional
-    protected void saveActivityTime(Long userId) {
-        UserActivityLog activityLog = UserActivityLog.builder()
-                .user(patientService.findById(userId))
-                .actionTime(LocalDateTime.now())
-                .actionType("ENTER_WRITE_DAILY_DATA")
-                .build();
-        userService.saveUserActivityLog(userId, activityLog);
-
-        String optimalTimeRecommendation = getOptimalNotificationTimeRecommendation(userId);
-    }
 
 
     protected SendMessage handleQuestionnaire(Update update, Long userId, RegistrationContext registrationContext)
@@ -113,32 +102,12 @@ public class WriteDailyData implements ICommand {
         }
     }
 
-    @Transactional
-    protected String getOptimalNotificationTimeRecommendation(Long userId) {
-        List<UserActivityLog> logs = userService.getUser(userId).getActivityLogs();
-
-        if (logs.isEmpty()) {
-            return "⏱ Пока недостаточно данных для рекомендации оптимального времени уведомлений.";
-        }
-
-        long totalSeconds = logs.stream()
-                .mapToLong(log -> log.getActionTime().toLocalTime().toSecondOfDay())
-                .sum();
-
-        int avgSeconds = (int) (totalSeconds / logs.size());
-        LocalTime optimalTime = LocalTime.ofSecondOfDay(avgSeconds);
-
-        return String.format("⏱ На основе вашей активности (%d записей), рекомендуемое время для уведомлений: %02d:%02d",
-                logs.size(), optimalTime.getHour(), optimalTime.getMinute());
-    }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor)
             throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         registrationContext.setStatus(userId, Status.WRITE_DAILY_DATA);
-
-        //saveActivityTime(userId);
 
         try {
             return handleQuestionnaire(update, userId, registrationContext);

@@ -5,9 +5,11 @@ import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.History;
 import com.aitherapist.aitherapist.domain.model.entities.MedicalNormalData;
+import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.DoctorRegistrationState;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +25,7 @@ public class RegistrationContext {
 
     private final Map<Long, History> mapUserToHistory = new ConcurrentHashMap<>();
     private final Map<Long, History> mapQaToHistory = new ConcurrentHashMap<>();
-
+    private final Map<Long, List<UserActivityLog>> userActivityLogsList = new ConcurrentHashMap<>();
     private final Map<Long, MedicalNormalData>  mapMedicalNormalData = new ConcurrentHashMap<>();
 
 
@@ -33,6 +35,15 @@ public class RegistrationContext {
         clientRegistrationStates.remove(userId);
         mapUserToHistory.remove(userId);
         mapQaToHistory.remove(userId);
+        userActivityLogsList.remove(userId);
+    }
+
+    public void addNewUserActivityLog(Long userId, UserActivityLog userActivityLog) throws TelegramApiException {
+        userActivityLogsList.get(userId).add(userActivityLog);
+    }
+
+    public List<UserActivityLog> getUserActivityLogs(Long userId) {
+        return userActivityLogsList.get(userId);
     }
 
     public MedicalNormalData getMedicalNormalData(Long userId) {
