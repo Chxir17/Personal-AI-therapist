@@ -31,7 +31,10 @@ public class RejectInvite implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long doctorId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
-        telegramExecutor.deleteMessage(chatId.toString(), update.getMessage().getMessageId());
+        Long userId = TelegramIdUtils.extractUserId(update);
+        if(registrationContext.getMessageToDelete(userId) != null) {
+            telegramExecutor.deleteMessage(chatId.toString(), update.getMessage().getMessageId());
+        }
         if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {

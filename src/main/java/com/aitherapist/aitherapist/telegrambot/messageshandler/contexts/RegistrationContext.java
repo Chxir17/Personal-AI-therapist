@@ -2,7 +2,6 @@ package com.aitherapist.aitherapist.telegrambot.messageshandler.contexts;
 
 import com.aitherapist.aitherapist.domain.enums.DynamicStatus;
 import com.aitherapist.aitherapist.domain.enums.Status;
-import com.aitherapist.aitherapist.domain.model.entities.ClinicPatient;
 import com.aitherapist.aitherapist.domain.model.entities.History;
 import com.aitherapist.aitherapist.domain.model.entities.MedicalNormalData;
 import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
@@ -14,7 +13,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -22,12 +20,23 @@ public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
     private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
-
+    private final Map<Long,  Long> MessageToDelete= new ConcurrentHashMap<>();
     private final Map<Long, History> mapUserToHistory = new ConcurrentHashMap<>();
     private final Map<Long, History> mapQaToHistory = new ConcurrentHashMap<>();
     private final Map<Long, List<UserActivityLog>> userActivityLogsList = new ConcurrentHashMap<>();
     private final Map<Long, MedicalNormalData>  mapMedicalNormalData = new ConcurrentHashMap<>();
 
+    public void setMessageToDelete(Long userId, Long messageId){
+        MessageToDelete.put(userId, messageId);
+    }
+
+    public Long getMessageToDelete(Long userId){
+        return MessageToDelete.get(userId);
+    }
+
+    public Boolean hasMessageToDelete(Long userId){
+        return MessageToDelete.isEmpty();
+    }
 
     public void deleteAllDataOfUser(Long userId) {
         mapOfUserStatus.remove(userId);
