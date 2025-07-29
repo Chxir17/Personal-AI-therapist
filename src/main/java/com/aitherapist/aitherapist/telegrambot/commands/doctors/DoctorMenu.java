@@ -16,11 +16,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
 public class DoctorMenu implements ICommand {
-    private final ITelegramExecutor telegramExecutor;
 
-    public DoctorMenu(ITelegramExecutor telegramExecutor) {
-        this.telegramExecutor = telegramExecutor;
-    }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {

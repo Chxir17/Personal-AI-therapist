@@ -41,6 +41,8 @@ public class DailyHealthData implements Serializable {
     @Column(name = "pressure", columnDefinition = "VARCHAR(10)")
     private String pressure;
 
+    @Column(name = "feels", columnDefinition = "TEXT")
+    private String feels;
 
     @Override
     public String toString() {
