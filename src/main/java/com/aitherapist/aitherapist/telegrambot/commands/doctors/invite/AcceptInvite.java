@@ -25,23 +25,24 @@ public class AcceptInvite implements ICommand {
     private final PatientServiceImpl patientService;
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
-
+    private final ITelegramExecutor telegramExecutor;
     @Autowired
     public AcceptInvite(DoctorServiceImpl doctorService,
                         PatientServiceImpl patientService,
                         TelegramMessageSender telegramMessageSender,
-                        UserServiceImpl userService) {
+                        UserServiceImpl userService, ITelegramExecutor telegramExecutor) {
         this.doctorService = doctorService;
         this.patientService = patientService;
         this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
+        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long doctorId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
-
+        telegramExecutor.deleteMessage(chatId.toString(), update.getMessage().getMessageId());
         if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {
