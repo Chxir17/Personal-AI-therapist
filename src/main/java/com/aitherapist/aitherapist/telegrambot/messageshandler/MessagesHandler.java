@@ -445,7 +445,7 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
 
-            if (parsedData.getHeight() < 50 || parsedData.getHeight() > 280) {
+            if (parsedData.getHeight() > 50 || parsedData.getHeight() < 280) {
                 initialHealthData.setHeight(parsedData.getHeight());
                 initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             }
@@ -465,7 +465,7 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
 
-            if (parsedData.getWeight() < 15 || parsedData.getWeight() > 300) {
+            if (parsedData.getWeight() > 15.0 || parsedData.getWeight() < 300.0) {
                 initialHealthData.setWeight(parsedData.getWeight());
                 initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             }
