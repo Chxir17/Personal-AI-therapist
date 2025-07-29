@@ -47,6 +47,7 @@ public class StartCommand implements ICommand {
         long chatId = TelegramIdUtils.getChatId(update);
 
         if (!userRegistrationService.isSignUp(userId)) {
+            registrationContext.deleteAllDataOfUser(userId);
             InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createRoleSelectionKeyboard();
             registrationContext.startRegistration(chatId);
 
