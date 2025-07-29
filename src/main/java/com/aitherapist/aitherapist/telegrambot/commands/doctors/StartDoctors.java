@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -146,9 +147,9 @@ public class StartDoctors implements ICommand {
                         .text("Ошибка обработки данных")
                         .build();
             }
-        } else if (registrationContext.isVerify(userId)) {
-            registrationContext.setStatus(userId, Status.GIVING_PHONE_NUMBER_DOCTOR);
-            return requestPhoneNumber(TelegramIdUtils.getChatId(update));
+        } else if (registrationContext.isVerify(userId) ) {
+                registrationContext.setStatus(userId, Status.GIVING_PHONE_NUMBER_DOCTOR);
+                return requestPhoneNumber(TelegramIdUtils.getChatId(update), update, telegramExecutor);
         }
 
 
@@ -158,10 +159,14 @@ public class StartDoctors implements ICommand {
                 .replyMarkup(InlineKeyboardFactory.createDoctorDefaultKeyboard())
                 .build();
     }
-    private SendMessage requestPhoneNumber(Long chatId) {
+    private SendMessage requestPhoneNumber(Long chatId, Update update, ITelegramExecutor telegramExecutor) {
+        String messageText = Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage();
+        telegramExecutor.deleteMessage(chatId.toString(), update.getCallbackQuery().getMessage().getMessageId());
+
+
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .text(messageText)
                 .replyMarkup(Verification.createContactRequestKeyboard())
                 .build();
     }

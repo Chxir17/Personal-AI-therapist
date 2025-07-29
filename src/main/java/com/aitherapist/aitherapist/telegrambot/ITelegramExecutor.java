@@ -9,4 +9,6 @@ public interface ITelegramExecutor {
     void execute(SendMessage message) throws TelegramApiException;
     void deleteMessage(String chatId, Integer messageId);
     void editMessageText(String chatId, Integer messageId, String newText, InlineKeyboardMarkup keyboard) throws TelegramApiException;
+    void editMessageText(String chatId, Integer messageId, String newText) throws TelegramApiException;
+
 }
