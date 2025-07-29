@@ -67,7 +67,7 @@ public class PatientsSendMessageToDoctor implements ICommand {
         List<Doctor> doctors = clinicPatient.getDoctors();
 
         if (doctors.isEmpty()) {
-            return createErrorMessage(chatId, "👨⚕️ У вас пока нет докторов!");
+            return createErrorMessage(chatId, "👨⚕️ giУ вас пока нет докторов!");
         }
 
         return createPatientsListMessage(chatId, doctors);
