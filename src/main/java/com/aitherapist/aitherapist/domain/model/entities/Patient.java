@@ -81,6 +81,10 @@ public abstract class Patient extends User {
         result.put("pressure", makeDataList(
                 history.stream().map(DailyHealthData::getPressure).toList()
         ));
+
+        result.put("userFeels", makeDataList(
+                history.stream().map(DailyHealthData::getFeels).toList()
+        ));
         return result;
     }
     @Override

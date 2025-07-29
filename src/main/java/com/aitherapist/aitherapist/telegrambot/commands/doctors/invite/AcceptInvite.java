@@ -25,17 +25,15 @@ public class AcceptInvite implements ICommand {
     private final PatientServiceImpl patientService;
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
-    private final ITelegramExecutor telegramExecutor;
     @Autowired
     public AcceptInvite(DoctorServiceImpl doctorService,
                         PatientServiceImpl patientService,
                         TelegramMessageSender telegramMessageSender,
-                        UserServiceImpl userService, ITelegramExecutor telegramExecutor) {
+                        UserServiceImpl userService) {
         this.doctorService = doctorService;
         this.patientService = patientService;
         this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
-        this.telegramExecutor = telegramExecutor;
     }
 
     @Override

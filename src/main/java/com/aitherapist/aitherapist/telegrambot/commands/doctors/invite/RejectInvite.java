@@ -19,14 +19,12 @@ public class RejectInvite implements ICommand {
 
     private final TelegramMessageSender telegramMessageSender;
     private final UserServiceImpl userService;
-    private final ITelegramExecutor telegramExecutor;
 
     @Autowired
     public RejectInvite(TelegramMessageSender telegramMessageSender,
-                        UserServiceImpl userService, ITelegramExecutor telegramExecutor) {
+                        UserServiceImpl userService) {
         this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
-        this.telegramExecutor = telegramExecutor;
     }
 
     @Override
