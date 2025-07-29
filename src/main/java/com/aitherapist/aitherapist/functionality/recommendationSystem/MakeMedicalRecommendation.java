@@ -27,7 +27,7 @@ public class MakeMedicalRecommendation {
 
     public static String removeForbiddenTags(String input) {
         String[] forbiddenTags = {"br", "p", "div", "span"};
-        String pattern = "</?(" + String.join("|", forbiddenTags) + ")(\\s[^>]*)?>";
+        String pattern = "</?\\s*(" + String.join("|", forbiddenTags) + ")(\\s+[^>]*?)?\\s*/?>";
         return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(input).replaceAll("");
     }
 
