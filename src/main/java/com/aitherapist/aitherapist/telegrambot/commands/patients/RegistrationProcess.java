@@ -123,10 +123,14 @@ public class RegistrationProcess {
                 .build();
     }
 
-    public SendMessage requestPhoneNumber(Long chatId) {
+    public SendMessage requestPhoneNumber(Long chatId, Update update, ITelegramExecutor telegramExecutor) {
+        String messageText = Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage();
+        telegramExecutor.deleteMessage(chatId.toString(), update.getCallbackQuery().getMessage().getMessageId());
+
+
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text(Answers.PLEASE_GIVE_TELEPHONE_NUMBER.getMessage())
+                .text(messageText)
                 .replyMarkup(Verification.createContactRequestKeyboard())
                 .build();
     }

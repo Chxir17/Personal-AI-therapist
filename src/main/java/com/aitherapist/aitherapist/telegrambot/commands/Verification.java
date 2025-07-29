@@ -2,7 +2,9 @@ package com.aitherapist.aitherapist.telegrambot.commands;
 
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -42,6 +44,8 @@ public class Verification {
 
         return keyboard;
     }
+
+
 
     private static String normalizePhoneNumber(String phoneNumber) {
         if (phoneNumber == null) {

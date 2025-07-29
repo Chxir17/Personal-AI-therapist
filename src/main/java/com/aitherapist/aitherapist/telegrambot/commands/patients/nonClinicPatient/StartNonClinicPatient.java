@@ -11,6 +11,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,18 +35,23 @@ public class StartNonClinicPatient implements ICommand {
     private final RegistrationProcess registrationProcess;
     private final PatientServiceImpl patientService;
 
+    private final IMessageSender messageSender;
+
     @Autowired
     public StartNonClinicPatient(
             PatientServiceImpl patientService,
-            UserServiceImpl userService, RegistrationProcess registrationProcess) {
+            UserServiceImpl userService, RegistrationProcess registrationProcess, IMessageSender messageSender) {
         this.patientService = patientService;
         this.userService = userService;
         this.registrationProcess = registrationProcess;
+        this.messageSender = messageSender;
+
     }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
+        Long chatId = TelegramIdUtils.getChatId(update);
         if (userId == null) {
             return SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
@@ -64,7 +70,7 @@ public class StartNonClinicPatient implements ICommand {
             }
         } else if (registrationContext.isVerify(userId)) {
             registrationContext.setStatus(userId, Status.REGISTRATION_NO_CLINIC_PATIENT);
-            return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+            return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update), update, telegramExecutor);
         }
 
         String messageText = "Выберите действие:";

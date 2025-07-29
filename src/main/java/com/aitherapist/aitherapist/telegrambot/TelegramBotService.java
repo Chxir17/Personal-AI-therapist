@@ -237,6 +237,14 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         execute(editMessage);
     }
 
+    @Override
+    public void editMessageText(String chatId, Integer messageId, String newText) throws TelegramApiException {
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setChatId(chatId);
+        editMessage.setMessageId(messageId);
+        editMessage.setText(newText);
+        execute(editMessage);
+    }
 
     private SendMessage requestPhoneNumber(Long chatId) {
         return SendMessage.builder()

@@ -10,6 +10,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class StartClinicPatient implements ICommand {
     private final UserServiceImpl userService;
     private final RegistrationProcess registrationProcess;
+    private final IMessageSender messageSender;
+
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -38,10 +41,11 @@ public class StartClinicPatient implements ICommand {
     public StartClinicPatient(
             RegistrationProcess registrationProcess,
             PatientServiceImpl patientService,
-            UserServiceImpl userService) {
+            UserServiceImpl userService, IMessageSender messageSender) {
         this.patientService = patientService;
         this.userService = userService;
         this.registrationProcess = registrationProcess;
+        this.messageSender = messageSender;
     }
 
     @Override
@@ -68,7 +72,7 @@ public class StartClinicPatient implements ICommand {
         } else {
             if (registrationContext.isVerify(userId)) {
                 registrationContext.setStatus(userId, Status.GIVING_PHONE_NUMBER_CLINIC_PATIENT);
-                return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update));
+                return registrationProcess.requestPhoneNumber(TelegramIdUtils.getChatId(update), update, telegramExecutor);
             }
         }
         String messageText = "Вы уже верифицированы. Выберите действие:";
