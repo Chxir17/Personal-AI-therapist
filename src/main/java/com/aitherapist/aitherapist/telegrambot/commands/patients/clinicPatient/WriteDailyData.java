@@ -4,7 +4,6 @@ import com.aitherapist.aitherapist.domain.enums.Answers;
 import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.DailyHealthData;
 import com.aitherapist.aitherapist.domain.model.entities.Patient;
-import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
 import com.aitherapist.aitherapist.functionality.recommendationSystem.MakeMedicalRecommendation;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
 import com.aitherapist.aitherapist.services.PatientServiceImpl;
@@ -19,18 +18,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Component
 public class WriteDailyData implements ICommand {
@@ -52,13 +44,10 @@ public class WriteDailyData implements ICommand {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-
-
     protected SendMessage handleQuestionnaire(Update update, Long userId, RegistrationContext registrationContext)
             throws TelegramApiException, JsonProcessingException {
         Long chatId = TelegramIdUtils.getChatId(update);
         String text = update.hasMessage() ? update.getMessage().getText() : "";
-
 
         ClientRegistrationState state = registrationContext.getClientRegistrationState(chatId);
         switch (state.getCurrentStep()) {
@@ -74,34 +63,91 @@ public class WriteDailyData implements ICommand {
                 String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
 
-                Patient currentPatient = patientService.getPatientWithData(userId);
-                patientService.addDailyHealthDataToPatient(userId, d);
-                currentPatient = patientService.getPatientWithData(userId);
-                String response4 = makeMedicalRecommendation.giveMedicalRecommendationWithScore(currentPatient);
+                if (!areHealthParametersNormal(d)) {
+                    state.setCurrentStep(3);
+                    return SendMessage.builder()
+                            .chatId(chatId.toString())
+                            .text(" Как вы себя чувствуете сегодня?")
+                            .build();
+                } else {
+                    return processFinalResponse(chatId, userId, registrationContext, d, null);
+                }
+            }
+            case 3 -> {
+                String wellbeing = text;
+                String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
+                DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
 
 
-                String fullResponse =
-                        (response4 != null ? response4 : "Рекомендации не сгенерированы");
-
-                registrationContext.setStatus(userId, Status.NONE);
                 registrationContext.clearClientRegistrationState(userId);
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(fullResponse)
-                        .parseMode("HTML")
-                        .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
-                        .build();
+                registrationContext.setStatus(userId, Status.WRITE_DAILY_DATA);
+
+                return processFinalResponse(chatId, userId, registrationContext, d, wellbeing);
             }
             default -> {
                 registrationContext.clearClientRegistrationState(userId);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Неизвестный шаг регистрации\n\n" )
+                        .text("Неизвестный шаг регистрации\n\n")
                         .build();
             }
         }
     }
 
+    private SendMessage processFinalResponse(Long chatId, Long userId, RegistrationContext context,
+                                             DailyHealthData data, String wellbeing) throws TelegramApiException {
+        Patient patient = patientService.getPatientWithData(userId);
+        patientService.addDailyHealthDataToPatient(userId, data);
+
+        String recommendations = makeMedicalRecommendation.giveMedicalRecommendationWithScore(patient);
+        if (wellbeing != null && !wellbeing.isEmpty()) {
+            recommendations += "\n\n<strong>Ваше самочувствие:</strong> " + wellbeing;
+        }
+
+        context.setStatus(userId, Status.NONE);
+        return SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(recommendations != null ? recommendations : "Рекомендации не сгенерированы")
+                .parseMode("HTML")
+                .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
+                .build();
+    }
+
+    private boolean areHealthParametersNormal(DailyHealthData data) {
+
+
+        // Проверка температуры (норма: 36.0-37.2°C)
+        if (data.getTemperature() == null || data.getTemperature() < 36.0 || data.getTemperature() > 37.2) {
+            return false;
+        }
+
+        if (data.getHoursOfSleepToday() == null || data.getHoursOfSleepToday() < 6) {
+            return false;
+        }
+
+        // Проверка пульса (норма: 60-100 уд/мин)
+        if (data.getPulse() == null || data.getPulse() < 60 || data.getPulse() > 100) {
+            return false;
+        }
+
+        if (data.getPressure() != null) {
+            try {
+                String[] parts = data.getPressure().split("/");
+                int systolic = Integer.parseInt(parts[0]);
+                int diastolic = Integer.parseInt(parts[1]);
+
+                if (systolic < 100 || systolic > 140 || diastolic < 60 || diastolic > 90) {
+                    return false;
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        return true;
+    }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor)
