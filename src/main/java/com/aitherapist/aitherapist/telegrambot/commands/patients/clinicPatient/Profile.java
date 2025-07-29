@@ -142,14 +142,12 @@ public class Profile implements ICommand {
                 ├ Хронические заболевания: %s
                 ├ Вредные привычки: %s
                 ├ Боли в сердце: %s
-                └ Аритмия: %s
                 """,
                 initialData.getHeight(),
                 initialData.getWeight(),
                 formatNullable(initialData.getChronicDiseases(), "нет"),
                 formatNullable(initialData.getBadHabits(), "нет"),
-                formatBoolean(initialData.getHeartPain(), "не указано"),
-                formatBoolean(initialData.getArrhythmia(), "не указано")
+                formatBoolean(initialData.getHeartPain(), "не указано")
         );
     }
 

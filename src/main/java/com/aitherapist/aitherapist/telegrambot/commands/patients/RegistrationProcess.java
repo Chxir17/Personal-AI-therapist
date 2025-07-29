@@ -71,8 +71,6 @@ public class RegistrationProcess {
             }
         }
 
-        String arrhythmiaDisplay = initialHealthData.getArrhythmia() != null ?
-                (initialHealthData.getArrhythmia() ? "Да" : "Нет") : "Не указано";
 
         String heightDisplay = initialHealthData.getHeight() != null ?
                 String.valueOf(initialHealthData.getHeight()) : "Не указан";
@@ -87,7 +85,6 @@ public class RegistrationProcess {
 🎂 *Дата рождения (возраст):* %s
 🚻 *Пол:* %s
 
-💓 *Аритмия:* %s
 🏥 *Хронические заболевания:* %s
 📏 *Рост:* %s
 ⚖️ *Вес:* %s
@@ -96,7 +93,6 @@ public class RegistrationProcess {
                 patient.getName(),
                 birthDateAndAge,
                 genderDisplay,
-                arrhythmiaDisplay,
                 chronicDiseasesDisplay,
                 heightDisplay,
                 weightDisplay,
@@ -143,7 +139,6 @@ public class RegistrationProcess {
         patient.setTelegramId(userId);
 
         InitialHealthData healthData = new InitialHealthData();
-        healthData.setArrhythmia(dto.getArrhythmia() != null ? dto.getArrhythmia() : false);
         healthData.setHeight(dto.getHeight());
         healthData.setWeight(dto.getWeight());
         healthData.setChronicDiseases(dto.getChronicDiseases() != null ? dto.getChronicDiseases() : "false");
@@ -188,39 +183,39 @@ public class RegistrationProcess {
                         .text(Answers.ARHYTHMIA_QUESTION.getMessage())
                         .build();
             }
+//            case 4 -> {
+//                state.getBase().append("arrhythmia: ").append(text).append("\n");
+//                state.setCurrentStep(5);
+//                return SendMessage.builder()
+//                        .chatId(chatId.toString())
+//                        .text(Answers.CHRONIC_DISEASES_QUESTION.getMessage())
+//                        .build();
+//            }
             case 4 -> {
-                state.getBase().append("arrhythmia: ").append(text).append("\n");
-                state.setCurrentStep(5);
-                return SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text(Answers.CHRONIC_DISEASES_QUESTION.getMessage())
-                        .build();
-            }
-            case 5 -> {
                 state.getBase().append("chronicDiseases: ").append(text).append("\n");
-                state.setCurrentStep(6);
+                state.setCurrentStep(5);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.HEIGHT_QUESTION.getMessage())
                         .build();
             }
-            case 6 -> {
+            case 5 -> {
                 state.getBase().append("height: ").append(text).append("\n");
-                state.setCurrentStep(7);
+                state.setCurrentStep(6);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.WEIGHT_QUESTION.getMessage())
                         .build();
             }
-            case 7 -> {
+            case 6 -> {
                 state.getBase().append("weight: ").append(text).append("\n");
-                state.setCurrentStep(8);
+                state.setCurrentStep(7);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(Answers.BAD_HABITS_QUESTION.getMessage())
                         .build();
             }
-            case 8 -> {
+            case 7 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
                 System.out.println("STATE " + state.getBase().toString());
                 String response = parseUserPrompt.patientRegistrationParser(state.getBase().toString());
@@ -252,7 +247,6 @@ public class RegistrationProcess {
                 try {
                     userService.saveUser(patient);
                 } catch (Exception e) {
-                    System.err.println("Ошибка сохранения попробуйте снова... ");
                     e.printStackTrace();
                     throw e;
                 }

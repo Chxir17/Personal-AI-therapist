@@ -12,7 +12,6 @@ public class PatientRegistrationDto {
     private String name;
     private LocalDate birthDate;
     private Boolean gender;
-    private Boolean arrhythmia;
     private String chronicDiseases;
     private Double height;
     private Double weight;
