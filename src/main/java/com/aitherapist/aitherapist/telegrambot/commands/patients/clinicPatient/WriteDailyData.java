@@ -30,14 +30,16 @@ public class WriteDailyData implements ICommand {
     private final UserServiceImpl userService;
     private final ParseUserPrompt parseUserPrompt;
     private final MakeMedicalRecommendation makeMedicalRecommendation;
+    private final RegistrationContext registrationContext;
 
     @Autowired
     public WriteDailyData(PatientServiceImpl patientService, UserServiceImpl userService,
-                          ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation) {
+                          ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation, RegistrationContext registrationContext) {
         this.patientService = patientService;
         this.userService = userService;
         this.parseUserPrompt = parseUserPrompt;
         this.makeMedicalRecommendation = makeMedicalRecommendation;
+        this.registrationContext = registrationContext;
     }
 
     private final ObjectMapper mapper = new ObjectMapper()
@@ -46,6 +48,7 @@ public class WriteDailyData implements ICommand {
 
     protected SendMessage handleQuestionnaire(Update update, Long userId, RegistrationContext registrationContext)
             throws TelegramApiException, JsonProcessingException {
+
         Long chatId = TelegramIdUtils.getChatId(update);
         String text = update.hasMessage() ? update.getMessage().getText() : "";
 
@@ -77,7 +80,7 @@ public class WriteDailyData implements ICommand {
                 String wellbeing = text;
                 String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
                 DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
-
+                d.setFeels(wellbeing);
 
                 registrationContext.clearClientRegistrationState(userId);
                 registrationContext.setStatus(userId, Status.WRITE_DAILY_DATA);
@@ -97,13 +100,11 @@ public class WriteDailyData implements ICommand {
     private SendMessage processFinalResponse(Long chatId, Long userId, RegistrationContext context,
                                              DailyHealthData data, String wellbeing) throws TelegramApiException {
         Patient patient = patientService.getPatientWithData(userId);
+
         patientService.addDailyHealthDataToPatient(userId, data);
 
         String recommendations = makeMedicalRecommendation.giveMedicalRecommendationWithScore(patient);
-        if (wellbeing != null && !wellbeing.isEmpty()) {
-            recommendations += "\n\n<strong>Ваше самочувствие:</strong> " + wellbeing;
-        }
-
+        registrationContext.removeClientRegistrationStates(userId);
         context.setStatus(userId, Status.NONE);
         return SendMessage.builder()
                 .chatId(chatId.toString())

@@ -27,6 +27,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.format.DateTimeFormatter;
+
 @Component
 @RequiredArgsConstructor
 public class StartDoctors implements ICommand {
@@ -50,15 +52,24 @@ public class StartDoctors implements ICommand {
         String genderDisplay = doctor.getGender() == null ? "Не указан" :
                 (doctor.getGender() ? "♂ Мужской" : "♀ Женский");
 
+        String birthDateAndAge;
+        if (doctor.getBirthDate() != null) {
+            String formattedDate = doctor.getBirthDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            int age = doctor.getAge();
+            birthDateAndAge = String.format("%s (%d лет)", formattedDate, age);
+        } else {
+            birthDateAndAge = "Не указана";
+        }
+
         String message = String.format("""
     📝 *Вы ввели данные:*
     
     👤 *Имя:* %s
-    🎂 *Возраст:* %d лет
+    🎂 *Возраст:* %s 
     🚻 *Пол:* %s
     """,
                 doctor.getName(),
-                doctor.getAge(),
+                birthDateAndAge,
                 genderDisplay);
 
         return SendMessage.builder()

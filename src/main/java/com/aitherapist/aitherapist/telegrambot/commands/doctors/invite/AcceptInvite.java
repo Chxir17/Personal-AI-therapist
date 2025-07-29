@@ -60,7 +60,7 @@ public class AcceptInvite implements ICommand {
                     patientMessage.setChatId(patient.getTelegramId().toString());
                     patientMessage.setText("✅ Врач принял ваше приглашение!");
                     telegramMessageSender.sendMessage(patientMessage);
-                    registrationContext.setMessageToDelete(userId, patientMessage.getId);
+
 
                     Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
                     telegramExecutor.editMessageText(

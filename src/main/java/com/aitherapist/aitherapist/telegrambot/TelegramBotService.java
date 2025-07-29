@@ -64,10 +64,15 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
         return "chat_" + chatId + "_" + System.currentTimeMillis();
     }
 
+    private void deleteRegisterContext(Long userId) {
+        registrationContext.deleteMessage(userId);
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
         try {
             if (update.hasMessage()) {
+                deleteRegisterContext(TelegramIdUtils.extractUserId(update));
                 if (update.getMessage().hasText()) {
                     handleMessageUpdate(update, registrationContext);
                 } else if(update.getMessage().hasVoice()) {

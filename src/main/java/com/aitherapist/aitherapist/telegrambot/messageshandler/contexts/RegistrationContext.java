@@ -20,22 +20,31 @@ public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
     private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
-    private final Map<Long,  Long> MessageToDelete= new ConcurrentHashMap<>();
+    private final Map<Long, Integer> MessageToDelete= new ConcurrentHashMap<>();
     private final Map<Long, History> mapUserToHistory = new ConcurrentHashMap<>();
     private final Map<Long, History> mapQaToHistory = new ConcurrentHashMap<>();
     private final Map<Long, List<UserActivityLog>> userActivityLogsList = new ConcurrentHashMap<>();
     private final Map<Long, MedicalNormalData>  mapMedicalNormalData = new ConcurrentHashMap<>();
 
-    public void setMessageToDelete(Long userId, Long messageId){
+    public void setMessageToDelete(Long userId, Integer messageId){
         MessageToDelete.put(userId, messageId);
     }
 
-    public Long getMessageToDelete(Long userId){
+
+    public Integer getMessageToDelete(Long userId){
         return MessageToDelete.get(userId);
     }
 
     public Boolean hasMessageToDelete(Long userId){
         return MessageToDelete.isEmpty();
+    }
+
+    public void deleteMessage(Long userId){
+        MessageToDelete.remove(userId);
+    }
+
+    public void removeClientRegistrationStates(Long userId){
+        clientRegistrationStates.remove(userId);
     }
 
     public void deleteAllDataOfUser(Long userId) {
