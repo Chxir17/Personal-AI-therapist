@@ -278,7 +278,7 @@ public class MessagesHandler implements IHandler {
         messageSender.sendMessage(commandsHandler.handleCustomCommand(update, registrationContext));
     }
 
-    public void handleEditBirthDate(Update update) {
+    public void handleEditBirthDate(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             String cleanJson = parseUserPrompt.parameterEditorParser(message);
@@ -298,7 +298,7 @@ public class MessagesHandler implements IHandler {
                 messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
 
@@ -341,7 +341,7 @@ public class MessagesHandler implements IHandler {
         }
     }
 
-    public void handleEditName(Update update) {
+    public void handleEditName(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             System.out.println("Message: " + message);
@@ -362,11 +362,11 @@ public class MessagesHandler implements IHandler {
                 messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
 
-    public void handleEditGender(Update update) {
+    public void handleEditGender(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             String cleanJson = parseUserPrompt.parameterEditorParser(message);
@@ -385,16 +385,10 @@ public class MessagesHandler implements IHandler {
                 messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, existingUser));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
 
-    /**
-     * TODO: add check is verify in db or no
-     * @param update
-     * @return
-     * @throws TelegramApiException
-     */
     public boolean verify(Update update) throws TelegramApiException {
         Long chatId = getChatId(update);
         if (update.hasMessage() && update.getMessage().hasContact()) {
@@ -427,7 +421,7 @@ public class MessagesHandler implements IHandler {
     }
 
 
-    public void handleEditChronicDiseases(Update update) {
+    public void handleEditChronicDiseases(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
@@ -440,10 +434,10 @@ public class MessagesHandler implements IHandler {
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update,  patientService.findById(TelegramIdUtils.extractUserId(update)));
         } catch (Exception e) {
-            e.printStackTrace();
+            messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
-    public void handleEditHeight(Update update) {
+    public void handleEditHeight(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
@@ -456,11 +450,11 @@ public class MessagesHandler implements IHandler {
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
-            e.printStackTrace();
+            messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
 
-    public void handleEditWeight(Update update) {
+    public void handleEditWeight(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
@@ -473,10 +467,10 @@ public class MessagesHandler implements IHandler {
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
-            e.printStackTrace();
+            messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
-    public void handleEditBadHabits(Update update) {
+    public void handleEditBadHabits(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
@@ -489,7 +483,7 @@ public class MessagesHandler implements IHandler {
             initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
-            e.printStackTrace();
+            messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
 
