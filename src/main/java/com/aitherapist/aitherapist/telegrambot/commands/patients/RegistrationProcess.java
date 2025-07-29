@@ -227,6 +227,24 @@ public class RegistrationProcess {
 
                 mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
+
+                if (dto.getBirthDate() != null) {
+                    int age = java.time.Period.between(dto.getBirthDate(), java.time.LocalDate.now()).getYears();
+                    if (age < 5 || age > 120) {
+                        dto.setBirthDate(null);
+                    }
+                } else {
+                    dto.setBirthDate(null);
+                }
+
+                if (dto.getHeight() != null && (dto.getHeight() < 50 || dto.getHeight() > 250)) {
+                    dto.setHeight(null);
+                }
+
+                if (dto.getWeight() != null && (dto.getWeight() < 20 || dto.getWeight() > 300)) {
+                    dto.setWeight(null);
+                }
+
                 Patient patient;
 
                 if (isClinicPatient) {
