@@ -63,9 +63,24 @@ public class WriteDailyData implements ICommand {
             }
             case 2 -> {
                 state.getBase().append(text);
-                //FIXME одно и тоже дейстиве 2 раза
-                String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
-                DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
+                DailyHealthData d;
+                try {
+                    String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
+                    d = mapper.readValue(response, DailyHealthData.class);
+                    if (d.getTemperature() == null && d.getHoursOfSleepToday() == null  && d.getPressure() == null && d.getBloodOxygenLevel() == null) {
+                        return SendMessage.builder()
+                                .chatId(chatId.toString())
+                                .text("Попробуйте еще раз!")
+                                .build();
+                    }
+                }
+                catch (JsonProcessingException e) {
+                      return SendMessage.builder()
+                            .chatId(chatId.toString())
+                            .text("Попробуйте еще раз!")
+                            .build();
+                }
+
 
                 if (!areHealthParametersNormal(d)) {
                     state.setCurrentStep(3);
@@ -114,7 +129,7 @@ public class WriteDailyData implements ICommand {
         context.setStatus(userId, Status.NONE);
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text(recommendations != null ? recommendations : "Рекомендации не сгенерированы")
+                .text(recommendations != null ? recommendations.replace("\\n", "\n").replace("/n", "\n") : "Рекомендации не сгенерированы")
                 .parseMode("HTML")
                 .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
                 .build();
@@ -132,7 +147,7 @@ public class WriteDailyData implements ICommand {
             return false;
         }
 
-        // Проверка пульса (норма: 60-100 уд/мин)
+
         if (data.getPulse() == null || data.getPulse() < 60 || data.getPulse() > 100) {
             return false;
         }

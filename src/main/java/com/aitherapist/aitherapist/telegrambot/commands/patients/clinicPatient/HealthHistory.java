@@ -42,7 +42,6 @@ public class HealthHistory implements ICommand {
         Patient patient = patientService.findById(userId);
 
         List<DailyHealthData> healthData = patientService.getPatientDailyHealthData(userId);
-        //healthData.sort(Comparator.comparingLong(DailyHealthData::getId).reversed());
 
         StringBuilder message = new StringBuilder();
         message.append("📆 История ваших показателей:\n\n");
