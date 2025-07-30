@@ -42,16 +42,18 @@ public class HealthHistory implements ICommand {
         Patient patient = patientService.findById(userId);
 
         List<DailyHealthData> healthData = patientService.getPatientDailyHealthData(userId);
-        healthData.sort(Comparator.comparingLong(DailyHealthData::getId).reversed());
+        //healthData.sort(Comparator.comparingLong(DailyHealthData::getId).reversed());
 
         StringBuilder message = new StringBuilder();
-        message.append("📆 *История ваших показателей:*\n\n");
+        message.append("📆 История ваших показателей:\n\n");
 
         if (healthData.isEmpty()) {
-            message.append("У вас пока нет сохранённых данных о здоровье.");
+            message.append("У вас пока нет сохранённых данных о здоровье");
         } else {
+            int counter = 1;
             for (DailyHealthData data : healthData) {
-                message.append(formatHealthData(data));
+                message.append(formatHealthData(data, counter));
+                counter++;
             }
             message.append("\n🔍 *Статистика за весь период:*\n");
             message.append(calculateStatistics(healthData));
@@ -70,7 +72,7 @@ public class HealthHistory implements ICommand {
                 );
                 return null;
             } catch (TelegramApiException e) {
-               e.printStackTrace();
+                e.printStackTrace();
             }
         }
 
@@ -82,15 +84,15 @@ public class HealthHistory implements ICommand {
                 .build();
     }
 
-    private String formatHealthData(DailyHealthData data) {
+    private String formatHealthData(DailyHealthData data, int counter) {
         return String.format(
-                "🆔 ID записи: *%d*\n" +
-                        "🌡 Температура: *%s*\n" +
-                        "❤️ Пульс: *%s*\n" +
-                        "🩸 Давление: *%s*\n" +
-                        "😴 Сон: *%s*\n" +
-                        "🧪 Кислород: *%s*\n\n",
-                data.getId(),
+                "🆔 ID записи: %d\n" +
+                        "🌡 Температура: %s\n" +
+                        "❤️ Пульс: %s\n" +
+                        "🩸 Давление: %s\n" +
+                        "😴 Сон: %s\n" +
+                        "🧪 Кислород: %s\n\n",
+                counter,
                 data.getTemperature() != null ? String.format("%.1f°C", data.getTemperature()) : "нет данных",
                 data.getPulse() != null ? data.getPulse() + " уд/мин" : "нет данных",
                 data.getPressure() != null ? data.getPressure() : "нет данных",

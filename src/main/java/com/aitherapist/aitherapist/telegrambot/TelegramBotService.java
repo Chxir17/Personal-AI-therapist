@@ -170,7 +170,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
 
     private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String messageText = update.getMessage().getText();
-        if (messageText.startsWith("/start") || messageText.startsWith("/help") || messageText.startsWith("/privacy")) {
+        if (messageText.startsWith("/start") || messageText.startsWith("/help") || messageText.startsWith("/privacy") || messageText.startsWith("/delete")) {
             sendMessage(commandsHandler.handleCommand(update, registrationContext));
         } else if (messageText.startsWith("/")) {
             SendMessage sm = SendMessage.builder()
@@ -215,12 +215,12 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     @Override
     public Message execute(SendMessage sendMessage) throws TelegramApiException {
         try {
-            super.execute(sendMessage);
+            Message message = super.execute(sendMessage);  // <--- сохраняем результат
+            return message;                                // <--- возвращаем его
         } catch (TelegramApiException e) {
             log.error("Send message error", e);
             throw e;
         }
-        return null;
     }
 
     @Override
@@ -259,6 +259,5 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                 .replyMarkup(verification.createContactRequestKeyboard())
                 .build();
     }
-
 
 }

@@ -82,7 +82,8 @@ public class CommandsHandler {
             GetPatientDailyData getPatientDailyData,
             Invite invite,
             AcceptInvite acceptInvite,
-            RejectInvite rejectInvite
+            RejectInvite rejectInvite,
+            DeleteData deleteData
     ) {
         this.verification = verification;
         this.messageSender = messageSender;
@@ -97,7 +98,7 @@ public class CommandsHandler {
                 editHeightCommand, editWeightCommand, editBadHabitsCommand, writeDailyData,
                 healthHistory, profile, setNotificationMessage, setNotificationTime,
                 toggleNotifications, doctorProfile, editMedicalDataCommand, clinicMenu,
-                lastRecords, qaMode, help, privacy, editDoctorAccountData, doctorMenu, getPatientDailyData, invite, acceptInvite, rejectInvite
+                lastRecords, qaMode, help, privacy, editDoctorAccountData, doctorMenu, getPatientDailyData, invite, acceptInvite, rejectInvite, deleteData
         );
     }
 
@@ -139,8 +140,9 @@ public class CommandsHandler {
             GetPatientDailyData getPatientDailyData,
             Invite invite,
             AcceptInvite acceptInvite,
-            RejectInvite rejectInvite
-            ) {
+            RejectInvite rejectInvite,
+            DeleteData deleteData
+    ) {
         return Map.ofEntries(
                 Map.entry("/start", startCommand),
                 Map.entry("/patientDailyData", getPatientDailyData),
@@ -179,8 +181,8 @@ public class CommandsHandler {
                 Map.entry("/editPatientMedicalData", editMedicalDataCommand),
                 Map.entry("/inviteDoctor", invite),
                 Map.entry("/acceptInvite", acceptInvite),
-                Map.entry("/rejectInvite", rejectInvite)
-
+                Map.entry("/rejectInvite", rejectInvite),
+                Map.entry("/delete", deleteData)
         );
     }
 
