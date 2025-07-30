@@ -36,6 +36,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.context.annotation.Lazy;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -283,12 +284,12 @@ public class MessagesHandler implements IHandler {
             String message = update.getMessage().getText();
             String cleanJson = parseUserPrompt.parameterEditorParser(message);
             UserRegistrationDto parsedUser = mapper.readValue(cleanJson, UserRegistrationDto.class);
-
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
-
-            existingUser.setBirthDate(parsedUser.getBirthDate());
-            userService.updateUser(existingUser, userId);
+            if (parsedUser.getBirthDate().isBefore(LocalDate.now().minusYears(5)) && parsedUser.getBirthDate().isAfter(LocalDate.now().minusYears(120))) {
+                existingUser.setBirthDate(parsedUser.getBirthDate());
+                userService.updateUser(existingUser, userId);
+            }
             registrationContext.setStatus(userId, Status.NONE);
             if (existingUser.getRole() == Roles.DOCTOR){
                 messageSender.sendMessage(startDoctors.acceptOrEditDoctorInfo(existingUser, update));
@@ -442,12 +443,14 @@ public class MessagesHandler implements IHandler {
             String message = update.getMessage().getText();
             Long userId = update.getMessage().getFrom().getId();
             String cleanJson = parseUserPrompt.parameterEditorParser("Рост " + message);
-
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
-            initialHealthData.setHeight(parsedData.getHeight());
+
+            if (parsedData.getHeight() > 50 && parsedData.getHeight() < 280) {
+                initialHealthData.setHeight(parsedData.getHeight());
+                initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
+            }
             registrationContext.setStatus(userId, Status.NONE);
-            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
             messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
@@ -462,9 +465,12 @@ public class MessagesHandler implements IHandler {
 
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
-            initialHealthData.setWeight(parsedData.getWeight());
+
+            if (parsedData.getWeight() > 15.0 && parsedData.getWeight() < 300.0) {
+                initialHealthData.setWeight(parsedData.getWeight());
+                initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
+            }
             registrationContext.setStatus(userId, Status.NONE);
-            initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             messageSender.sendMessage(registrationProcess.acceptOrEditMedicalInitData(initialHealthData, update, patientService.findById(userId)));
         } catch (Exception e) {
             messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
