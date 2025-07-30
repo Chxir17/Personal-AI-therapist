@@ -21,6 +21,7 @@ public class EditPatientAccountData implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditClinicPatientData();
+        Long userId = TelegramIdUtils.extractUserId(update);
         String messageText = "Что вы хотите изменить в медицинских данных?";
 
         if (update.hasCallbackQuery()) {

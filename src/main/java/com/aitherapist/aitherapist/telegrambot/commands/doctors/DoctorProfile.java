@@ -44,7 +44,6 @@ public class DoctorProfile implements ICommand {
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
             try {
-                // Редактируем существующее сообщение
                 telegramExecutor.editMessageText(
                         chatId.toString(),
                         messageId,

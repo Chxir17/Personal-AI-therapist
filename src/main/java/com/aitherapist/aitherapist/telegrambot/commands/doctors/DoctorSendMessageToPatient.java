@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 import com.aitherapist.aitherapist.domain.enums.Status;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -36,13 +37,14 @@ public class DoctorSendMessageToPatient implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long doctorId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
+
         if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {
                 Long patientId = Long.parseLong(parts[1]);
-                registrationContext.setStatus(doctorId, Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER);
+                registrationContext.setStatusWithId(doctorId, Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER, patientId);
 
-                registrationContext.setStatusWithId(patientId, Status.SEND_TO_THIS_USER, doctorId);
+                //registrationContext.setStatusWithId(patientId, Status.SEND_TO_THIS_USER, doctorId);
                 SendMessage message = new SendMessage();
                 message.setChatId(chatId.toString());
                 message.setText("✏️ Введите текст сообщения для пациента:");
@@ -52,39 +54,60 @@ public class DoctorSendMessageToPatient implements ICommand {
         }
 
         if (doctorId == null) {
-            return createErrorMessage(chatId, "❌ Ошибка: не удалось определить ваш профиль врача");
+            createErrorMessage(chatId, "❌ Ошибка: не удалось определить ваш профиль врача", registrationContext, telegramExecutor, TelegramIdUtils.extractUserId(update));
         }
 
         List<Patient> patients = doctorService.getPatients(doctorId);
 
         if (patients.isEmpty()) {
-            return createErrorMessage(chatId, "👨⚕️ У вас пока нет пациентов для отправки сообщений");
+            createErrorMessage(chatId, "👨⚕️ У вас пока нет пациентов для отправки сообщений", registrationContext, telegramExecutor, TelegramIdUtils.extractUserId(update));
+            return null;
         }
 
         return createPatientsListMessage(chatId, patients);
     }
 
-    private SendMessage createErrorMessage(Long chatId, String errorMessage) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId.toString());
-        message.setText(errorMessage);
-        return message;
+    private void createErrorMessage(Long chatId, String errorMessage, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor, Long userId) throws TelegramApiException {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId.toString());
+        sendMessage.setText(errorMessage);
+        Message message = telegramExecutor.execute(sendMessage);
+        registrationContext.setMessageToDelete(userId, message.getMessageId());
     }
 
     private SendMessage createPatientsListMessage(Long chatId, List<Patient> patients) {
+        if (chatId == null) {
+            throw new IllegalArgumentException("chatId не может быть null");
+        }
+
+        if (patients == null || patients.isEmpty()) {
+            SendMessage emptyMessage = new SendMessage();
+            emptyMessage.setChatId(chatId.toString());
+            emptyMessage.setText("🙁 Список пациентов пуст.");
+            emptyMessage.enableHtml(true);
+            return emptyMessage;
+        }
+
         StringBuilder messageText = new StringBuilder();
         messageText.append("💌 <b>Отправка сообщения пациенту</b>\n\n");
         messageText.append("👇 <i>Выберите пациента из списка:</i>\n\n");
 
         for (int i = 0; i < patients.size(); i++) {
             Patient patient = patients.get(i);
+            if (patient == null) continue;
+
+            String name = patient.getName() != null ? patient.getName() : "Без имени";
+            Integer age = patient.getAge() != null ? patient.getAge() : 0;
+            String gender = patient.getGender() != null ? (patient.getGender() ? "М" : "Ж") : "N/A";
+            String phone = patient.getPhoneNumber() != null ? patient.getPhoneNumber() : "Телефон не указан";
+
             messageText.append(String.format(
                     "%d. <b>%s</b> (%d лет, %s)\n <b>%s</b>\n",
                     i + 1,
-                    patient.getName(),
-                    patient.getAge(),
-                    patient.getGender() ? "М" : "Ж",
-                    patient.getPhoneNumber()
+                    name,
+                    age,
+                    gender,
+                    phone
             ));
         }
 
@@ -98,4 +121,5 @@ public class DoctorSendMessageToPatient implements ICommand {
 
         return message;
     }
+
 }

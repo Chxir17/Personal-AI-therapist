@@ -40,10 +40,9 @@ public class AcceptInvite implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long doctorId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
-        Long userId = TelegramIdUtils.extractUserId(update);
-        if(registrationContext.getMessageToDelete(userId) != null) {
-            telegramExecutor.deleteMessage(chatId.toString(), update.getMessage().getMessageId());
-        }        if (update.hasCallbackQuery()) {
+
+
+        if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {
                 Long patientId = Long.parseLong(parts[1]);
@@ -59,16 +58,15 @@ public class AcceptInvite implements ICommand {
                     SendMessage patientMessage = new SendMessage();
                     patientMessage.setChatId(patient.getTelegramId().toString());
                     patientMessage.setText("✅ Врач принял ваше приглашение!");
-                    telegramMessageSender.sendMessage(patientMessage);
+                    telegramMessageSender.sendMessageAndSetToList(patientMessage, registrationContext, patientId);
 
 
                     Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
-                    telegramExecutor.editMessageText(
-                            chatId.toString(),
-                            messageId,
-                            "✅ Вы приняли приглашение пациента " + patient.getName(),
-                            null
-                    );
+                    SendMessage doctorMessage = new SendMessage();
+                    doctorMessage.setChatId(chatId.toString());
+                    doctorMessage.setText("✅ Вы приняли приглашение пациента " + patient.getName());
+
+                    telegramMessageSender.sendMessageAndSetToList(doctorMessage, registrationContext, doctorId);
                     return null;
                 }
             }

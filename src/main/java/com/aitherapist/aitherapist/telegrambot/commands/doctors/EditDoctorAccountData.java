@@ -28,9 +28,10 @@ public class EditDoctorAccountData implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long chatId = TelegramIdUtils.getChatId(update);
-        Doctor doctor = doctorService.getDoctor(TelegramIdUtils.extractUserId(update));
         String messageText = "Что вы хотите изменить?";
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createEditDoctorData();
+        Long userId = TelegramIdUtils.extractUserId(update);
+        Doctor doctor = doctorService.getDoctor(userId);
 
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();

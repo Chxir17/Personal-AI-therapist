@@ -24,9 +24,7 @@ public class DoctorMenu implements ICommand {
         String messageText = "Выберите команду:";
         Long userId = TelegramIdUtils.extractUserId(update);
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorDefaultKeyboard();
-        if(registrationContext.getMessageToDelete(userId) != null) {
-            telegramExecutor.deleteMessage(chatId.toString(), update.getMessage().getMessageId());
-        }
+
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
             try {

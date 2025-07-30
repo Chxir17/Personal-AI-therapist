@@ -7,6 +7,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +24,12 @@ import java.util.List;
 @Component
 public class HistoryPatients implements ICommand {
     DoctorServiceImpl doctorService;
+    private final TelegramMessageSender telegramMessageSender;
 
     @Autowired
-    public HistoryPatients(DoctorServiceImpl doctorService) {
+    public HistoryPatients(DoctorServiceImpl doctorService, TelegramMessageSender telegramMessageSender) {
         this.doctorService = doctorService;
+        this.telegramMessageSender = telegramMessageSender;
     }
 
     @Override
@@ -36,13 +39,14 @@ public class HistoryPatients implements ICommand {
         Long chatId = TelegramIdUtils.getChatId(update);
 
         if (doctorId == null) {
-            return new SendMessage(chatId.toString(), "❌ Ошибка: не удалось определить ваш профиль врача");
+             new SendMessage(chatId.toString(), "❌ Ошибка: не удалось определить ваш профиль врача");
         }
 
         List<Patient> patients = doctorService.getPatients(doctorId);
 
         if (patients.isEmpty()) {
-            return new SendMessage(chatId.toString(), "У вас пока нет пациентов.");
+            telegramMessageSender.sendMessageAndSetToList(new SendMessage(chatId.toString(), "У вас пока нет пациентов."), registrationContext, doctorId);
+            return null;
         }
 
         StringBuilder message = new StringBuilder("📋 Список ваших пациентов:\n\n");

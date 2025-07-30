@@ -1,35 +1,14 @@
 package com.aitherapist.aitherapist.telegrambot.commands.medicalDataEditor;
 
-import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
-import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
-import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+
 import com.aitherapist.aitherapist.domain.enums.Status;
-import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 
 @Component
-public class EditBirthDate implements ICommand {
-    @Override
-    public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
-        Long chatId = TelegramIdUtils.getChatId(update);
-        Long userId = TelegramIdUtils.extractUserId(update);
-
-        registrationContext.setStatus(userId, Status.EDIT_BIRTH_DATE);
-
-        return SendMessage.builder()
-                .chatId(chatId.toString())
-                .text("Измените дату рождения на:")
-                .build();
+public class EditBirthDate extends AbstractEditCommand {
+    public EditBirthDate(TelegramMessageSender telegramMessageSender) {
+        super(telegramMessageSender, "Измените возраст:", Status.EDIT_BIRTH_DATE);
     }
-
-    private Long getChatId(Update update) {
-        return update.hasCallbackQuery() ?
-                update.getCallbackQuery().getMessage().getChatId() :
-                update.getMessage().getChatId();
-    }
-
-
 }

@@ -5,6 +5,7 @@ import com.aitherapist.aitherapist.domain.enums.Status;
 import com.aitherapist.aitherapist.domain.model.entities.History;
 import com.aitherapist.aitherapist.domain.model.entities.MedicalNormalData;
 import com.aitherapist.aitherapist.domain.model.entities.UserActivityLog;
+import com.aitherapist.aitherapist.telegrambot.messageshandler.MessagesHandler;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.ClientRegistrationState;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.DoctorRegistrationState;
 import org.springframework.stereotype.Component;
@@ -20,18 +21,18 @@ public class RegistrationContext {
     private final Map<Long, DynamicStatus> mapOfUserStatus = new ConcurrentHashMap<>();
     private final Map<Long, DoctorRegistrationState> doctorRegistrationStates = new ConcurrentHashMap<>();
     private final Map<Long, ClientRegistrationState> clientRegistrationStates = new ConcurrentHashMap<>();
-    private final Map<Long, Integer> MessageToDelete= new ConcurrentHashMap<>();
+    private final Map<Long, List<Integer>> MessageToDelete= new ConcurrentHashMap<>();
     private final Map<Long, History> mapUserToHistory = new ConcurrentHashMap<>();
     private final Map<Long, History> mapQaToHistory = new ConcurrentHashMap<>();
     private final Map<Long, List<UserActivityLog>> userActivityLogsList = new ConcurrentHashMap<>();
     private final Map<Long, MedicalNormalData>  mapMedicalNormalData = new ConcurrentHashMap<>();
 
     public void setMessageToDelete(Long userId, Integer messageId){
-        MessageToDelete.put(userId, messageId);
+        MessageToDelete.computeIfAbsent(userId, k -> new ArrayList<>()).add(messageId);
     }
 
 
-    public Integer getMessageToDelete(Long userId){
+    public List<Integer> getMessageToDelete(Long userId){
         return MessageToDelete.get(userId);
     }
 
@@ -45,6 +46,15 @@ public class RegistrationContext {
 
     public void removeClientRegistrationStates(Long userId){
         clientRegistrationStates.remove(userId);
+    }
+
+    public void removeClientRegistrationStatesCheck(Long id) {
+        if (!clientRegistrationStates.containsKey(id)) {
+            return;
+        }
+        if (clientRegistrationStates.get(id).getCurrentStep() == 8) {
+            clientRegistrationStates.remove(id);
+        }
     }
 
     public void deleteAllDataOfUser(Long userId) {
@@ -115,6 +125,9 @@ public class RegistrationContext {
     }
 
     public ClientRegistrationState getClientRegistrationState(Long userId) {
+//        if (clientRegistrationStates.get(userId).getCurrentStep() == 8) {
+//            removeClientRegistrationStates(userId);
+//        }
         return clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
     }
 
@@ -158,6 +171,10 @@ public class RegistrationContext {
 
     public void setStatus(Long userId, Status status) {
         mapOfUserStatus.put(userId, status.withId(null));
+    }
+
+    public Long getExtraId(Long id) {
+        return mapOfUserStatus.get(id   ).getAssociatedId();
     }
 
     public void setStatusWithId(Long userId, Status status, Long associatedId) {

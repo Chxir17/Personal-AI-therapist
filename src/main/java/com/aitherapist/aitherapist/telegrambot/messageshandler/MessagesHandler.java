@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -264,7 +265,7 @@ public class MessagesHandler implements IHandler {
                 .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId))) // <- сюда
                 .build();
 
-        messageSender.sendMessage(response);
+        messageSender.sendMessageAndSetToList(response, registrationContext, userId);
         registrationContext.setStatus(userId, Status.NONE);
     }
 
@@ -279,6 +280,12 @@ public class MessagesHandler implements IHandler {
         messageSender.sendMessage(commandsHandler.handleCustomCommand(update, registrationContext));
     }
 
+    private boolean checkValidBirthDateValue(UserRegistrationDto parsedUser){
+        return parsedUser.getBirthDate().isBefore(LocalDate.now().minusYears(5)) && parsedUser.getBirthDate().isAfter(LocalDate.now().minusYears(120));
+    }
+
+
+
     public void handleEditBirthDate(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
@@ -286,7 +293,7 @@ public class MessagesHandler implements IHandler {
             UserRegistrationDto parsedUser = mapper.readValue(cleanJson, UserRegistrationDto.class);
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
-            if (parsedUser.getBirthDate().isBefore(LocalDate.now().minusYears(5)) && parsedUser.getBirthDate().isAfter(LocalDate.now().minusYears(120))) {
+            if (checkValidBirthDateValue(parsedUser)) {
                 existingUser.setBirthDate(parsedUser.getBirthDate());
                 userService.updateUser(existingUser, userId);
             }
@@ -305,21 +312,34 @@ public class MessagesHandler implements IHandler {
 
     private void handleMessageFromDoctorToUser(Update update) throws TelegramApiException {
         Message message = update.getMessage();
-        Long currentDoctorId = message.getFrom().getId();
+        Long id = message.getFrom().getId();
 
-        List<Long> userIds = registrationContext.findUserIdsWithSendToDoctorStatus(currentDoctorId);
 
-        for (Long userId : userIds) {
-            String doctorMessage = String.format(
-                    "✉️ *" +
-                            "Вам пришло сообщение от вашего доктора: %s\n\n" +
-                            "%s\n",
-                    userService.getUser(currentDoctorId).getName(),
-                    message.getText()
-            );
+        String doctorMessage = String.format(
+                "✉️ *" +
+                        "Вам пришло сообщение от вашего доктора: %s\n\n" +
+                        "%s\n",
+                userService.getUser(id).getName(),
+                message.getText()
+        );
 
-            messageSender.sendMessage(SendMessage.builder().chatId(userId).text(doctorMessage).replyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard()).build());
-        }
+        messageSender.sendMessage(SendMessage.builder().chatId(registrationContext.getExtraId(id)).text(doctorMessage).replyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard()).build());
+
+//        List<Long> userIds = registrationContext.findUserIdsWithSendToDoctorStatus(currentDoctorId);
+//
+//
+//
+//        for (Long userId : userIds) {
+//            String doctorMessage = String.format(
+//                    "✉️ *" +
+//                            "Вам пришло сообщение от вашего доктора: %s\n\n" +
+//                            "%s\n",
+//                    userService.getUser(currentDoctorId).getName(),
+//                    message.getText()
+//            );
+//
+//            messageSender.sendMessage(SendMessage.builder().chatId(userId).text(doctorMessage).replyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard()).build());
+//        }
     }
 
     private void handleMessageFromUserToDoctor(Update update) throws TelegramApiException {
@@ -438,6 +458,11 @@ public class MessagesHandler implements IHandler {
             messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
+
+    private boolean checkValidHeightValue(InitialHealthData parsedData){
+        return parsedData.getHeight() > 50 && parsedData.getHeight() < 280;
+    }
+
     public void handleEditHeight(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
@@ -446,7 +471,7 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
 
-            if (parsedData.getHeight() > 50 && parsedData.getHeight() < 280) {
+            if (checkValidHeightValue(parsedData)) {
                 initialHealthData.setHeight(parsedData.getHeight());
                 initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             }
@@ -455,6 +480,12 @@ public class MessagesHandler implements IHandler {
         } catch (Exception e) {
             messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
+    }
+
+
+
+    private boolean checkValidWeightValue(InitialHealthData parsedData){
+        return parsedData.getWeight() > 15.0 && parsedData.getWeight() < 300.0;
     }
 
     public void handleEditWeight(Update update) throws TelegramApiException {
@@ -466,7 +497,7 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
 
-            if (parsedData.getWeight() > 15.0 && parsedData.getWeight() < 300.0) {
+            if (checkValidWeightValue(parsedData)) {
                 initialHealthData.setWeight(parsedData.getWeight());
                 initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             }

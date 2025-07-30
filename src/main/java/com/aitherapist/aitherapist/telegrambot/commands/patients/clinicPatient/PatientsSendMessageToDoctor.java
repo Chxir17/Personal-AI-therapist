@@ -12,6 +12,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -28,10 +29,13 @@ import java.util.List;
 public class PatientsSendMessageToDoctor implements ICommand {
 
     private final PatientServiceImpl patientService;
+    private final TelegramMessageSender telegramMessageSender;
+
 
     @Autowired
-    public PatientsSendMessageToDoctor(PatientServiceImpl patientService) {
+    public PatientsSendMessageToDoctor(PatientServiceImpl patientService, TelegramMessageSender telegramMessageSender) {
         this.patientService = patientService;
+        this.telegramMessageSender = telegramMessageSender;
     }
 
     @Override
@@ -67,10 +71,12 @@ public class PatientsSendMessageToDoctor implements ICommand {
         List<Doctor> doctors = clinicPatient.getDoctors();
 
         if (doctors.isEmpty()) {
-            return createErrorMessage(chatId, "👨⚕️ У вас пока нет докторов!");
+            telegramMessageSender.sendMessageAndSetToList(createErrorMessage(chatId, "👨⚕️ У вас пока нет докторов!"), registrationContext, userId);
+            return null;
         }
 
-        return createPatientsListMessage(chatId, doctors);
+        telegramMessageSender.sendMessageAndSetToList( createPatientsListMessage(chatId, doctors), registrationContext, userId);
+        return null;
     }
 
     private SendMessage createErrorMessage(Long chatId, String errorMessage) {
@@ -81,19 +87,38 @@ public class PatientsSendMessageToDoctor implements ICommand {
     }
 
     private SendMessage createPatientsListMessage(Long chatId, List<Doctor> doctors) {
+        if (chatId == null) {
+            throw new IllegalArgumentException("chatId не может быть null");
+        }
+
+        if (doctors == null || doctors.isEmpty()) {
+            SendMessage emptyMessage = new SendMessage();
+            emptyMessage.setChatId(chatId.toString());
+            emptyMessage.setText("🙁 Список врачей пуст.");
+            emptyMessage.enableHtml(true);
+            return emptyMessage;
+        }
+
         StringBuilder messageText = new StringBuilder();
-        messageText.append("💌 <b>Отправка сообщения пациенту</b>\n\n");
-        messageText.append("👇 <i>Выберите пациента из списка:</i>\n\n");
+        messageText.append("💌 <b>Отправка сообщения врачу</b>\n\n");
+        messageText.append("👇 <i>Выберите врача из списка:</i>\n\n");
 
         for (int i = 0; i < doctors.size(); i++) {
             Doctor doctor = doctors.get(i);
+            if (doctor == null) continue;
+
+            String name = doctor.getName() != null ? doctor.getName() : "Без имени";
+            Integer age = doctor.getAge() != null ? doctor.getAge() : 0;
+            String gender = doctor.getGender() != null ? (doctor.getGender() ? "М" : "Ж") : "N/A";
+            String phone = doctor.getPhoneNumber() != null ? doctor.getPhoneNumber() : "Телефон не указан";
+
             messageText.append(String.format(
                     "%d. <b>%s</b> (%d лет, %s)\n <b>%s</b>\n",
                     i + 1,
-                    doctor.getName(),
-                    doctor.getAge(),
-                    doctor.getGender() ? "М" : "Ж",
-                    doctor.getPhoneNumber()
+                    name,
+                    age,
+                    gender,
+                    phone
             ));
         }
 
@@ -107,4 +132,5 @@ public class PatientsSendMessageToDoctor implements ICommand {
 
         return message;
     }
+
 }

@@ -1,5 +1,6 @@
 package com.aitherapist.aitherapist.telegrambot.commands.doctors;
 
+import com.aitherapist.aitherapist.domain.model.PatientRegistrationDto;
 import com.aitherapist.aitherapist.domain.model.entities.Doctor;
 import com.aitherapist.aitherapist.domain.model.entities.User;
 import com.aitherapist.aitherapist.interactionWithGigaApi.inputParser.ParseUserPrompt;
@@ -118,16 +119,7 @@ public class StartDoctors implements ICommand {
                 try {
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     Doctor doctorInput = mapper.readValue(jsonWithType, Doctor.class);
-
-                    if (doctorInput.getBirthDate() != null) {
-                        int age = java.time.Period.between(doctorInput.getBirthDate(), java.time.LocalDate.now()).getYears();
-                        if (age < 18 || age > 120) {
-                            doctorInput.setBirthDate(null);
-                        }
-                    } else {
-                        doctorInput.setBirthDate(null);
-                    }
-
+                    checkValidValue(doctorInput);
                     doctorInput.setPhoneNumber(registrationContext.getTelephone(userId));
                     Doctor savedDoctor = doctorService.createDoctor(userId, doctorInput);
                     registrationContext.clearDoctorRegistrationState(userId);
@@ -190,6 +182,18 @@ public class StartDoctors implements ICommand {
                 .text(messageText)
                 .replyMarkup(Verification.createContactRequestKeyboard())
                 .build();
+    }
+
+
+    private void checkValidValue(Doctor doctorInput){
+        if (doctorInput.getBirthDate() != null) {
+            int age = java.time.Period.between(doctorInput.getBirthDate(), java.time.LocalDate.now()).getYears();
+            if (age < 18 || age > 120) {
+                doctorInput.setBirthDate(null);
+            }
+        } else {
+            doctorInput.setBirthDate(null);
+        }
     }
 
 }

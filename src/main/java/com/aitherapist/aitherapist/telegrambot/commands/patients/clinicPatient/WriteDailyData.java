@@ -14,6 +14,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.Cl
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -24,6 +25,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Component
 public class WriteDailyData implements ICommand {
     private final PatientServiceImpl patientService;
@@ -31,15 +35,16 @@ public class WriteDailyData implements ICommand {
     private final ParseUserPrompt parseUserPrompt;
     private final MakeMedicalRecommendation makeMedicalRecommendation;
     private final RegistrationContext registrationContext;
-
+    private final Map<Long, String> mapResponse = new ConcurrentHashMap<>();
     @Autowired
     public WriteDailyData(PatientServiceImpl patientService, UserServiceImpl userService,
-                          ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation, RegistrationContext registrationContext) {
+                          ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation, RegistrationContext registrationContext, TelegramMessageSender messageSender) {
         this.patientService = patientService;
         this.userService = userService;
         this.parseUserPrompt = parseUserPrompt;
         this.makeMedicalRecommendation = makeMedicalRecommendation;
         this.registrationContext = registrationContext;
+        this.messageSender = messageSender;
     }
 
     private final ObjectMapper mapper = new ObjectMapper()
@@ -63,9 +68,26 @@ public class WriteDailyData implements ICommand {
             }
             case 2 -> {
                 state.getBase().append(text);
-                //FIXME одно и тоже дейстиве 2 раза
-                String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
-                DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
+                DailyHealthData d;
+                try {
+                    String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
+                    mapResponse.clear();
+                    mapResponse.put(chatId, response);
+                    d = mapper.readValue(response, DailyHealthData.class);
+                    if (d.getTemperature() == null && d.getHoursOfSleepToday() == null  && d.getPressure() == null && d.getBloodOxygenLevel() == null) {
+                        return SendMessage.builder()
+                                .chatId(chatId.toString())
+                                .text("Попробуйте еще раз!")
+                                .build();
+                    }
+                }
+                catch (JsonProcessingException e) {
+                      return SendMessage.builder()
+                            .chatId(chatId.toString())
+                            .text("Попробуйте еще раз!")
+                            .build();
+                }
+
 
                 if (!areHealthParametersNormal(d)) {
                     state.setCurrentStep(3);
@@ -82,9 +104,8 @@ public class WriteDailyData implements ICommand {
             }
             case 3 -> {
                 String wellbeing = text;
-                //FIXME одно и тоже дейстиве 2 раза
-                String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
-                DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
+
+                DailyHealthData d = mapper.readValue(mapResponse.get(userId), DailyHealthData.class);
                 validateAndCleanHealthParameters(d);
                 d.setFeels(wellbeing);
 
@@ -114,7 +135,7 @@ public class WriteDailyData implements ICommand {
         context.setStatus(userId, Status.NONE);
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text(recommendations != null ? recommendations : "Рекомендации не сгенерированы")
+                .text(recommendations != null ? recommendations.replace("\\n", "\n").replace("/n", "\n") : "Рекомендации не сгенерированы")
                 .parseMode("HTML")
                 .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId)))
                 .build();
@@ -132,7 +153,7 @@ public class WriteDailyData implements ICommand {
             return false;
         }
 
-        // Проверка пульса (норма: 60-100 уд/мин)
+
         if (data.getPulse() == null || data.getPulse() < 60 || data.getPulse() > 100) {
             return false;
         }
@@ -161,9 +182,10 @@ public class WriteDailyData implements ICommand {
             throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         registrationContext.setStatus(userId, Status.WRITE_DAILY_DATA);
-
+        registrationContext.removeClientRegistrationStatesCheck(userId);
         try {
-            return handleQuestionnaire(update, userId, registrationContext);
+            messageSender.sendMessageAndSetToList(handleQuestionnaire(update, userId, registrationContext), registrationContext, userId);
+            return null;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

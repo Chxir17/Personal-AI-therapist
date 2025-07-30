@@ -12,6 +12,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -25,10 +26,13 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT, Roles.BOT_PATIENT}, requiresRegistration = true)
 public class Profile implements ICommand {
 
+    private final TelegramMessageSender telegramMessageSender;
+
     private final UserServiceImpl userService;
 
     @Autowired
-    public Profile(UserServiceImpl userService) {
+    public Profile(TelegramMessageSender telegramMessageSender, UserServiceImpl userService) {
+        this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
     }
 
@@ -38,13 +42,15 @@ public class Profile implements ICommand {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
+
         Roles role = userService.getUserRoles(userId);
         Patient patient = role == Roles.CLINIC_PATIENT
                 ? userService.getClinicPatientById(userId)
                 : userService.getNonClinicPatientById(userId);
 
         if (patient == null) {
-            return buildErrorMessage(chatId);
+            telegramMessageSender.sendMessageAndSetToList( buildErrorMessage(chatId), registrationContext, userId);
+            return null;
         }
 
         String messageText = buildProfileMessageText(patient);
@@ -90,12 +96,12 @@ public class Profile implements ICommand {
         String doctorInfo = "";
 
         if (patient instanceof ClinicPatient clinicPatient) {
-            if (!clinicPatient.getDoctors().isEmpty()) {
+            if (clinicPatient.getDoctors() != null && !clinicPatient.getDoctors().isEmpty()) {
                 StringBuilder doctorsBuilder = new StringBuilder("\n👨⚕️ Ваши врачи:\n");
                 for (Doctor doctor : clinicPatient.getDoctors()) {
                     doctorsBuilder.append(String.format(
                             "├ %s (%s)\n",
-                            doctor.getName(),
+                            safe(doctor.getName(), "Не указано"),
                             doctor.getLicenseNumber() != null ? "лиц. " + doctor.getLicenseNumber() : "лицензия не указана"
                     ));
                 }
@@ -111,7 +117,7 @@ public class Profile implements ICommand {
                 
                 👤 Основная информация
                 ├ Имя: %s
-                ├ Возраст: %d лет
+                ├ Возраст: %s
                 ├ Номер телефона: %s
                 └ Пол: %s
                 
@@ -121,10 +127,10 @@ public class Profile implements ICommand {
                 
                 ✏️ Вы можете изменить данные через меню профиля
                 """,
-                patient.getName(),
-                patient.getAge(),
-                patient.getPhoneNumber(),
-                patient.getGender() ? "Мужской ♂" : "Женский ♀",
+                safe(patient.getName(), "Не указано"),
+                safeAge(patient.getAge()),
+                safe(patient.getPhoneNumber(), "Не указано"),
+                formatGender(patient.getGender()),
                 buildHealthDataSection(initialData),
                 doctorInfo
         );
@@ -137,14 +143,14 @@ public class Profile implements ICommand {
 
         return String.format(
                 """
-                ├ Рост: %.1f см
-                ├ Вес: %.1f кг
+                ├ Рост: %s
+                ├ Вес: %s
                 ├ Хронические заболевания: %s
                 ├ Вредные привычки: %s
                 ├ Боли в сердце: %s
                 """,
-                initialData.getHeight(),
-                initialData.getWeight(),
+                safeDouble(initialData.getHeight()),
+                safeDouble(initialData.getWeight()),
                 formatNullable(initialData.getChronicDiseases(), "нет"),
                 formatNullable(initialData.getBadHabits(), "нет"),
                 formatBoolean(initialData.getHeartPain(), "не указано")
@@ -158,5 +164,22 @@ public class Profile implements ICommand {
     private String formatBoolean(Boolean value, String defaultValue) {
         if (value == null) return defaultValue;
         return value ? "да" : "нет";
+    }
+
+    private String formatGender(Boolean gender) {
+        if (gender == null) return "Не указано";
+        return gender ? "Мужской ♂" : "Женский ♀";
+    }
+
+    private String safe(String value, String defaultValue) {
+        return (value == null || value.isEmpty()) ? defaultValue : value;
+    }
+
+    private String safeAge(Integer age) {
+        return (age == null || age <= 0) ? "Не указано" : age + " лет";
+    }
+
+    private String safeDouble(Double value) {
+        return value == null ? "Не указано" : String.format("%.1f", value);
     }
 }

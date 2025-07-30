@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -71,8 +72,17 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     @Override
     public void onUpdateReceived(Update update) {
         try {
+            Long userId = TelegramIdUtils.extractUserId(update);
+            Long chatId = TelegramIdUtils.getChatId(update);
+            List<Integer> messagesId = registrationContext.getMessageToDelete(userId);
+            if (messagesId != null) {
+                for(Integer message : messagesId) {
+                    System.out.println("\n--------------------"+message.toString()+ "--------------------\n");
+                    deleteMessage(chatId.toString(), message);
+                }
+                messagesId.clear();
+            }
             if (update.hasMessage()) {
-                deleteRegisterContext(TelegramIdUtils.extractUserId(update));
                 if (update.getMessage().hasText()) {
                     handleMessageUpdate(update, registrationContext);
                 } else if(update.getMessage().hasVoice()) {
@@ -170,7 +180,7 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
 
     private void handleMessageUpdate(Update update, RegistrationContext registrationContext) throws TelegramApiException, JsonProcessingException, InterruptedException {
         String messageText = update.getMessage().getText();
-        if (messageText.startsWith("/start") || messageText.startsWith("/help") || messageText.startsWith("/privacy")) {
+        if (messageText.startsWith("/start") || messageText.startsWith("/help") || messageText.startsWith("/privacy") || messageText.startsWith("/delete")) {
             sendMessage(commandsHandler.handleCommand(update, registrationContext));
         } else if (messageText.startsWith("/")) {
             SendMessage sm = SendMessage.builder()
@@ -215,12 +225,12 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
     @Override
     public Message execute(SendMessage sendMessage) throws TelegramApiException {
         try {
-            super.execute(sendMessage);
+            Message message = super.execute(sendMessage);  // <--- сохраняем результат
+            return message;                                // <--- возвращаем его
         } catch (TelegramApiException e) {
             log.error("Send message error", e);
             throw e;
         }
-        return null;
     }
 
     @Override
@@ -259,6 +269,5 @@ public class TelegramBotService extends TelegramLongPollingBot implements ITeleg
                 .replyMarkup(verification.createContactRequestKeyboard())
                 .build();
     }
-
 
 }

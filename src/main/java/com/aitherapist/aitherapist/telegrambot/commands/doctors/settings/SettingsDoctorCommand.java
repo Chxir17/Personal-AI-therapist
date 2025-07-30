@@ -20,7 +20,6 @@ public class SettingsDoctorCommand implements ICommand {
         long chatId = TelegramIdUtils.getChatId(update);
         String messageText = "✨ Доступные действия ✨";
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createDoctorSettingsKeyboard();
-
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
             try {
