@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -279,6 +280,12 @@ public class MessagesHandler implements IHandler {
         messageSender.sendMessage(commandsHandler.handleCustomCommand(update, registrationContext));
     }
 
+    private boolean checkValidBirthDateValue(UserRegistrationDto parsedUser){
+        return parsedUser.getBirthDate().isBefore(LocalDate.now().minusYears(5)) && parsedUser.getBirthDate().isAfter(LocalDate.now().minusYears(120));
+    }
+
+
+
     public void handleEditBirthDate(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
@@ -286,7 +293,7 @@ public class MessagesHandler implements IHandler {
             UserRegistrationDto parsedUser = mapper.readValue(cleanJson, UserRegistrationDto.class);
             Long userId = update.getMessage().getFrom().getId();
             User existingUser = userService.getUserByUserId(userId);
-            if (parsedUser.getBirthDate().isBefore(LocalDate.now().minusYears(5)) && parsedUser.getBirthDate().isAfter(LocalDate.now().minusYears(120))) {
+            if (checkValidBirthDateValue(parsedUser)) {
                 existingUser.setBirthDate(parsedUser.getBirthDate());
                 userService.updateUser(existingUser, userId);
             }
@@ -451,6 +458,11 @@ public class MessagesHandler implements IHandler {
             messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
     }
+
+    private boolean checkValidHeightValue(InitialHealthData parsedData){
+        return parsedData.getHeight() > 50 && parsedData.getHeight() < 280;
+    }
+
     public void handleEditHeight(Update update) throws TelegramApiException {
         try {
             String message = update.getMessage().getText();
@@ -459,7 +471,7 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
 
-            if (parsedData.getHeight() > 50 && parsedData.getHeight() < 280) {
+            if (checkValidHeightValue(parsedData)) {
                 initialHealthData.setHeight(parsedData.getHeight());
                 initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             }
@@ -468,6 +480,12 @@ public class MessagesHandler implements IHandler {
         } catch (Exception e) {
             messageSender.sendMessage(new SendMessage(TelegramIdUtils.getChatId(update).toString(), Answers.EDIT_ERROR.getMessage()));
         }
+    }
+
+
+
+    private boolean checkValidWeightValue(InitialHealthData parsedData){
+        return parsedData.getWeight() > 15.0 && parsedData.getWeight() < 300.0;
     }
 
     public void handleEditWeight(Update update) throws TelegramApiException {
@@ -479,7 +497,7 @@ public class MessagesHandler implements IHandler {
             InitialHealthData initialHealthData = initialHealthDataServiceImpl.getInitialHealthDataByUserId(userId);
             InitialHealthData parsedData = mapper.readValue(cleanJson, InitialHealthData.class);
 
-            if (parsedData.getWeight() > 15.0 && parsedData.getWeight() < 300.0) {
+            if (checkValidWeightValue(parsedData)) {
                 initialHealthData.setWeight(parsedData.getWeight());
                 initialHealthDataServiceImpl.updateInitialHealthDataByUserId(userId, initialHealthData);
             }
