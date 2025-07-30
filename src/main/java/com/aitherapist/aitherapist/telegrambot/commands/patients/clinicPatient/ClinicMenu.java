@@ -40,6 +40,7 @@ public class ClinicMenu implements ICommand {
         String messageText = "✨ Доступные действия ✨";
         InlineKeyboardMarkup keyboard = InlineKeyboardFactory.createPatientDefaultKeyboard(patient);
 
+
         if (update.hasCallbackQuery()) {
             Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
             try {

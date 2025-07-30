@@ -3,6 +3,7 @@ package com.aitherapist.aitherapist.telegrambot.commands.doctors.settings;
 import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
+import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,6 @@ public class ChangeDoctorAccountData implements ICommand {
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) {
         long chatId = update.getMessage().getChatId();
-
         Map<String, String> buttons = Map.of(
                 "Сменить возраст", "/editAge",
                 "Сменить пол", "/editGender",

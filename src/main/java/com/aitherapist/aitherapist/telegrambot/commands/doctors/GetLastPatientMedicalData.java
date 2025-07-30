@@ -7,6 +7,7 @@ import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -21,26 +22,34 @@ import java.util.Optional;
 @Component
 public class GetLastPatientMedicalData implements ICommand {
     private final DoctorServiceImpl doctorService;
+    private final TelegramMessageSender messageSender;
 
     @Autowired
-    public GetLastPatientMedicalData(DoctorServiceImpl doctorService){
+    public GetLastPatientMedicalData(DoctorServiceImpl doctorService, TelegramMessageSender messageSender){
         this.doctorService = doctorService;
+        this.messageSender = messageSender;
     }
 
     @Override
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
-        long chatId = TelegramIdUtils.getChatId(update);
-        long doctorId = update.getMessage().getFrom().getId();
+        Long chatId = TelegramIdUtils.getChatId(update);
+        Long doctorId = TelegramIdUtils.extractUserId(update);
+
 
         if (registrationContext.getStatus(doctorId) == Status.GIVING_PATIENT_ID) {
             try {
                 Long patientId = Long.parseLong(update.getMessage().getText());
-                return sendLastPatientData(chatId, doctorId, patientId, registrationContext);
+                SendMessage lastData = sendLastPatientData(chatId, doctorId, patientId, registrationContext);
+                messageSender.sendMessageAndSetToList(lastData, registrationContext, TelegramIdUtils.extractUserId(update));
+                return null;
             } catch (NumberFormatException e) {
-                return new SendMessage(String.valueOf(chatId), "❌ Неверный формат ID. Пожалуйста, введите числовой ID пациента.");
+                messageSender.sendMessageAndSetToList(new SendMessage(String.valueOf(chatId), "❌ Неверный формат ID. Пожалуйста, введите числовой ID пациента.") , registrationContext, TelegramIdUtils.extractUserId(update));
+                return null;
             }
         } else {
-            return showPatientList(chatId, doctorId, registrationContext);
+            SendMessage patientList = showPatientList(chatId, doctorId, registrationContext);
+            messageSender.sendMessageAndSetToList(patientList, registrationContext, TelegramIdUtils.extractUserId(update));
+            return null;
         }
     }
 

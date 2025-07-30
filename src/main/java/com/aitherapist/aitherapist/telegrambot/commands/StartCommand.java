@@ -43,7 +43,6 @@ public class StartCommand implements ICommand {
         if (userId == null) {
             throw new TelegramApiException("Error value. Can't find userId");
         }
-
         long chatId = TelegramIdUtils.getChatId(update);
 
         if (!userRegistrationService.isSignUp(userId)) {

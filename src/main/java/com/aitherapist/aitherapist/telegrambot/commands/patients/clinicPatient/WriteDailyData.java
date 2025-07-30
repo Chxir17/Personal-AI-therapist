@@ -14,6 +14,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.model.Cl
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -37,12 +38,13 @@ public class WriteDailyData implements ICommand {
     private final Map<Long, String> mapResponse = new ConcurrentHashMap<>();
     @Autowired
     public WriteDailyData(PatientServiceImpl patientService, UserServiceImpl userService,
-                          ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation, RegistrationContext registrationContext) {
+                          ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation, RegistrationContext registrationContext, TelegramMessageSender messageSender) {
         this.patientService = patientService;
         this.userService = userService;
         this.parseUserPrompt = parseUserPrompt;
         this.makeMedicalRecommendation = makeMedicalRecommendation;
         this.registrationContext = registrationContext;
+        this.messageSender = messageSender;
     }
 
     private final ObjectMapper mapper = new ObjectMapper()
@@ -182,7 +184,8 @@ public class WriteDailyData implements ICommand {
         registrationContext.setStatus(userId, Status.WRITE_DAILY_DATA);
         registrationContext.removeClientRegistrationStatesCheck(userId);
         try {
-            return handleQuestionnaire(update, userId, registrationContext);
+            messageSender.sendMessageAndSetToList(handleQuestionnaire(update, userId, registrationContext), registrationContext, userId);
+            return null;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -12,6 +12,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 import com.aitherapist.aitherapist.telegrambot.utils.CommandAccess;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -25,10 +26,13 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @CommandAccess(allowedRoles = {Roles.CLINIC_PATIENT, Roles.BOT_PATIENT}, requiresRegistration = true)
 public class Profile implements ICommand {
 
+    private final TelegramMessageSender telegramMessageSender;
+
     private final UserServiceImpl userService;
 
     @Autowired
-    public Profile(UserServiceImpl userService) {
+    public Profile(TelegramMessageSender telegramMessageSender, UserServiceImpl userService) {
+        this.telegramMessageSender = telegramMessageSender;
         this.userService = userService;
     }
 
@@ -38,13 +42,15 @@ public class Profile implements ICommand {
         Long userId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
 
+
         Roles role = userService.getUserRoles(userId);
         Patient patient = role == Roles.CLINIC_PATIENT
                 ? userService.getClinicPatientById(userId)
                 : userService.getNonClinicPatientById(userId);
 
         if (patient == null) {
-            return buildErrorMessage(chatId);
+            telegramMessageSender.sendMessageAndSetToList( buildErrorMessage(chatId), registrationContext, userId);
+            return null;
         }
 
         String messageText = buildProfileMessageText(patient);

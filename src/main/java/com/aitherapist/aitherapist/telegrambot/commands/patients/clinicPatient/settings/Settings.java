@@ -9,6 +9,7 @@ import com.aitherapist.aitherapist.telegrambot.ITelegramExecutor;
 import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.IMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -29,14 +30,16 @@ public class Settings implements ICommand {
     private final UserServiceImpl userService;
     private final NotificationServiceImpl notificationService;
     private final RegistrationContext registrationContext;
+    private final IMessageSender messageSender;
 
     @Autowired
     public Settings(UserServiceImpl userService,
                     NotificationServiceImpl notificationService,
-                    RegistrationContext registrationContext) {
+                    RegistrationContext registrationContext, IMessageSender messageSender) {
         this.userService = userService;
         this.notificationService = notificationService;
         this.registrationContext = registrationContext;
+        this.messageSender = messageSender;
     }
 
     @Override
@@ -46,10 +49,11 @@ public class Settings implements ICommand {
 
         User user = userService.fetchUserByTelegramId(userId);
         if (user == null) {
-            return SendMessage.builder()
+            messageSender.sendMessageAndSetToList(SendMessage.builder()
                     .chatId(chatId.toString())
                     .text("❌ Пользователь не найден")
-                    .build();
+                    .build(), registrationContext, userId);
+            return null;
         }
 
         registrationContext.setStatus(userId, Status.NOTIFICATION_SETTINGS);
@@ -70,21 +74,23 @@ public class Settings implements ICommand {
                 );
                 return null;
             } catch (TelegramApiException e) {
-                return SendMessage.builder()
+                messageSender.sendMessageAndSetToList(SendMessage.builder()
                         .chatId(chatId.toString())
                         .text(messageText)
                         .parseMode("HTML")
                         .replyMarkup(keyboard)
-                        .build();
+                        .build(), registrationContext, userId);
+                return null;
             }
         }
 
-        return SendMessage.builder()
+        messageSender.sendMessageAndSetToList( SendMessage.builder()
                 .chatId(chatId.toString())
                 .text(messageText)
                 .parseMode("HTML")
                 .replyMarkup(keyboard)
-                .build();
+                .build(), registrationContext, userId);
+        return null;
     }
 
     private String buildSettingsMessage(User user, Long userId) {
