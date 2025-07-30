@@ -47,6 +47,15 @@ public class RegistrationContext {
         clientRegistrationStates.remove(userId);
     }
 
+    public void removeClientRegistrationStatesCheck(Long id) {
+        if (!clientRegistrationStates.containsKey(id)) {
+            return;
+        }
+        if (clientRegistrationStates.get(id).getCurrentStep() == 8) {
+            clientRegistrationStates.remove(id);
+        }
+    }
+
     public void deleteAllDataOfUser(Long userId) {
         mapOfUserStatus.remove(userId);
         doctorRegistrationStates.remove(userId);
@@ -115,6 +124,9 @@ public class RegistrationContext {
     }
 
     public ClientRegistrationState getClientRegistrationState(Long userId) {
+//        if (clientRegistrationStates.get(userId).getCurrentStep() == 8) {
+//            removeClientRegistrationStates(userId);
+//        }
         return clientRegistrationStates.computeIfAbsent(userId, k -> new ClientRegistrationState());
     }
 

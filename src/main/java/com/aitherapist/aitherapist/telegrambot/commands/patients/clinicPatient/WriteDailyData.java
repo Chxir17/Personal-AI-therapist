@@ -24,6 +24,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Component
 public class WriteDailyData implements ICommand {
     private final PatientServiceImpl patientService;
@@ -31,7 +34,7 @@ public class WriteDailyData implements ICommand {
     private final ParseUserPrompt parseUserPrompt;
     private final MakeMedicalRecommendation makeMedicalRecommendation;
     private final RegistrationContext registrationContext;
-
+    private final Map<Long, String> mapResponse = new ConcurrentHashMap<>();
     @Autowired
     public WriteDailyData(PatientServiceImpl patientService, UserServiceImpl userService,
                           ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation, RegistrationContext registrationContext) {
@@ -66,6 +69,8 @@ public class WriteDailyData implements ICommand {
                 DailyHealthData d;
                 try {
                     String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
+                    mapResponse.clear();
+                    mapResponse.put(chatId, response);
                     d = mapper.readValue(response, DailyHealthData.class);
                     if (d.getTemperature() == null && d.getHoursOfSleepToday() == null  && d.getPressure() == null && d.getBloodOxygenLevel() == null) {
                         return SendMessage.builder()
@@ -97,9 +102,8 @@ public class WriteDailyData implements ICommand {
             }
             case 3 -> {
                 String wellbeing = text;
-                //FIXME одно и тоже дейстиве 2 раза
-                String response = parseUserPrompt.dailyQuestionnaireParser(state.getBase().toString());
-                DailyHealthData d = mapper.readValue(response, DailyHealthData.class);
+
+                DailyHealthData d = mapper.readValue(mapResponse.get(userId), DailyHealthData.class);
                 validateAndCleanHealthParameters(d);
                 d.setFeels(wellbeing);
 
@@ -176,7 +180,7 @@ public class WriteDailyData implements ICommand {
             throws TelegramApiException {
         Long userId = TelegramIdUtils.extractUserId(update);
         registrationContext.setStatus(userId, Status.WRITE_DAILY_DATA);
-
+        registrationContext.removeClientRegistrationStatesCheck(userId);
         try {
             return handleQuestionnaire(update, userId, registrationContext);
         } catch (JsonProcessingException e) {
