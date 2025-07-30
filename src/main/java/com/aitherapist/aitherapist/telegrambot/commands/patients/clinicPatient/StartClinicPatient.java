@@ -53,12 +53,15 @@ public class StartClinicPatient implements ICommand {
         Long userId = TelegramIdUtils.extractUserId(update);
         Patient patient = patientService.findById(userId);
 
+
         if (userId == null) {
             return SendMessage.builder()
                     .chatId(TelegramIdUtils.getChatId(update).toString())
                     .text("Не удалось определить пользователя")
                     .build();
         }
+
+
 
         if (registrationContext.getStatus(userId) == Status.REGISTERED_CLINIC_PATIENT) {
             try {

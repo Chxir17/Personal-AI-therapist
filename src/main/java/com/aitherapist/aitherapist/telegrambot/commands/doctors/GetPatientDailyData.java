@@ -9,6 +9,7 @@ import com.aitherapist.aitherapist.telegrambot.commands.ICommand;
 import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.RegistrationContext;
 import com.aitherapist.aitherapist.telegrambot.utils.TelegramIdUtils;
 import com.aitherapist.aitherapist.telegrambot.utils.createButtons.InlineKeyboardFactory;
+import com.aitherapist.aitherapist.telegrambot.utils.sender.TelegramMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +25,11 @@ import java.util.List;
 public class GetPatientDailyData implements ICommand {
 
     private final PatientServiceImpl patientService;
+    private final TelegramMessageSender telegramMessageSender;
     @Autowired
-    public GetPatientDailyData(PatientServiceImpl patientService) {
+    public GetPatientDailyData(PatientServiceImpl patientService, TelegramMessageSender telegramMessageSender) {
         this.patientService = patientService;
+        this.telegramMessageSender = telegramMessageSender;
     }
 
     @Override
@@ -39,12 +42,14 @@ public class GetPatientDailyData implements ICommand {
                 throw new IllegalArgumentException("Неверный формат команды");
             }
 
+
             Long patientId = Long.parseLong(parts[1]);
             Long chatId = TelegramIdUtils.getChatId(update);
 
             Patient patient = patientService.findById(patientId);
             if (patient == null) {
-                return new SendMessage(chatId.toString(), "❌ Пациент не найден");
+                telegramMessageSender.sendMessageAndSetToList(new SendMessage(chatId.toString(), "❌ Пациент не найден"), registrationContext, patientId);
+                return null;
             }
 
             List<DailyHealthData> healthData = patientService.getPatientDailyHealthData(patientId);
@@ -66,10 +71,12 @@ public class GetPatientDailyData implements ICommand {
             return response;
         } catch (NumberFormatException e) {
             Long chatId = TelegramIdUtils.getChatId(update);
-            return new SendMessage(chatId.toString(), "❌ Ошибка: неверный ID пациента");
+            telegramMessageSender.sendMessageAndSetToList( new SendMessage(chatId.toString(), "❌ Ошибка: неверный ID пациента"), registrationContext, TelegramIdUtils.extractUserId(update));
+            return null;
         } catch (Exception e) {
             Long chatId = TelegramIdUtils.getChatId(update);
-            return new SendMessage(chatId.toString(), "❌ Произошла ошибка при получении данных");
+            telegramMessageSender.sendMessageAndSetToList(new SendMessage(chatId.toString(), "❌ Произошла ошибка при получении данных"), registrationContext, TelegramIdUtils.extractUserId(update));
+            return null;
         }
     }
 

@@ -265,7 +265,7 @@ public class MessagesHandler implements IHandler {
                 .replyMarkup(InlineKeyboardFactory.createPatientDefaultKeyboard(patientService.findById(userId))) // <- сюда
                 .build();
 
-        messageSender.sendMessage(response);
+        messageSender.sendMessageAndSetToList(response, registrationContext, userId);
         registrationContext.setStatus(userId, Status.NONE);
     }
 

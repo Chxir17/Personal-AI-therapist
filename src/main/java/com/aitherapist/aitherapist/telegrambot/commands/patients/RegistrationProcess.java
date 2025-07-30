@@ -214,7 +214,6 @@ public class RegistrationProcess {
             }
             case 7 -> {
                 state.getBase().append("badHabits: ").append(text).append("\n");
-                System.out.println("STATE " + state.getBase().toString());
                 String response = parseUserPrompt.patientRegistrationParser(state.getBase().toString());
                 String jsonWithType;
                 if (isClinicPatient) {
@@ -223,8 +222,6 @@ public class RegistrationProcess {
                     jsonWithType = "{\"user_type\":\"BOT_PATIENT\"," + response.substring(1);
                 }
                 state.setCurrentStep(8);
-
-
                 mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
                 PatientRegistrationDto dto = mapper.readValue(jsonWithType, PatientRegistrationDto.class);
                 checkValidValue(dto);

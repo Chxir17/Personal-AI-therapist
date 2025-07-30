@@ -53,7 +53,7 @@ public class Invite implements ICommand {
             if ("/inviteDoctor".equals(parts[0])) {
                 if (parts.length == 2) {
                     Long doctorId = Long.parseLong(parts[1]);
-                    sendInviteToDoctor(patientId, doctorId);
+                    sendInviteToDoctor(patientId, doctorId, registrationContext);
 
                     Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
                     telegramExecutor.editMessageText(
@@ -90,10 +90,12 @@ public class Invite implements ICommand {
 
         List<Doctor> availableDoctors = getAvailableDoctors(patientId);
         if (availableDoctors.isEmpty()) {
-            return createErrorMessage(chatId, "👨⚕️ Нет доступных врачей для приглашения");
+            telegramMessageSender.sendMessageAndSetToList(createErrorMessage(chatId, "👨⚕️ Нет доступных врачей для приглашения"), registrationContext, patientId);
+            return null;
         }
 
-        return createDoctorsListMessage(chatId, availableDoctors);
+        telegramMessageSender.sendMessageAndSetToList(createDoctorsListMessage(chatId, availableDoctors), registrationContext, patientId);
+        return null;
     }
 
     private List<Doctor> getAvailableDoctors(Long patientId) {
@@ -130,7 +132,7 @@ public class Invite implements ICommand {
         return messageText.toString();
     }
 
-    private void sendInviteToDoctor(Long patientId, Long doctorId) throws TelegramApiException {
+    private void sendInviteToDoctor(Long patientId, Long doctorId, RegistrationContext registrationContext) throws TelegramApiException {
         User patient = userService.getUserByUserId(patientId);
         Doctor doctor = doctorService.getDoctor(doctorId);
 
@@ -151,7 +153,7 @@ public class Invite implements ICommand {
         inviteMessage.enableHtml(true);
         inviteMessage.setReplyMarkup(InlineKeyboardFactory.createDoctorInviteResponseKeyboard(patientId));
 
-        telegramMessageSender.sendMessage(inviteMessage);
+        telegramMessageSender.sendMessageAndSetToList(inviteMessage, registrationContext, doctorId);
     }
 
     private SendMessage createErrorMessage(Long chatId, String errorMessage) {

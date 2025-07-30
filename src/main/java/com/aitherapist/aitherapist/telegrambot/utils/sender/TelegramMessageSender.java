@@ -32,6 +32,7 @@ public class TelegramMessageSender implements IMessageSender {
     @Override
     public void sendMessageAndSetToList(SendMessage sendMessage, RegistrationContext registrationContext, Long userId) throws TelegramApiException {
         Message message = telegramExecutor.execute(sendMessage);
+        System.out.println(message.getText() + message.getMessageId().toString());
         registrationContext.setMessageToDelete(userId, message.getMessageId());
     }
 

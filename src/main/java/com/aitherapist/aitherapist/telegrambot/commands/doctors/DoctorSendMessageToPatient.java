@@ -6,6 +6,7 @@ import com.aitherapist.aitherapist.telegrambot.messageshandler.contexts.Registra
 import com.aitherapist.aitherapist.domain.enums.Status;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -36,6 +37,7 @@ public class DoctorSendMessageToPatient implements ICommand {
     public SendMessage apply(Update update, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor) throws TelegramApiException {
         Long doctorId = TelegramIdUtils.extractUserId(update);
         Long chatId = TelegramIdUtils.getChatId(update);
+
         if (update.hasCallbackQuery()) {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {
@@ -52,23 +54,25 @@ public class DoctorSendMessageToPatient implements ICommand {
         }
 
         if (doctorId == null) {
-            return createErrorMessage(chatId, "❌ Ошибка: не удалось определить ваш профиль врача");
+            createErrorMessage(chatId, "❌ Ошибка: не удалось определить ваш профиль врача", registrationContext, telegramExecutor, TelegramIdUtils.extractUserId(update));
         }
 
         List<Patient> patients = doctorService.getPatients(doctorId);
 
         if (patients.isEmpty()) {
-            return createErrorMessage(chatId, "👨⚕️ У вас пока нет пациентов для отправки сообщений");
+            createErrorMessage(chatId, "👨⚕️ У вас пока нет пациентов для отправки сообщений", registrationContext, telegramExecutor, TelegramIdUtils.extractUserId(update));
+            return null;
         }
 
         return createPatientsListMessage(chatId, patients);
     }
 
-    private SendMessage createErrorMessage(Long chatId, String errorMessage) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId.toString());
-        message.setText(errorMessage);
-        return message;
+    private void createErrorMessage(Long chatId, String errorMessage, RegistrationContext registrationContext, ITelegramExecutor telegramExecutor, Long userId) throws TelegramApiException {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId.toString());
+        sendMessage.setText(errorMessage);
+        Message message = telegramExecutor.execute(sendMessage);
+        registrationContext.setMessageToDelete(userId, message.getMessageId());
     }
 
     private SendMessage createPatientsListMessage(Long chatId, List<Patient> patients) {
