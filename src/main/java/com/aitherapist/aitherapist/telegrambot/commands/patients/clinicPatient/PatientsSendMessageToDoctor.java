@@ -81,19 +81,38 @@ public class PatientsSendMessageToDoctor implements ICommand {
     }
 
     private SendMessage createPatientsListMessage(Long chatId, List<Doctor> doctors) {
+        if (chatId == null) {
+            throw new IllegalArgumentException("chatId не может быть null");
+        }
+
+        if (doctors == null || doctors.isEmpty()) {
+            SendMessage emptyMessage = new SendMessage();
+            emptyMessage.setChatId(chatId.toString());
+            emptyMessage.setText("🙁 Список врачей пуст.");
+            emptyMessage.enableHtml(true);
+            return emptyMessage;
+        }
+
         StringBuilder messageText = new StringBuilder();
-        messageText.append("💌 <b>Отправка сообщения пациенту</b>\n\n");
-        messageText.append("👇 <i>Выберите пациента из списка:</i>\n\n");
+        messageText.append("💌 <b>Отправка сообщения врачу</b>\n\n");
+        messageText.append("👇 <i>Выберите врача из списка:</i>\n\n");
 
         for (int i = 0; i < doctors.size(); i++) {
             Doctor doctor = doctors.get(i);
+            if (doctor == null) continue;
+
+            String name = doctor.getName() != null ? doctor.getName() : "Без имени";
+            Integer age = doctor.getAge() != null ? doctor.getAge() : 0;
+            String gender = doctor.getGender() != null ? (doctor.getGender() ? "М" : "Ж") : "N/A";
+            String phone = doctor.getPhoneNumber() != null ? doctor.getPhoneNumber() : "Телефон не указан";
+
             messageText.append(String.format(
                     "%d. <b>%s</b> (%d лет, %s)\n <b>%s</b>\n",
                     i + 1,
-                    doctor.getName(),
-                    doctor.getAge(),
-                    doctor.getGender() ? "М" : "Ж",
-                    doctor.getPhoneNumber()
+                    name,
+                    age,
+                    gender,
+                    phone
             ));
         }
 
@@ -107,4 +126,5 @@ public class PatientsSendMessageToDoctor implements ICommand {
 
         return message;
     }
+
 }

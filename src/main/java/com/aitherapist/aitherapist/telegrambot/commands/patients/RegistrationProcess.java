@@ -222,7 +222,7 @@ public class RegistrationProcess {
                 } else {
                     jsonWithType = "{\"user_type\":\"BOT_PATIENT\"," + response.substring(1);
                 }
-                System.out.println("JSON MAPPER " + jsonWithType);
+                state.setCurrentStep(8);
 
 
                 mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
@@ -266,11 +266,9 @@ public class RegistrationProcess {
                     throw e;
                 }
 
-                registrationContext.clearClientRegistrationState(userId);
                 return acceptOrEditMedicalInitData(patient.getInitialData(), update, patient);
             }
             default -> {
-                registrationContext.clearClientRegistrationState(userId);
                 return SendMessage.builder()
                         .chatId(chatId.toString())
                         .text("Неизвестный шаг регистрации")

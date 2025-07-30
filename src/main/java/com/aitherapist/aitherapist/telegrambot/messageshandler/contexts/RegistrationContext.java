@@ -160,6 +160,10 @@ public class RegistrationContext {
         mapOfUserStatus.put(userId, status.withId(null));
     }
 
+    public Long getExtraId(Long id) {
+        return mapOfUserStatus.get(id   ).getAssociatedId();
+    }
+
     public void setStatusWithId(Long userId, Status status, Long associatedId) {
         mapOfUserStatus.put(userId, status.withId(associatedId));
     }

@@ -305,21 +305,34 @@ public class MessagesHandler implements IHandler {
 
     private void handleMessageFromDoctorToUser(Update update) throws TelegramApiException {
         Message message = update.getMessage();
-        Long currentDoctorId = message.getFrom().getId();
+        Long id = message.getFrom().getId();
 
-        List<Long> userIds = registrationContext.findUserIdsWithSendToDoctorStatus(currentDoctorId);
 
-        for (Long userId : userIds) {
-            String doctorMessage = String.format(
-                    "✉️ *" +
-                            "Вам пришло сообщение от вашего доктора: %s\n\n" +
-                            "%s\n",
-                    userService.getUser(currentDoctorId).getName(),
-                    message.getText()
-            );
+        String doctorMessage = String.format(
+                "✉️ *" +
+                        "Вам пришло сообщение от вашего доктора: %s\n\n" +
+                        "%s\n",
+                userService.getUser(id).getName(),
+                message.getText()
+        );
 
-            messageSender.sendMessage(SendMessage.builder().chatId(userId).text(doctorMessage).replyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard()).build());
-        }
+        messageSender.sendMessage(SendMessage.builder().chatId(registrationContext.getExtraId(id)).text(doctorMessage).replyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard()).build());
+
+//        List<Long> userIds = registrationContext.findUserIdsWithSendToDoctorStatus(currentDoctorId);
+//
+//
+//
+//        for (Long userId : userIds) {
+//            String doctorMessage = String.format(
+//                    "✉️ *" +
+//                            "Вам пришло сообщение от вашего доктора: %s\n\n" +
+//                            "%s\n",
+//                    userService.getUser(currentDoctorId).getName(),
+//                    message.getText()
+//            );
+//
+//            messageSender.sendMessage(SendMessage.builder().chatId(userId).text(doctorMessage).replyMarkup(InlineKeyboardFactory.createBackToMainMenuKeyboard()).build());
+//        }
     }
 
     private void handleMessageFromUserToDoctor(Update update) throws TelegramApiException {

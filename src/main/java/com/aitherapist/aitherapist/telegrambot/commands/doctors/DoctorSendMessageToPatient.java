@@ -40,9 +40,9 @@ public class DoctorSendMessageToPatient implements ICommand {
             String[] parts = update.getCallbackQuery().getData().split(" ");
             if (parts.length == 2) {
                 Long patientId = Long.parseLong(parts[1]);
-                registrationContext.setStatus(doctorId, Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER);
+                registrationContext.setStatusWithId(doctorId, Status.WAIT_DOCTOR_WRITE_MESSAGE_TO_USER, patientId);
 
-                registrationContext.setStatusWithId(patientId, Status.SEND_TO_THIS_USER, doctorId);
+                //registrationContext.setStatusWithId(patientId, Status.SEND_TO_THIS_USER, doctorId);
                 SendMessage message = new SendMessage();
                 message.setChatId(chatId.toString());
                 message.setText("✏️ Введите текст сообщения для пациента:");
@@ -72,19 +72,38 @@ public class DoctorSendMessageToPatient implements ICommand {
     }
 
     private SendMessage createPatientsListMessage(Long chatId, List<Patient> patients) {
+        if (chatId == null) {
+            throw new IllegalArgumentException("chatId не может быть null");
+        }
+
+        if (patients == null || patients.isEmpty()) {
+            SendMessage emptyMessage = new SendMessage();
+            emptyMessage.setChatId(chatId.toString());
+            emptyMessage.setText("🙁 Список пациентов пуст.");
+            emptyMessage.enableHtml(true);
+            return emptyMessage;
+        }
+
         StringBuilder messageText = new StringBuilder();
         messageText.append("💌 <b>Отправка сообщения пациенту</b>\n\n");
         messageText.append("👇 <i>Выберите пациента из списка:</i>\n\n");
 
         for (int i = 0; i < patients.size(); i++) {
             Patient patient = patients.get(i);
+            if (patient == null) continue;
+
+            String name = patient.getName() != null ? patient.getName() : "Без имени";
+            Integer age = patient.getAge() != null ? patient.getAge() : 0;
+            String gender = patient.getGender() != null ? (patient.getGender() ? "М" : "Ж") : "N/A";
+            String phone = patient.getPhoneNumber() != null ? patient.getPhoneNumber() : "Телефон не указан";
+
             messageText.append(String.format(
                     "%d. <b>%s</b> (%d лет, %s)\n <b>%s</b>\n",
                     i + 1,
-                    patient.getName(),
-                    patient.getAge(),
-                    patient.getGender() ? "М" : "Ж",
-                    patient.getPhoneNumber()
+                    name,
+                    age,
+                    gender,
+                    phone
             ));
         }
 
@@ -98,4 +117,5 @@ public class DoctorSendMessageToPatient implements ICommand {
 
         return message;
     }
+
 }
