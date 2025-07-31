@@ -36,6 +36,7 @@ public class WriteDailyData implements ICommand {
     private final MakeMedicalRecommendation makeMedicalRecommendation;
     private final RegistrationContext registrationContext;
     private final Map<Long, String> mapResponse = new ConcurrentHashMap<>();
+    private final TelegramMessageSender messageSender;
     @Autowired
     public WriteDailyData(PatientServiceImpl patientService, UserServiceImpl userService,
                           ParseUserPrompt parseUserPrompt, MakeMedicalRecommendation makeMedicalRecommendation, RegistrationContext registrationContext, TelegramMessageSender messageSender) {
@@ -216,3 +217,4 @@ public class WriteDailyData implements ICommand {
         }
     }
 }
+
